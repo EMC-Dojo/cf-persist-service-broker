@@ -2,8 +2,9 @@ package main
 
 import (
 	"net/http"
-	"log"
 	"io"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 func HelloServer(w http.ResponseWriter, req *http.Request) {
