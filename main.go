@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"io"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -13,5 +14,5 @@ func HelloServer(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	http.HandleFunc("/hello", HelloServer)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), nil))
 }

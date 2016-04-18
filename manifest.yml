@@ -1,0 +1,4 @@
+---
+applications:
+- name: persist
+  memory: 512M
