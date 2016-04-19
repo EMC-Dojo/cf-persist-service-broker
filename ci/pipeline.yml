@@ -1,0 +1,53 @@
+jobs:
+  - name: lifecycle
+    serial: true
+    plan:
+      - aggregate:
+        - get: cf-persist-service-broker
+          trigger: true
+      - task: lifecycle
+        file: cf-persist-service-broker/ci/tasks/lifecycle.yml
+        config:
+          params:
+            CF_IP: {{cf_ip}}
+            CF_ENDPOINT: {{cf_endpoint}}
+            CF_USERNAME: {{cf_username}}
+            CF_PASSWORD: {{cf_password}}
+            CF_ORG: {{cf_org}}
+            CF_SPACE: {{cf_space}}
+            SCALEIO_ENDPOINT: {{scaleio_endpoint}}
+            SCALEIO_USERNAME: {{scaleio_username}}
+            SCALEIO_PASSWORD: {{scaleio_password}}
+            BROKER_USERNAME: {{broker_username}}
+            BROKER_PASSWORD: {{broker_password}}
+
+  - name: deploy
+    serial: true
+    plan:
+      - aggregate:
+        - get: cf-persist-service-broker
+          trigger: true
+          passed: [lifecycle]
+      - task: deploy
+        file: cf-persist-service-broker/ci/tasks/deploy.yml
+        config:
+          params:
+            CF_IP: {{cf_ip}}
+            CF_ENDPOINT: {{cf_endpoint}}
+            CF_USERNAME: {{cf_username}}
+            CF_PASSWORD: {{cf_password}}
+            CF_ORG: {{cf_org}}
+            CF_SPACE: {{cf_space}}
+            BROKER_USERNAME: {{broker_username}}
+            BROKER_PASSWORD: {{broker_password}}
+            SCALEIO_ENDPOINT: {{scaleio_endpoint}}
+            SCALEIO_USERNAME: {{scaleio_username}}
+            SCALEIO_PASSWORD: {{scaleio_password}}
+
+resources:
+  - name: cf-persist-service-broker
+    type: git
+    source:
+      uri: git@github.com:EMC-CMD/cf-persist-service-broker.git
+      branch: master
+      private_key: {{github_private_key}}

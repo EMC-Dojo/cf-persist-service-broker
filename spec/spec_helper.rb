@@ -3,7 +3,7 @@ require 'rspec'
 require 'json'
 
 def app_name
-  "cf-persist-broker-lifecycle"
+  "cf-persist-service-broker-lifecycle"
 end
 
 def endpoint

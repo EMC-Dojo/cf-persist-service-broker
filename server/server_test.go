@@ -18,15 +18,25 @@ import (
 var _ = Describe("Server", func() {
 
 	var serverURL string
+	var broker_user string
+	var broker_password string
 
 	BeforeEach(func() {
 		serverURL = os.Getenv("SCALEIO_SERVICE_BROKER_SERVER_URL")
+		Expect(serverURL).ToNot(BeEmpty())
+		broker_user = os.Getenv("BROKER_USERNAME")
+		Expect(serverURL).ToNot(BeEmpty())
+		broker_password = os.Getenv("BROKER_PASSWORD")
 		Expect(serverURL).ToNot(BeEmpty())
 	})
 
 	Context("when fetching catalog", func() {
 		It("returns catalog", func() {
-			resp, err := http.Get(serverURL + "/v2/catalog")
+			req, err := http.NewRequest("GET", serverURL+"/v2/catalog", nil)
+			Expect(err).ToNot(HaveOccurred())
+			req.SetBasicAuth(broker_user, broker_password)
+
+			resp, err := (&http.Client{}).Do(req)
 			Expect(err).ToNot(HaveOccurred())
 			defer resp.Body.Close()
 
@@ -56,6 +66,7 @@ var _ = Describe("Server", func() {
 				path := "/v2/service_instances/29C39AEB-9A09-49D3-A432-AE995C75FFF8"
 				req, err := http.NewRequest("PUT", serverURL+path, provisionInstanceRequestBody)
 				Expect(err).ToNot(HaveOccurred())
+				req.SetBasicAuth(broker_user, broker_password)
 
 				resp, err := (&http.Client{}).Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -78,6 +89,7 @@ var _ = Describe("Server", func() {
 				path := "/v2/service_instances/CCDB8015-92BE-42FB-B4C3-00CEAB503144/service_bindings/47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1"
 				req, err := http.NewRequest("PUT", serverURL+path, provisionInstanceRequestBody)
 				Expect(err).ToNot(HaveOccurred())
+				req.SetBasicAuth(broker_user, broker_password)
 
 				resp, err := (&http.Client{}).Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -113,6 +125,7 @@ var _ = Describe("Server", func() {
 				u.RawQuery = q.Encode()
 				req, err := http.NewRequest("DELETE", u.String(), nil)
 				Expect(err).ToNot(HaveOccurred())
+				req.SetBasicAuth(broker_user, broker_password)
 
 				resp, err := (&http.Client{}).Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -137,6 +150,7 @@ var _ = Describe("Server", func() {
 				req, err := http.NewRequest("DELETE", u.String(), nil)
 				Expect(err).ToNot(HaveOccurred())
 
+				req.SetBasicAuth(broker_user, broker_password)
 				resp, err := (&http.Client{}).Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				defer resp.Body.Close()
