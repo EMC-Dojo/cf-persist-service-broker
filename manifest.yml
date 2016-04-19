@@ -2,3 +2,4 @@
 applications:
 - name: persist
   memory: 512M
+  command: cf-persist-service-broker
