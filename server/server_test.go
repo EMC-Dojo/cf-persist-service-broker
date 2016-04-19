@@ -6,16 +6,14 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
-
 	"strings"
 
+	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Server", func() {
+var _ = Describe("Integration", func() {
 
 	var serverURL string
 	var broker_user string
