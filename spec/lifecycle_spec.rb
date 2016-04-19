@@ -15,13 +15,13 @@ describe 'lifecycle', type: :lifecycle do
   end
 
   after(:all) do
-    # exec_command("cf delete-service-broker scaleio -f")
+    exec_command("cf delete-service-broker scaleio -f")
     exec_command("cf delete #{app_name} -f")
   end
 
   it 'should push app to cf ' do
     get_service_catalog
-    # register_the_service_broker
+    register_the_service_broker
     # create_service_instance
     # bind_service
     # unbind_service
@@ -40,6 +40,7 @@ end
 def get_service_catalog
   uri = URI("https://#{app_name}.#{endpoint}/v2/catalog")
   req = Net::HTTP::Get.new(uri.path)
+  req.basic_auth ENV['BROKER_USERNAME'], ENV['BROKER_PASSWORD']
   res = Net::HTTP.start(
     uri.host, uri.port,
     :use_ssl => uri.scheme == 'https',

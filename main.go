@@ -33,11 +33,15 @@ func UnbindingHandler(c *gin.Context) {
 func main() {
 	server := gin.Default()
 
-	server.GET("/v2/catalog", CatalogHandler)
-	server.PUT("/v2/service_instances/:instanceId", ProvisioningHandler)
-	server.PUT("/v2/service_instances/:instanceId/service_bindings/:bindingId", BindingHandler)
-	server.DELETE("/v2/service_instances/:instanceId/service_bindings/:bindingId", UnbindingHandler)
-	server.DELETE("/v2/service_instances/:instanceId", DeprovisionHandler)
+	authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
+		os.Getenv("BROKER_USERNAME"): os.Getenv("BROKER_PASSWORD"),
+	}))
+
+	authorized.GET("/v2/catalog", CatalogHandler)
+	authorized.PUT("/v2/service_instances/:instanceId", ProvisioningHandler)
+	authorized.PUT("/v2/service_instances/:instanceId/service_bindings/:bindingId", BindingHandler)
+	authorized.DELETE("/v2/service_instances/:instanceId/service_bindings/:bindingId", UnbindingHandler)
+	authorized.DELETE("/v2/service_instances/:instanceId", DeprovisionHandler)
 
 	server.Run(":" + os.Getenv("PORT"))
 }
