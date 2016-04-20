@@ -8,6 +8,7 @@ type VolumeAttachment struct  {
 
 type StorageDriver interface{
   VolumeCreate(ctx Context, name string, opts *VolumeCreateOpts) (*Volume, error)
+  VolumeRemove(ctx Context, name string, opts *VolumeCreateOpts) error
 }
 
 type Volume struct {
@@ -56,4 +57,8 @@ func (s *ScaleIODriver) VolumeCreate(ctx Context, name string, opts *VolumeCreat
     ID:   "volume-id",
   }
   return &volume, nil
+}
+
+func (s *ScaleIODriver) VolumeRemove(ctx Context, name string, opts *VolumeCreateOpts) error{
+  return nil
 }

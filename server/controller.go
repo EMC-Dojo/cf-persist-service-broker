@@ -16,7 +16,7 @@ func CatalogHandler(c *gin.Context) {
 func ProvisioningHandler(c *gin.Context) {
   _, err := CreateVolume(&storage.ScaleIODriver{})
   if err != nil {
-    c.JSON(422, gin.H{})
+    c.JSON(500, gin.H{})
   }
   c.JSON(http.StatusCreated, gin.H{})
 }
@@ -26,7 +26,15 @@ func CreateVolume(driver storage.StorageDriver) (*storage.Volume, error) {
 }
 
 func DeprovisionHandler(c *gin.Context) {
+  err := RemoveVolume(&storage.ScaleIODriver{})
+  if err != nil {
+    c.JSON(500, gin.H{})
+  }
   c.JSON(http.StatusOK, gin.H{})
+}
+
+func RemoveVolume(driver storage.StorageDriver) (error){
+  return driver.VolumeRemove(storage.Context{}, "", &storage.VolumeCreateOpts{})
 }
 
 func BindingHandler(c *gin.Context) {

@@ -53,6 +53,17 @@ var _ = Describe("Unit", func() {
 			})
 		})
 	})
+
+	Describe("RemoveVolume", func() {
+		Context("when deletion succeeded", func() {
+			It("returns no error", func() {
+				mockStorageDriver.EXPECT().VolumeRemove(storage.Context{}, "", &storage.VolumeCreateOpts{}).Return(nil)
+
+				err := RemoveVolume(mockStorageDriver)
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+	})
 })
 
 var _ = Describe("Integration", func() {

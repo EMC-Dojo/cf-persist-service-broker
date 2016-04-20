@@ -38,3 +38,13 @@ func (_m *MockStorageDriver) VolumeCreate(ctx Context, name string, opts *Volume
 func (_mr *_MockStorageDriverRecorder) VolumeCreate(arg0, arg1, arg2 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "VolumeCreate", arg0, arg1, arg2)
 }
+
+func (_m *MockStorageDriver) VolumeRemove(ctx Context, name string, opts *VolumeCreateOpts) error {
+	ret := _m.ctrl.Call(_m, "VolumeRemove", ctx, name, opts)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockStorageDriverRecorder) VolumeRemove(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "VolumeRemove", arg0, arg1, arg2)
+}
