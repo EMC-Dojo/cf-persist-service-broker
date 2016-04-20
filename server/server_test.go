@@ -8,10 +8,52 @@ import (
 	"os"
 	"strings"
 
+	"github.com/golang/mock/gomock"
+	"github.com/EMC-CMD/cf-persist-service-broker/storage"
 	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"fmt"
 )
+
+type GinkgoTestReporter struct {}
+
+func (g GinkgoTestReporter) Errorf(format string, args ...interface{}){
+	Fail(fmt.Sprintf(format, args))
+}
+
+func (g GinkgoTestReporter) Fatalf(format string, args ...interface{}){
+	Fail(fmt.Sprintf(format, args))
+}
+
+var _ = Describe("Unit", func() {
+	var (
+		t GinkgoTestReporter
+		mockCtrl *gomock.Controller
+		mockStorageDriver *storage.MockStorageDriver
+	)
+
+	BeforeEach(func() {
+		mockCtrl = gomock.NewController(t)
+		mockStorageDriver = storage.NewMockStorageDriver(mockCtrl)
+	})
+
+	AfterEach(func() {
+		mockCtrl.Finish()
+	})
+
+	Describe("CreateVolume", func() {
+		Context("when provision succeeded", func() {
+			It("returns volumes", func() {
+				mockStorageDriver.EXPECT().VolumeCreate(storage.Context{}, "", &storage.VolumeCreateOpts{}).Return(&storage.Volume{}, nil)
+
+				volume, err := CreateVolume(mockStorageDriver)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(*volume).To(Equal(storage.Volume{}))
+			})
+		})
+	})
+})
 
 var _ = Describe("Integration", func() {
 
