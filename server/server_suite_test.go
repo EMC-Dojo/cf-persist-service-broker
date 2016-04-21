@@ -1,12 +1,13 @@
 package server_test
 
 import (
+	"testing"
+	"io/ioutil"
+
+	log "github.com/Sirupsen/logrus"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"testing"
-	log "github.com/Sirupsen/logrus"
-	"io/ioutil"
 )
 
 func TestServer(t *testing.T) {
