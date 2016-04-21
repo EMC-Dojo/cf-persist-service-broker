@@ -1,12 +1,15 @@
 package main
 
 import (
-	"os"
+  "os"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/server"
+  "github.com/EMC-CMD/cf-persist-service-broker/server"
+
+  log "github.com/Sirupsen/logrus"
 )
 
 func main() {
-	s := server.Server{}
-	s.Run(os.Getenv("PORT"))
+  s := server.Server{}
+  log.Info("Starting service at port ", os.Getenv("PORT"))
+  s.Run(os.Getenv("PORT"))
 }
