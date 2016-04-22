@@ -1,7 +1,8 @@
 ---
 applications:
-- name: persist
+- name: go-persistence-service-broker
   memory: 512M
   command: cf-persist-service-broker
   buildpack: go_buildpack
-
+  env:
+    GO15VENDOREXPERIMENT: 0
