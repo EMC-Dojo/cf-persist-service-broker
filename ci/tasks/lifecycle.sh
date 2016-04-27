@@ -17,9 +17,6 @@ check_param SCALEIO_PASSWORD
 check_param BROKER_USERNAME
 check_param BROKER_PASSWORD
 
-curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx
-export PATH=${PWD}:$PATH
-
 cd cf-persist-service-broker/
 
 echo "${CF_IP} api.${CF_ENDPOINT}" >> /etc/hosts

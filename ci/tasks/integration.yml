@@ -1,6 +1,6 @@
 ---
 platform: linux
-image: docker:///golang#1.6.2
+image: docker:///emccmd/persist-sb
 inputs:
 - name: cf-persist-service-broker
 run:
