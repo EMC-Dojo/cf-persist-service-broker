@@ -1,10 +1,26 @@
 jobs:
+  - name: integration
+    serial: true
+    plan:
+      - aggregate:
+        - get: cf-persist-service-broker
+          trigger: true
+      - task: integration
+        file: cf-persist-service-broker/ci/tasks/integration.yml
+        config:
+          params:
+            PORT: {{service_broker_server_port}}
+            SCALEIO_SERVICE_BROKER_SERVER_URL: {{service_broker_server_url}}
+            BROKER_USERNAME: {{broker_username}}
+            BROKER_PASSWORD: {{broker_password}}
+
   - name: lifecycle
     serial: true
     plan:
       - aggregate:
         - get: cf-persist-service-broker
           trigger: true
+          passed: [integration]
       - task: lifecycle
         file: cf-persist-service-broker/ci/tasks/lifecycle.yml
         config:

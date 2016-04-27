@@ -1,0 +1,12 @@
+---
+platform: linux
+image: docker:///golang#1.6.2
+inputs:
+- name: cf-persist-service-broker
+run:
+  path: cf-persist-service-broker/ci/tasks/integration.sh
+params:
+  BROKER_USERNAME:                    replace-me
+  BROKER_PASSWORD:                    replace-me
+  PORT:                               replace-me
+  SCALEIO_SERVICE_BROKER_SERVER_URL:  replace-me
