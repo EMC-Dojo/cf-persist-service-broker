@@ -9,5 +9,5 @@ source cf-persist-service-broker/ci/tasks/util.sh
 export integer_version=`cut -d "." -f1 version-semver/version`
 cp -r cf-persist-service-broker promote/cf-persist-service-broker
 
-echo ${integer_version} > promote/integer_version
+echo ${integer_version} > promote/number
 echo ":airplane: New release v${integer_version}" > promote/tag_message
