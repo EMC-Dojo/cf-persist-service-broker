@@ -48,7 +48,7 @@ jobs:
       file: cf-persist-service-broker/ci/tasks/promote-candidate.yml
 
     - put: cf-persist-service-broker-out
-      params: {repository: cf-persist-service-broker, only_tag: true, tag_prefix: "v", tag: promote/integer_version, annotate: promote/tag_message}
+      params: {repository: promote/cf-persist-service-broker, only_tag: true, tag_prefix: "v", tag: promote/integer_version, annotate: promote/tag_message}
 
     - put: version-semver
       params: {file: version-semver/number}
