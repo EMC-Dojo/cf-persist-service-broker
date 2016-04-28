@@ -11,6 +11,8 @@ cp -r cf-persist-service-broker promote/cf-persist-service-broker
 
 echo ${integer_version} > promote/number
 echo ${tag_message} >> promote/cf-persist-service-broker/release_log.txt
-git config --global user.email emccmd-eng@emc.com
-git config --global user.name EMCCMD-CI
-git commit -m ":airplane: New final release v ${integer_version}" -m "[ci skip]"
+pushd promote/cf-persist-service-broker/
+  git config --global user.email emccmd-eng@emc.com
+  git config --global user.name EMCCMD-CI
+  git commit -m ":airplane: New final release v ${integer_version}" -m "[ci skip]"
+popd
