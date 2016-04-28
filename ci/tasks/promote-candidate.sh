@@ -16,5 +16,5 @@ pushd promote/cf-persist-service-broker/
   git config --global user.email emccmd-eng@emc.com
   git config --global user.name EMCCMD-CI
   export annotate_message=":airplane: New final release v${integer_version}"
-  git commit -m ${annotate_message} -m "[ci skip]"
+  git commit -m "${annotate_message}" -m "[ci skip]"
 popd
