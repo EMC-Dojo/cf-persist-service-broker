@@ -41,7 +41,7 @@ jobs:
     serial: true
     plan:
     - aggregate:
-      - {trigger: true,   passed: [lifecycle, integration], get: cf-persist-service-broker}
+      - {trigger: true,   passed: [lifecycle], get: cf-persist-service-broker}
       - {trigger: false,  get: version-semver,  params: {bump: major}}
 
     - task: promote
