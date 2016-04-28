@@ -47,7 +47,7 @@ jobs:
     - task: promote
       file: cf-persist-service-broker/ci/tasks/promote-candidate.yml
 
-    - put: cf-persist-service-broker
+    - put: cf-persist-service-broker-out
       params: {repository: cf-persist-service-broker, only_tag: true, tag_prefix: "v", tag: promote/integer_version, annotate: promote/tag_message}
 
     - put: version-semver
@@ -55,6 +55,13 @@ jobs:
 
 resources:
   - name: cf-persist-service-broker
+    type: git
+    source:
+      uri: git@github.com:EMC-CMD/cf-persist-service-broker.git
+      branch: master
+      private_key: {{github_private_key}}
+
+  - name: cf-persist-service-broker-out
     type: git
     source:
       uri: git@github.com:EMC-CMD/cf-persist-service-broker.git
