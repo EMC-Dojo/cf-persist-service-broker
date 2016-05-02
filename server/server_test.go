@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/joho/godotenv"
@@ -24,6 +25,7 @@ func startServer() *exec.Cmd {
 	Expect(err).ToNot(HaveOccurred())
 
 	server := exec.Command("go", "run", "main.go")
+	server.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	server.Stdout = ioutil.Discard
 	server.Stderr = ioutil.Discard
 
@@ -46,8 +48,14 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
-	s.Process.Kill()
-	s.Wait()
+	s.Process.Signal(syscall.SIGHUP)
+	pgid, err := syscall.Getpgid(s.Process.Pid)
+	if err == nil {
+		syscall.Kill(-pgid, 15) // note the minus sign
+	}
+	err = s.Wait()
+	Expect(err).To(HaveOccurred())
+	Expect(s.ProcessState.String()).To(Equal("signal: terminated"))
 })
 
 var _ = Describe("Integration", func() {
@@ -57,7 +65,6 @@ var _ = Describe("Integration", func() {
 	var brokerPassword string
 
 	BeforeEach(func() {
-
 		serverURL = "http://localhost:" + os.Getenv("PORT")
 		Expect(serverURL).ToNot(BeEmpty())
 		brokerUser = os.Getenv("BROKER_USERNAME")
