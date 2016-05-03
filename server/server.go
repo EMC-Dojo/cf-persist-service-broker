@@ -12,24 +12,24 @@ import (
   log "github.com/Sirupsen/logrus"
 )
 
+var scaleioClient client.Client
+
 // The Service Broker Server
 type Server struct {
 }
 
-func clientConfig() client.Client {
+func (s Server) Init(configPath string) {
   config := gofig.New()
-  file, err := os.Open("../config/config.yml")
+  file, err := os.Open(configPath)
   if err != nil {
-    log.Panic("Unable to open config.yml", err)
+    log.Panic("Unable to open config_test.yml", err)
   }
   config.ReadConfig(file)
 
-  scaleioClient, err := client.New(config)
+  scaleioClient, err = client.New(config)
   if err != nil {
     log.Panic("Unable to create client", err)
   }
-
-  return scaleioClient
 }
 
 // Run the Service Broker
