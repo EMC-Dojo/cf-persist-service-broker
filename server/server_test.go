@@ -53,9 +53,8 @@ var _ = AfterSuite(func() {
 	if err == nil {
 		syscall.Kill(-pgid, 15) // note the minus sign
 	}
-	err = s.Wait()
-	Expect(err).To(HaveOccurred())
-	Expect(s.ProcessState.String()).To(Equal("signal: terminated"))
+	s.Wait()
+	Expect(s.ProcessState.String()).To(Or(Equal("signal: terminated"), Equal("exit status 0")))
 })
 
 var _ = Describe("Integration", func() {

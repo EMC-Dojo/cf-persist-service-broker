@@ -1,0 +1,34 @@
+libstorage:
+  host: tcp://127.0.0.1
+  driver: scaleio
+  server:
+    services:
+      scaleio:
+        endpoint:             https://192.168.50.12/api
+        insecure:             true
+        useCerts:             false
+        userName:             admin
+        password:             Scaleio123
+        systemID:             6cfe25856a90658d
+        systemName:           cluster1
+        protectionDomainID:   6d13747300000000
+        protectionDomainName: pdomain
+        storagePoolID:        672d836d00000000
+        storagePoolName:      pool1
+        thinOrThick:          ThinProvisioned
+        version:              2.0
+
+scaleio:
+  endpoint:             https://192.168.50.12/api
+  insecure:             true
+  useCerts:             false
+  userName:             admin
+  password:             Scaleio123
+  systemID:             6cfe25856a90658d
+  systemName:           cluster1
+  protectionDomainID:   6d13747300000000
+  protectionDomainName: pdomain
+  storagePoolID:        672d836d00000000
+  storagePoolName:      pool1
+  thinOrThick:          ThinProvisioned
+  version:              2.0

@@ -4,9 +4,124 @@
 	"GodepVersion": "v62",
 	"Deps": [
 		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.2.0",
+			"Rev": "bbd5bb678321a0d6e58f1099321dfa73391c1b6f"
+		},
+		{
 			"ImportPath": "github.com/Sirupsen/logrus",
 			"Comment": "v0.10.0-16-gcd7d1bb",
 			"Rev": "cd7d1bbe41066b6c1f19780f895901052150a575"
+		},
+		{
+			"ImportPath": "github.com/akutz/gofig",
+			"Comment": "v0.1.2-13-g75058bb",
+			"Rev": "75058bb08041bf5b30b9ac5a54fc7384522ce8f5"
+		},
+		{
+			"ImportPath": "github.com/akutz/golf",
+			"Comment": "v0.1.1",
+			"Rev": "e26bdd995cb746e431d42ea303ebe7622389d29f"
+		},
+		{
+			"ImportPath": "github.com/akutz/goof",
+			"Rev": "61bbe86282839460bc88e9e391801971794d0fa0"
+		},
+		{
+			"ImportPath": "github.com/akutz/gotil",
+			"Rev": "6fa2e80bd3ac40f15788cfc3d12ebba49a0add92"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/client",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/context",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/registry",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/types",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/utils",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/utils/config",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/utils/paths",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/utils/semaphore",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/cli/executors",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/client",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/integration/docker",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/os/darwin",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/os/linux",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/libstorage",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/libstorage/types",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/mock/executor",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio/executor",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/client",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/executor",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/imports/config",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/imports/executors",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/imports/local",
+			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
 		},
 		{
 			"ImportPath": "github.com/gin-gonic/gin",
@@ -24,24 +139,107 @@
 			"Rev": "5caaac4c5c712a9e7a7de29e6c24ef46c753017f"
 		},
 		{
-			"ImportPath": "github.com/golang/mock/gomock",
-			"Rev": "bd3c8e81be01eef76d4b503f5e687d2d1354d2d9"
-		},
-		{
 			"ImportPath": "github.com/golang/protobuf/proto",
 			"Rev": "7cc19b78d562895b13596ddce7aafb59dd789318"
+		},
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/hcl/ast",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/hcl/parser",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/hcl/scanner",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/hcl/strconv",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/hcl/token",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/json/parser",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/json/scanner",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/hcl/json/token",
+			"Rev": "2604f3bda7e8960c1be1063709e7d7f0765048d0"
+		},
+		{
+			"ImportPath": "github.com/kardianos/osext",
+			"Rev": "29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc"
+		},
+		{
+			"ImportPath": "github.com/kr/pretty",
+			"Comment": "go.weekly.2011-12-22-29-gadd1dbc",
+			"Rev": "add1dbc86daf0f983cd4a48ceb39deb95c729b67"
+		},
+		{
+			"ImportPath": "github.com/kr/text",
+			"Rev": "bb797dc4fb8320488f47bf11de07a733d7233e1f"
+		},
+		{
+			"ImportPath": "github.com/magiconair/properties",
+			"Comment": "v1.7.0",
+			"Rev": "c265cfa48dda6474e208715ca93e987829f572f8"
 		},
 		{
 			"ImportPath": "github.com/manucorporat/sse",
 			"Rev": "ee05b128a739a0fb76c7ebd3ae4810c1de808d6d"
 		},
 		{
+			"ImportPath": "github.com/mitchellh/mapstructure",
+			"Rev": "d2dd0262208475919e1a362f675cfc0e7c10e905"
+		},
+		{
+			"ImportPath": "github.com/spf13/cast",
+			"Rev": "27b586b42e29bec072fe7379259cc719e1289da6"
+		},
+		{
+			"ImportPath": "github.com/spf13/jwalterweatherman",
+			"Rev": "33c24e77fb80341fe7130ee7c594256ff08ccc46"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Rev": "7f60f83a2c81bc3c3c0d5297f61ddfa68da9d3b7"
+		},
+		{
+			"ImportPath": "github.com/spf13/viper",
+			"Rev": "c975dc1b4eacf4ec7fdbf0873638de5d090ba323"
+		},
+		{
 			"ImportPath": "golang.org/x/net/context",
+			"Rev": "cb0ed7acc4f717d79a358093419e5a7da09b8b45"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
 			"Rev": "cb0ed7acc4f717d79a358093419e5a7da09b8b45"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "f64b50fbea64174967a8882830d621a18ee1548e"
+		},
+		{
+			"ImportPath": "gopkg.in/fsnotify.v1",
+			"Comment": "v1.2.10",
+			"Rev": "875cf421b32f8f1b31bd43776297876d01542279"
 		},
 		{
 			"ImportPath": "gopkg.in/go-playground/validator.v8",
