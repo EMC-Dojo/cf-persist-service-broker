@@ -3,11 +3,12 @@ package server
 import (
   "fmt"
 
-  "github.com/EMC-CMD/cf-persist-service-broker/storage"
-  "github.com/emccode/libstorage/api/types"
   "github.com/golang/mock/gomock"
   . "github.com/onsi/ginkgo"
   . "github.com/onsi/gomega"
+
+  "github.com/emccode/libstorage/api/types"
+  "github.com/EMC-CMD/cf-persist-service-broker/storage"
 )
 
 type GinkgoTestReporter struct{}

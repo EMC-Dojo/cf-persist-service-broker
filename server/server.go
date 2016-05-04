@@ -1,15 +1,16 @@
 package server
 
 import (
-	"os"
-	"github.com/gin-gonic/gin"
-  "path/filepath"
+  "os"
   "net/http"
   "io/ioutil"
+  "path/filepath"
+
+  "github.com/akutz/gofig"
+  "github.com/gin-gonic/gin"
+  log "github.com/Sirupsen/logrus"
 
   "github.com/emccode/libstorage/client"
-  "github.com/akutz/gofig"
-  log "github.com/Sirupsen/logrus"
 )
 
 var scaleioClient client.Client
@@ -18,11 +19,20 @@ var scaleioClient client.Client
 type Server struct {
 }
 
+func (s Server) SetClient(c client.Client) {
+  scaleioClient = c
+}
+
 func (s Server) Init(configPath string) {
+  if scaleioClient != nil {
+    log.Info("client already set; skipping initialization")
+    return
+  }
+
   config := gofig.New()
   file, err := os.Open(configPath)
   if err != nil {
-    log.Panic("Unable to open config_test.yml", err)
+    log.Panic("Unable to open ", configPath, err)
   }
   config.ReadConfig(file)
 
@@ -34,25 +44,24 @@ func (s Server) Init(configPath string) {
 
 // Run the Service Broker
 func (s Server) Run(port string) {
-	gin.SetMode(gin.ReleaseMode)
-	server := gin.Default()
-	authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
-		os.Getenv("BROKER_USERNAME"): os.Getenv("BROKER_PASSWORD"),
-	}))
+  server := gin.Default()
+  authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
+    os.Getenv("BROKER_USERNAME"): os.Getenv("BROKER_PASSWORD"),
+  }))
 
-	authorized.GET("/v2/catalog", CatalogHandler)
-	authorized.PUT("/v2/service_instances/:instanceId", ProvisioningHandler)
-	authorized.PUT("/v2/service_instances/:instanceId/service_bindings/:bindingId", BindingHandler)
-	authorized.DELETE("/v2/service_instances/:instanceId/service_bindings/:bindingId", UnbindingHandler)
-	authorized.DELETE("/v2/service_instances/:instanceId", DeprovisionHandler)
+  authorized.GET("/v2/catalog", CatalogHandler)
+  authorized.PUT("/v2/service_instances/:instanceId", ProvisioningHandler)
+  authorized.PUT("/v2/service_instances/:instanceId/service_bindings/:bindingId", BindingHandler)
+  authorized.DELETE("/v2/service_instances/:instanceId/service_bindings/:bindingId", UnbindingHandler)
+  authorized.DELETE("/v2/service_instances/:instanceId", DeprovisionHandler)
 
-	server.Run(":" + port)
+  server.Run(":" + port)
 }
 
 func CatalogHandler(c *gin.Context) {
-	c.Status(http.StatusOK)
-	p, _ := filepath.Abs("templates/catalog.json")
-	c.File(p)
+  c.Status(http.StatusOK)
+  p, _ := filepath.Abs("templates/catalog.json")
+  c.File(p)
 }
 
 func ProvisioningHandler(c *gin.Context) {

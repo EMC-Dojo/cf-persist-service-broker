@@ -5,7 +5,6 @@ import (
   "io/ioutil"
 
   log "github.com/Sirupsen/logrus"
-
   . "github.com/onsi/ginkgo"
   . "github.com/onsi/gomega"
 )
