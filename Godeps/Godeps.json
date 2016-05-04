@@ -15,8 +15,8 @@
 		},
 		{
 			"ImportPath": "github.com/akutz/gofig",
-			"Comment": "v0.1.2-13-g75058bb",
-			"Rev": "75058bb08041bf5b30b9ac5a54fc7384522ce8f5"
+			"Comment": "v0.1.2-15-g96b760d",
+			"Rev": "96b760df1cdbc843d5f633b7705f95c9090cb21e"
 		},
 		{
 			"ImportPath": "github.com/akutz/golf",
@@ -32,96 +32,209 @@
 			"Rev": "6fa2e80bd3ac40f15788cfc3d12ebba49a0add92"
 		},
 		{
+			"ImportPath": "github.com/appropriate/go-virtualboxclient/vboxwebsrv",
+			"Rev": "e0978ab2ed407095400a69d5933958dd260058cd"
+		},
+		{
+			"ImportPath": "github.com/appropriate/go-virtualboxclient/virtualboxclient",
+			"Rev": "e0978ab2ed407095400a69d5933958dd260058cd"
+		},
+		{
+			"ImportPath": "github.com/asaskevich/govalidator",
+			"Comment": "v3-3-g50f5823",
+			"Rev": "50f582311784a55b42018d88643ccfceadf7ab61"
+		},
+		{
+			"ImportPath": "github.com/cesanta/ucl",
+			"Rev": "97c016fce90e6af1b14558563ac46852167e6a76"
+		},
+		{
+			"ImportPath": "github.com/cesanta/validate-json/schema",
+			"Rev": "2f16017c76fc2403d143e93cea1e1b9526a01148"
+		},
+		{
+			"ImportPath": "github.com/emccode/goscaleio",
+			"Rev": "53ea76f52205380ab52b9c1f4ad89321c286bb95"
+		},
+		{
+			"ImportPath": "github.com/emccode/goscaleio/types/v1",
+			"Rev": "53ea76f52205380ab52b9c1f4ad89321c286bb95"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
 			"ImportPath": "github.com/emccode/libstorage/api/client",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/context",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/registry",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/executors",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/handlers",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/httputils",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/router/executor",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/router/root",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/router/service",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/router/snapshot",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/router/tasks",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/router/volume",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/server/services",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/types",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils/config",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/utils/filters",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils/paths",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/api/utils/schema",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils/semaphore",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/cli/executors",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/client",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/integration/docker",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/os/darwin",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/os/linux",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/libstorage",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
-			"ImportPath": "github.com/emccode/libstorage/drivers/storage/libstorage/types",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/mock",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/mock/executor",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio/executor",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio/storage",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/client",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/executor",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/storage",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/virtualbox",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/drivers/storage/virtualbox/executor",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/imports/config",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/imports/executors",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/imports/local",
-			"Rev": "d0bb2e384b3be3e0663afe847fb302a258c493a8"
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/imports/remote",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
+		},
+		{
+			"ImportPath": "github.com/emccode/libstorage/imports/routers",
+			"Rev": "28a7e7559ab7a01139cf76b8d63553d06f02d921"
 		},
 		{
 			"ImportPath": "github.com/gin-gonic/gin",
@@ -145,6 +258,11 @@
 		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.1",
+			"Rev": "0eeaf8392f5b04950925b8a69fe70f110fa7cbfc"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/hcl",

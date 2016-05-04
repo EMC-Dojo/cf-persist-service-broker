@@ -16,10 +16,11 @@ import (
   . "github.com/onsi/gomega"
 
   "github.com/EMC-CMD/cf-persist-service-broker/model"
-  "github.com/EMC-CMD/cf-persist-service-broker/storage"
+  "github.com/EMC-CMD/cf-persist-service-broker/mocks"
 )
 
 func startServer() {
+  os.Setenv("PORT", "9900")
   s := Server{}
   devNull, err := os.Open(os.DevNull)
   if err != nil {
@@ -28,12 +29,11 @@ func startServer() {
   gin.SetMode(gin.ReleaseMode)
   gin.DefaultWriter = devNull
   gin.LoggerWithWriter(ioutil.Discard)
-  s.SetClient(&storage.MockClient{})
+  s.SetClient(&mocks.MockClient{})
   s.Run("9900")
 }
 
 var _ = BeforeSuite(func() {
-  os.Setenv("PORT", "9900")
   err := godotenv.Load("../test.env")
   Expect(err).ToNot(HaveOccurred())
   os.Chdir("..")
@@ -42,7 +42,7 @@ var _ = BeforeSuite(func() {
   time.Sleep(5 * time.Second)
 })
 
-var _ = Describe("Integration", func() {
+var _ = Describe("Server Unit Test", func() {
 
   var serverURL string
   var brokerUser string

@@ -8,7 +8,7 @@ import (
   . "github.com/onsi/gomega"
 
   "github.com/emccode/libstorage/api/types"
-  "github.com/EMC-CMD/cf-persist-service-broker/storage"
+  "github.com/EMC-CMD/cf-persist-service-broker/mocks"
 )
 
 type GinkgoTestReporter struct{}
@@ -25,16 +25,16 @@ var _ = Describe("Controller", func() {
   var (
     t GinkgoTestReporter
     mockCtrl   *gomock.Controller
-    mockClient *storage.MockClient
-    mockContext *storage.MockContext
-    mockStorageDriver *storage.MockStorageDriver
+    mockClient *mocks.MockClient
+    mockContext *mocks.MockContext
+    mockStorageDriver *mocks.MockStorageDriver
   )
 
   BeforeEach(func() {
     mockCtrl = gomock.NewController(t)
-    mockClient = storage.NewMockClient(mockCtrl)
-    mockContext = storage.NewMockContext(mockCtrl)
-    mockStorageDriver = storage.NewMockStorageDriver(mockCtrl)
+    mockClient = mocks.NewMockClient(mockCtrl)
+    mockContext = mocks.NewMockContext(mockCtrl)
+    mockStorageDriver = mocks.NewMockStorageDriver(mockCtrl)
   })
 
   AfterEach(func() {

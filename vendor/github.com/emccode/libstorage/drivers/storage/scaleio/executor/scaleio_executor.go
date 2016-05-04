@@ -1,82 +1,93 @@
 package executor
 
 import (
+	"github.com/akutz/gofig"
+
 	"fmt"
+	"github.com/akutz/goof"
+	"github.com/emccode/libstorage/api/registry"
+	"github.com/emccode/libstorage/api/types"
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/akutz/gofig"
-	"github.com/emccode/libstorage/api/registry"
-	"github.com/emccode/libstorage/api/types"
 )
 
-const Name = "scaleio"
+const (
+	// Name is the name of the driver.
+	Name = "scaleio"
+)
 
-// Executor is the storage executor for the ScaleIO storage driver.
-type StorageExecutor struct {
+// driver is the storage executor for the VFS storage driver.
+type driver struct {
 	Config     gofig.Config
-	name       string
 	instanceID *types.InstanceID
-	InitDriver func() error
 }
 
 func init() {
-	gofig.Register(configRegistration())
-	registry.RegisterStorageExecutor(Name, newExecutor)
+	registry.RegisterStorageExecutor(Name, newdriver)
 }
 
-func (e *StorageExecutor) Init(ctx types.Context, config gofig.Config) error {
-	e.Config = config
-	if e.InitDriver != nil {
-		if err := e.InitDriver(); err != nil {
-			return err
-		}
-	}
-	instanceID, err := getSdcLocalGUID()
+func newdriver() types.StorageExecutor {
+	return &driver{}
+}
+
+func (d *driver) Init(context types.Context, config gofig.Config) error {
+	d.Config = config
+	id, err := GetInstanceID()
 	if err != nil {
 		return err
 	}
-	e.instanceID = &types.InstanceID{ID: instanceID}
+	d.instanceID = id
 	return nil
 }
 
-func newExecutor() types.StorageExecutor {
-	return NewExecutor()
-}
-
-func NewExecutor() *StorageExecutor {
-	return &StorageExecutor{
-		name:       Name,
-	}
-}
-
-func (e *StorageExecutor) Name() string {
-	return e.name
-}
-
-// InstanceID returns the local system's InstanceID.
-func (e *StorageExecutor) InstanceID(
-	ctx types.Context,
-	opts types.Store) (*types.InstanceID, error) {
-	return e.instanceID, nil
+func (d *driver) Name() string {
+	return Name
 }
 
 // NextDevice returns the next available device.
-func (e *StorageExecutor) NextDevice(
+func (d *driver) NextDevice(
 	ctx types.Context,
 	opts types.Store) (string, error) {
 	return "", nil
 }
 
 // LocalDevices returns a map of the system's local devices.
-func (e *StorageExecutor) LocalDevices(
+func (d *driver) LocalDevices(
 	ctx types.Context,
 	opts types.Store) (map[string]string, error) {
+	return getLocalVolumeMap()
+}
 
-	var volumeMap = make(map[string]string)
+type sdcMappedVolume struct {
+	mdmID       string
+	volumeID    string
+	mdmVolumeID string
+	sdcDevice   string
+}
+
+func getLocalVolumeMap() (map[string]string, error) {
+	mappedVolumesMap := make(map[string]*sdcMappedVolume)
+	volumeMap := make(map[string]string)
+
+	out, err := exec.Command("/opt/emc/scaleio/sdc/bin/drv_cfg", "--query_vols").Output()
+	if err != nil {
+		return nil, goof.WithError("error querying volumes", err)
+	}
+
+	result := string(out)
+	lines := strings.Split(result, "\n")
+
+	for _, line := range lines {
+		split := strings.Split(line, " ")
+		if split[0] == "VOL-ID" {
+			mappedVolume := &sdcMappedVolume{mdmID: split[3], volumeID: split[1]}
+			mappedVolume.mdmVolumeID = fmt.Sprintf("%s-%s", mappedVolume.mdmID, mappedVolume.volumeID)
+			mappedVolumesMap[mappedVolume.mdmVolumeID] = mappedVolume
+		}
+	}
 
 	diskIDPath := "/dev/disk/by-id"
 	files, _ := ioutil.ReadDir(diskIDPath)
@@ -86,46 +97,41 @@ func (e *StorageExecutor) LocalDevices(
 		if matched {
 			mdmVolumeID := strings.Replace(f.Name(), "emc-vol-", "", 1)
 			devPath, _ := filepath.EvalSymlinks(fmt.Sprintf("%s/%s", diskIDPath, f.Name()))
-			volumeID := strings.Split(mdmVolumeID, "-")[1]
-			volumeMap[volumeID] = devPath
+			if _, ok := mappedVolumesMap[mdmVolumeID]; ok {
+				volumeID := mappedVolumesMap[mdmVolumeID].volumeID
+				volumeMap[volumeID] = devPath
+			}
 		}
 	}
+
 	return volumeMap, nil
 }
 
-func configRegistration() *gofig.Registration {
-	r := gofig.NewRegistration("ScaleIO")
-	r.Key(gofig.String, "", "", "", "scaleio.endpoint")
-	r.Key(gofig.Bool, "", false, "", "scaleio.insecure")
-	r.Key(gofig.Bool, "", false, "", "scaleio.useCerts")
-	r.Key(gofig.String, "", "", "", "scaleio.userID")
-	r.Key(gofig.String, "", "", "", "scaleio.userName")
-	r.Key(gofig.String, "", "", "", "scaleio.password")
-	r.Key(gofig.String, "", "", "", "scaleio.systemID")
-	r.Key(gofig.String, "", "", "", "scaleio.systemName")
-	r.Key(gofig.String, "", "", "", "scaleio.protectionDomainID")
-	r.Key(gofig.String, "", "", "", "scaleio.protectionDomainName")
-	r.Key(gofig.String, "", "", "", "scaleio.storagePoolID")
-	r.Key(gofig.String, "", "", "", "scaleio.storagePoolName")
-	r.Key(gofig.String, "", "", "", "scaleio.thinOrThick")
-	r.Key(gofig.String, "", "", "", "scaleio.version")
-	return r
+// InstanceID returns the local system's InstanceID.
+func (d *driver) InstanceID(
+	ctx types.Context,
+	opts types.Store) (*types.InstanceID, error) {
+	return d.instanceID, nil
+}
+
+// GetInstanceID returns the instance ID object
+func GetInstanceID() (*types.InstanceID, error) {
+	sg, err := getSdcLocalGUID()
+	if err != nil {
+		return nil, err
+	}
+	return &types.InstanceID{
+		ID: sg,
+	}, nil
 }
 
 func getSdcLocalGUID() (sdcGUID string, err error) {
-
-	// get sdc kernel guid
-	// /bin/emc/scaleio/drv_cfg --query_guid
-	// sdcKernelGuid := "271bad82-08ee-44f2-a2b1-7e2787c27be1"
-
 	out, err := exec.Command("/opt/emc/scaleio/sdc/bin/drv_cfg", "--query_guid").Output()
 	if err != nil {
-		return "", fmt.Errorf("Error querying volumes: ", err)
+		return "", goof.WithError("problem getting sdc guid", err)
 	}
 
 	sdcGUID = strings.Replace(string(out), "\n", "", -1)
 
 	return sdcGUID, nil
 }
-
-

@@ -6,27 +6,10 @@ import (
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/registry"
 	"github.com/emccode/libstorage/api/types"
-	lstypes "github.com/emccode/libstorage/drivers/storage/libstorage/types"
 
 	// load the local imports
 	_ "github.com/emccode/libstorage/imports/local"
 )
-
-// Client is the libStorage client.
-type Client interface {
-
-	// API returns the underlying libStorage API client.
-	API() lstypes.Client
-
-	// OS returns the client's OS driver instance.
-	OS() types.OSDriver
-
-	// Storage returns the client's storage driver instance.
-	Storage() types.StorageDriver
-
-	// IntegrationDriver returns the client's integration driver instance.
-	Integration() types.IntegrationDriver
-}
 
 type client struct {
 	config gofig.Config
@@ -34,74 +17,64 @@ type client struct {
 	od     types.OSDriver
 	id     types.IntegrationDriver
 	ctx    types.Context
-	lsc    lstypes.Client
+	api    types.APIClient
+	xli    types.StorageExecutorCLI
 }
 
 // New returns a new libStorage client.
-func New(config gofig.Config) (Client, error) {
+func New(config gofig.Config) (types.Client, error) {
 
-	ctx := context.Background().WithConfig(config)
+	var (
+		c   *client
+		err error
+	)
+
+	c = &client{ctx: context.Background().WithConfig(config), config: config}
+	c.ctx = c.ctx.WithClient(c)
 
 	if config.IsSet(types.ConfigService) {
-		ctx = ctx.WithServiceName(config.GetString(types.ConfigService))
+		c.ctx = c.ctx.WithServiceName(config.GetString(types.ConfigService))
 	}
 
-	osDriverName := ctx.GetString(types.ConfigOSDriver)
-	od, err := registry.NewOSDriver(osDriverName)
-	if err != nil {
+	osDriverName := config.GetString(types.ConfigOSDriver)
+	if c.od, err = registry.NewOSDriver(osDriverName); err != nil {
 		return nil, err
 	}
-	if err := od.Init(ctx, config); err != nil {
+	if err = c.od.Init(c.ctx, config); err != nil {
 		return nil, err
 	}
-	ctx = ctx.WithOSDriver(
-		od,
-	).WithContextSID(
-		types.ContextOSDriver, osDriverName,
-	)
-	ctx.Info("os driver initialized")
+	c.ctx = c.ctx.WithContextSID(types.ContextOSDriver, osDriverName)
+	c.ctx.Info("os driver initialized")
 
-	storageDriverName := ctx.GetString(types.ConfigStorageDriver)
-	sd, err := registry.NewStorageDriver(storageDriverName)
-	if err != nil {
+	storageDriverName := config.GetString(types.ConfigStorageDriver)
+	if c.sd, err = registry.NewStorageDriver(storageDriverName); err != nil {
 		return nil, err
 	}
-	if err := sd.Init(ctx, config); err != nil {
+	if err = c.sd.Init(c.ctx, config); err != nil {
 		return nil, err
 	}
-	ctx = ctx.WithStorageDriver(
-		sd,
-	).WithContextSID(
-		types.ContextStorageDriver, storageDriverName,
-	)
-	ctx.Info("storage driver initialized")
-
-	integrationDriverName := ctx.GetString(types.ConfigIntegrationDriver)
-	id, err := registry.NewIntegrationDriver(integrationDriverName)
-	if err != nil {
-		return nil, err
+	if papi, ok := c.sd.(types.ProvidesAPIClient); ok {
+		c.api = papi.API()
 	}
-	if err := id.Init(ctx, config); err != nil {
-		return nil, err
-	}
-	ctx = ctx.WithIntegrationDriver(
-		id,
-	).WithContextSID(
-		types.ContextIntegrationDriver, integrationDriverName,
-	)
-	ctx.Info("integration driver initialized")
-
-	c := &client{
-		od:     od,
-		sd:     sd,
-		id:     id,
-		ctx:    ctx,
-		config: config,
-	}
-	if lsd, ok := c.sd.(lstypes.Driver); ok {
-		c.lsc = lsd.API()
+	if pxli, pxliOk := c.sd.(types.ProvidesStorageExecutorCLI); pxliOk {
+		c.xli = pxli.XCLI()
 	}
 
-	ctx.Info("created libStorage client")
+	c.ctx = c.ctx.WithContextSID(types.ContextStorageDriver, storageDriverName)
+	c.ctx.Info("storage driver initialized")
+
+	integrationDriverName := config.GetString(types.ConfigIntegrationDriver)
+	if c.id, err = registry.NewIntegrationDriver(
+		integrationDriverName); err != nil {
+		return nil, err
+	}
+	if err := c.id.Init(c.ctx, config); err != nil {
+		return nil, err
+	}
+	c.ctx = c.ctx.WithContextSID(
+		types.ContextIntegrationDriver, integrationDriverName)
+	c.ctx.Info("integration driver initialized")
+
+	c.ctx.Info("created libStorage client")
 	return c, nil
 }

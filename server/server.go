@@ -10,16 +10,17 @@ import (
   "github.com/gin-gonic/gin"
   log "github.com/Sirupsen/logrus"
 
+  "github.com/emccode/libstorage/api/types"
   "github.com/emccode/libstorage/client"
 )
 
-var scaleioClient client.Client
+var scaleioClient types.Client
 
 // The Service Broker Server
 type Server struct {
 }
 
-func (s Server) SetClient(c client.Client) {
+func (s Server) SetClient(c types.Client) {
   scaleioClient = c
 }
 
@@ -45,6 +46,7 @@ func (s Server) Init(configPath string) {
 // Run the Service Broker
 func (s Server) Run(port string) {
   server := gin.Default()
+  gin.SetMode("release")
   authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
     os.Getenv("BROKER_USERNAME"): os.Getenv("BROKER_PASSWORD"),
   }))
