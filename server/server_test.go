@@ -2,54 +2,26 @@ package server
 
 import (
   "os"
-  "time"
   "strings"
   "net/url"
   "net/http"
   "io/ioutil"
+  "path/filepath"
   "encoding/json"
 
-  "github.com/gin-gonic/gin"
-  "github.com/joho/godotenv"
-  log "github.com/Sirupsen/logrus"
   . "github.com/onsi/ginkgo"
   . "github.com/onsi/gomega"
 
   "github.com/EMC-CMD/cf-persist-service-broker/model"
-  "github.com/EMC-CMD/cf-persist-service-broker/mocks"
 )
 
-func startServer() {
-  os.Setenv("PORT", "9900")
-  s := Server{}
-  devNull, err := os.Open(os.DevNull)
-  if err != nil {
-    log.Panic("Unable to open ", os.DevNull, err)
-  }
-  gin.SetMode(gin.ReleaseMode)
-  gin.DefaultWriter = devNull
-  gin.LoggerWithWriter(ioutil.Discard)
-  s.SetClient(&mocks.MockClient{})
-  s.Run("9900")
-}
-
-var _ = BeforeSuite(func() {
-  err := godotenv.Load("../test.env")
-  Expect(err).ToNot(HaveOccurred())
-  os.Chdir("..")
-  go startServer()
-
-  time.Sleep(5 * time.Second)
-})
-
-var _ = Describe("Server Unit Test", func() {
-
+var _ = Describe("Unit", func() {
   var serverURL string
   var brokerUser string
   var brokerPassword string
 
   BeforeEach(func() {
-    serverURL = "http://localhost:" + os.Getenv("PORT")
+    serverURL = "http://localhost:9900"
     Expect(serverURL).ToNot(BeEmpty())
     brokerUser = os.Getenv("BROKER_USERNAME")
     Expect(serverURL).ToNot(BeEmpty())
@@ -74,7 +46,7 @@ var _ = Describe("Server Unit Test", func() {
       Expect(err).ToNot(HaveOccurred())
 
       var expectedCatalog model.Catalog
-      expectedBody, err := ioutil.ReadFile("templates/catalog.json")
+      expectedBody, err := ioutil.ReadFile(filepath.Join(RootDirectory, "templates/catalog.json"))
       Expect(err).ToNot(HaveOccurred())
 
       err = json.Unmarshal(expectedBody, &expectedCatalog)
@@ -86,7 +58,7 @@ var _ = Describe("Server Unit Test", func() {
   Context("when provisioning instances", func() {
     Context("when request is valid", func() {
       It("returns 201 created", func() {
-        provisionInstanceRequestBody, err := os.Open("fixtures/provision_instance_request.json")
+        provisionInstanceRequestBody, err := os.Open(filepath.Join(RootDirectory, "fixtures/provision_instance_request.json"))
         Expect(err).ToNot(HaveOccurred())
 
         path := "/v2/service_instances/29C39AEB-9A09-49D3-A432-AE995C75FFF8"
@@ -109,7 +81,7 @@ var _ = Describe("Server Unit Test", func() {
   Context("when creating bindings", func() {
     Context("when request is valid", func() {
       It("returns the binding authorization parameters with status 201", func() {
-        provisionInstanceRequestBody, err := os.Open("fixtures/create_binding_request.json")
+        provisionInstanceRequestBody, err := os.Open(filepath.Join(RootDirectory, "fixtures/create_binding_request.json"))
         Expect(err).ToNot(HaveOccurred())
 
         path := "/v2/service_instances/CCDB8015-92BE-42FB-B4C3-00CEAB503144/service_bindings/47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1"
@@ -129,7 +101,7 @@ var _ = Describe("Server Unit Test", func() {
         err = json.Unmarshal(body, &binding)
         Expect(err).ToNot(HaveOccurred())
 
-        expectedBody, err := ioutil.ReadFile("fixtures/create_binding_response.json")
+        expectedBody, err := ioutil.ReadFile(filepath.Join(RootDirectory, "fixtures/create_binding_response.json"))
         Expect(err).ToNot(HaveOccurred())
 
         var expectedBinding model.ServiceBinding
