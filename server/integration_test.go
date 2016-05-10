@@ -4,11 +4,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"strings"
+
+	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
-	"strings"
 )
 
 var _ = Describe("Integration", func() {

@@ -8,5 +8,14 @@ run:
 params:
   BROKER_USERNAME:                    replace-me
   BROKER_PASSWORD:                    replace-me
-  PORT:                               replace-me
-  SCALEIO_SERVICE_BROKER_SERVER_URL:  replace-me
+  SCALEIO_ENDPOINT:                   replace-me
+  LIBSTORAGE_HOST_URL:                replace-me
+  SCALEIO_USERNAME:                   replace-me
+  SCALEIO_PASSWORD:                   replace-me
+  SCALEIO_SYSTEMID:                   replace-me
+  SCALEIO_SYSTEMNAME:                 replace-me
+  SCALEIO_PROTECTIONDOMAIN_ID:        replace-me
+  SCALEIO_PROTECTIONDOMAIN_NAME:      replace-me
+  SCALEIO_STORAGEPOOL_NAME:           replace-me
+  SCALEIO_THINORTHICK:                replace-me
+  SCALEIO_VERSION:                    replace-me
