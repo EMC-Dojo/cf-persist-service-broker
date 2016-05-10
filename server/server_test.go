@@ -13,6 +13,7 @@ import (
   . "github.com/onsi/gomega"
 
   "github.com/EMC-CMD/cf-persist-service-broker/model"
+  "github.com/EMC-CMD/cf-persist-service-broker/utils"
 )
 
 var _ = Describe("Unit", func() {
@@ -46,7 +47,7 @@ var _ = Describe("Unit", func() {
       Expect(err).ToNot(HaveOccurred())
 
       var expectedCatalog model.Catalog
-      expectedBody, err := ioutil.ReadFile(filepath.Join(RootDirectory, "templates/catalog.json"))
+      expectedBody, err := ioutil.ReadFile(filepath.Join(utils.ProjectDirectory(), "templates/catalog.json"))
       Expect(err).ToNot(HaveOccurred())
 
       err = json.Unmarshal(expectedBody, &expectedCatalog)
@@ -58,7 +59,7 @@ var _ = Describe("Unit", func() {
   Context("when provisioning instances", func() {
     Context("when request is valid", func() {
       It("returns 201 created", func() {
-        provisionInstanceRequestBody, err := os.Open(filepath.Join(RootDirectory, "fixtures/provision_instance_request.json"))
+        provisionInstanceRequestBody, err := os.Open(filepath.Join(utils.ProjectDirectory(), "fixtures/provision_instance_request.json"))
         Expect(err).ToNot(HaveOccurred())
 
         path := "/v2/service_instances/29C39AEB-9A09-49D3-A432-AE995C75FFF8"
@@ -81,7 +82,7 @@ var _ = Describe("Unit", func() {
   Context("when creating bindings", func() {
     Context("when request is valid", func() {
       It("returns the binding authorization parameters with status 201", func() {
-        provisionInstanceRequestBody, err := os.Open(filepath.Join(RootDirectory, "fixtures/create_binding_request.json"))
+        provisionInstanceRequestBody, err := os.Open(filepath.Join(utils.ProjectDirectory(), "fixtures/create_binding_request.json"))
         Expect(err).ToNot(HaveOccurred())
 
         path := "/v2/service_instances/CCDB8015-92BE-42FB-B4C3-00CEAB503144/service_bindings/47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1"
@@ -101,7 +102,7 @@ var _ = Describe("Unit", func() {
         err = json.Unmarshal(body, &binding)
         Expect(err).ToNot(HaveOccurred())
 
-        expectedBody, err := ioutil.ReadFile(filepath.Join(RootDirectory, "fixtures/create_binding_response.json"))
+        expectedBody, err := ioutil.ReadFile(filepath.Join(utils.ProjectDirectory(), "fixtures/create_binding_response.json"))
         Expect(err).ToNot(HaveOccurred())
 
         var expectedBinding model.ServiceBinding

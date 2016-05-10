@@ -7,11 +7,13 @@ import (
 	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/akutz/gofig"
 	"github.com/gin-gonic/gin"
 
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
+	"github.com/EMC-CMD/cf-persist-service-broker/model"
+	"strings"
+	"io"
 )
 
 var scaleioClient types.Client
@@ -30,12 +32,21 @@ func (s Server) Init(configPath string) {
 		return
 	}
 
-	config := gofig.New()
-	file, err := os.Open(configPath)
-	if err != nil {
-		log.Panic("Unable to open ", configPath, err)
+	var configReader io.Reader
+	var err error
+
+	configReader = strings.NewReader("")
+	if configPath != "" {
+		configReader, err = os.Open(configPath)
+		if err != nil {
+			log.Panic("Unable to open ", configPath, err)
+		}
 	}
-	config.ReadConfig(file)
+
+	config, err := model.GetConfig(configReader)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	scaleioClient, err = client.New(config)
 	if err != nil {

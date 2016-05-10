@@ -4,7 +4,6 @@ import (
   "os"
   "testing"
   "io/ioutil"
-  "path/filepath"
 
   log "github.com/Sirupsen/logrus"
   . "github.com/onsi/ginkgo"
@@ -22,15 +21,8 @@ func TestServer(t *testing.T) {
   RunSpecs(t, "Server Suite")
 }
 
-var RootDirectory string
-
 var _ = BeforeSuite(func() {
-  serverDirectory, err := os.Getwd()
-  Expect(err).ToNot(HaveOccurred())
-  RootDirectory, err = filepath.Abs(filepath.Join(serverDirectory,".."))
-  Expect(err).ToNot(HaveOccurred())
-
-  err = godotenv.Load("../test.env")
+  err := godotenv.Load("../test.env")
   Expect(err).ToNot(HaveOccurred())
 
   go startServer()

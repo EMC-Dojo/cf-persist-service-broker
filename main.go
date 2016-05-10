@@ -5,14 +5,15 @@ import (
 
   log "github.com/Sirupsen/logrus"
   "github.com/EMC-CMD/cf-persist-service-broker/server"
+  "flag"
 )
 
 func main() {
-  if len(os.Args) < 2 {
-    log.Panic("configuration for client is required")
-  }
   s := server.Server{}
-  s.Init(os.Args[1])
+  configPath := flag.String("config", "", "Configuration override .yml file")
+  flag.Parse()
+
+  s.Init(*configPath)
 
   log.Info("Starting service at port ", os.Getenv("PORT"))
   s.Run(os.Getenv("PORT"))

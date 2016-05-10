@@ -1,16 +1,14 @@
 package server
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/akutz/gofig"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
+	"github.com/EMC-CMD/cf-persist-service-broker/model"
+	"strings"
 )
 
 var _ = Describe("Integration", func() {
@@ -22,13 +20,10 @@ var _ = Describe("Integration", func() {
 		ctx := context.Background()
 
 		BeforeEach(func() {
-			c := gofig.New()
-			configFile, err := os.Open(filepath.Join(RootDirectory, "config/config_test.yml"))
-			Expect(err).ToNot(HaveOccurred())
-			err = c.ReadConfig(configFile)
+			config, err := model.GetConfig(strings.NewReader(""))
 			Expect(err).NotTo(HaveOccurred())
 
-			libsClient, err = client.New(c)
+			libsClient, err = client.New(config)
 			Expect(err).ToNot(HaveOccurred())
 
 			volume, err := CreateVolume(libsClient, ctx, volumeName, "az", "pool1", 100, 8)
