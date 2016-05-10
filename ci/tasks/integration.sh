@@ -23,26 +23,6 @@ export PATH=$PATH:$GOPATH/bin
 mkdir -p gocode/src/github.com/EMC-CMD
 cp -r cf-persist-service-broker gocode/src/github.com/EMC-CMD/cf-persist-service-broker
 
-SCALEIO_CLIENT_CONFIGURATION_FILEPATH=${PWD}/scaleio_client_config.yml
-cat > ${SCALEIO_CLIENT_CONFIGURATION_FILEPATH} <<EOF
-libstorage:
-  host: ${LIBSTORAGE_HOST_URL}
-  storage:
-    driver: scaleio
-scaleio:
-  endpoint:             ${SCALEIO_ENDPOINT}
-  insecure:             true
-  useCerts:             false
-  userName:             ${SCALEIO_USERNAME}
-  password:             ${SCALEIO_PASSWORD}
-  systemID:             ${SCALEIO_SYSTEMID}
-  protectionDomainID:   ${SCALEIO_PROTECTIONDOMAIN_ID}
-  protectionDomainName: ${SCALEIO_PROTECTIONDOMAIN_NAME}
-  storagePoolName:      ${SCALEIO_STORAGEPOOL_NAME}
-  thinOrThick:          ${SCALEIO_THINORTHICK}
-  version:              ${SCALEIO_VERSION}
-EOF
-
 pushd gocode/src/github.com/EMC-CMD/cf-persist-service-broker
   godep restore
   go run main.go &
