@@ -4,14 +4,16 @@ import (
 	"os"
 	"strings"
 
+	"fmt"
+	"strconv"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/akutz/gofig"
 	"github.com/akutz/goof"
 	"github.com/emccode/libstorage/api/registry"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/api/utils"
-	"strconv"
-	"time"
+	apiconfig "github.com/emccode/libstorage/api/utils/config"
 )
 
 const (
@@ -24,8 +26,9 @@ type driver struct {
 }
 
 type volumeMapping struct {
-	Name             string `json:"Name"`
-	VolumeMountPoint string `json:"Mountpoint"`
+	Name             string                 `json:"Name"`
+	VolumeMountPoint string                 `json:"Mountpoint"`
+	VolumeStatus     map[string]interface{} `json:"Status"`
 }
 
 func (v *volumeMapping) VolumeName() string {
@@ -34,6 +37,10 @@ func (v *volumeMapping) VolumeName() string {
 
 func (v *volumeMapping) MountPoint() string {
 	return v.VolumeMountPoint
+}
+
+func (v *volumeMapping) Status() map[string]interface{} {
+	return v.VolumeStatus
 }
 
 func init() {
@@ -47,6 +54,25 @@ func newDriver() types.IntegrationDriver {
 
 func (d *driver) Init(ctx types.Context, config gofig.Config) error {
 	d.config = config
+
+	ctx.WithField(types.ConfigIgVolOpsMountRootPath, d.volumeRootPath()).Info(
+		"subdirectory to append to the mounted volume path")
+	ctx.WithField(types.ConfigIgVolOpsCreateDefaultType, d.volumeType()).Info(
+		"default volume type")
+	ctx.WithField(types.ConfigIgVolOpsCreateDefaultIOPS, d.iops()).Info(
+		"default DefaultIOPS")
+	ctx.WithField(types.ConfigIgVolOpsCreateDefaultSize, d.size()).Info(
+		"default size in gb")
+	ctx.WithField(types.ConfigIgVolOpsCreateDefaultAZ, d.availabilityZone()).Info(
+		"default availability zone")
+	ctx.WithField(types.ConfigIgVolOpsCreateDefaultFsType, d.fsType()).Info(
+		"default filesystem type")
+	ctx.WithField(types.ConfigIgVolOpsMountPath, d.mountDirPath()).Info(
+		"default path for mounting volumes")
+	ctx.WithField(types.ConfigIgVolOpsCreateImplicit,
+		d.volumeCreateImplicit()).Info(
+		"create a volume if it does not exist on mount")
+
 	return nil
 }
 
@@ -59,10 +85,14 @@ func (d *driver) List(
 	ctx types.Context,
 	opts types.Store) ([]types.VolumeMapping, error) {
 
+	fields := log.Fields{
+		"opts": opts}
+	ctx.WithFields(fields).Info("listing volumes")
+
 	vols, err := ctx.Client().Storage().Volumes(
 		ctx,
 		&types.VolumesOpts{
-			Attachments: false,
+			Attachments: opts.GetBool("attachments"),
 			Opts:        opts,
 		},
 	)
@@ -72,9 +102,19 @@ func (d *driver) List(
 
 	volMaps := []types.VolumeMapping{}
 	for _, v := range vols {
+		vs := make(map[string]interface{})
+		vs["name"] = v.Name
+		vs["size"] = v.Size
+		vs["iops"] = v.IOPS
+		vs["type"] = v.Type
+		vs["availabilityZone"] = v.AvailabilityZone
+		vs["fields"] = v.Fields
+		vs["service"] = ctx.ServiceName()
+		vs["server"] = ctx.ServiceName()
 		volMaps = append(volMaps, &volumeMapping{
 			Name:             v.Name,
 			VolumeMountPoint: v.MountPoint(),
+			VolumeStatus:     vs,
 		})
 	}
 
@@ -87,6 +127,11 @@ func (d *driver) Inspect(
 	ctx types.Context,
 	volumeName string,
 	opts types.Store) (types.VolumeMapping, error) {
+
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"opts":       opts}
+	ctx.WithFields(fields).Info("inspecting volume")
 
 	objs, err := d.List(ctx, opts)
 	if err != nil {
@@ -105,6 +150,11 @@ func (d *driver) Inspect(
 		return nil, utils.NewNotFoundError(volumeName)
 	}
 
+	fields = log.Fields{
+		"volumeName": volumeName,
+		"volume":     obj}
+	ctx.WithFields(fields).Info("volume inspected")
+
 	return obj, nil
 }
 
@@ -120,13 +170,23 @@ func (d *driver) Mount(
 		"volumeName":  volumeName,
 		"volumeID":    volumeID,
 		"overwriteFS": opts.OverwriteFS,
-		"newFSType":   opts.NewFSType,
-		"driverName":  d.Name()}).Info("mounting volume")
+		"newFSType":   opts.NewFSType}).Info("mounting volume")
 
 	vol, err := d.volumeInspectByIDOrName(
 		ctx, volumeID, volumeName, true, opts.Opts)
-	if err != nil {
+	if isErrNotFound(err) && d.volumeCreateImplicit() {
+		var err error
+		if vol, err = d.Create(ctx, volumeName, &types.VolumeCreateOpts{
+			Opts: utils.NewStore(),
+		}); err != nil {
+			return "", nil, goof.WithError("problem creating volume implicitly", err)
+		}
+	} else if err != nil {
 		return "", nil, err
+	}
+
+	if vol == nil {
+		return "", nil, goof.New("no volume returned or created")
 	}
 
 	if len(vol.Attachments) == 0 {
@@ -148,8 +208,16 @@ func (d *driver) Mount(
 			return "", nil, err
 		}
 
-		_, _, err = ctx.Client().Executor().WaitForDevice(ctx,
-			token, *d.attachWaitForDevice(), utils.NewStore())
+		opts := &types.WaitForDeviceOpts{
+			LocalDevicesOpts: types.LocalDevicesOpts{
+				ScanType: apiconfig.DeviceScanType(d.config),
+				Opts:     opts.Opts,
+			},
+			Token:   token,
+			Timeout: apiconfig.DeviceAttachTimeout(d.config),
+		}
+
+		_, _, err = ctx.Client().Executor().WaitForDevice(ctx, opts)
 		if err != nil {
 			return "", nil, goof.WithError("problem with device discovery", err)
 		}
@@ -211,7 +279,15 @@ func (d *driver) Mount(
 		return "", nil, err
 	}
 
-	return d.volumeMountPath(mountPath), vol, nil
+	mntPath := d.volumeMountPath(mountPath)
+
+	fields := log.Fields{
+		"vol":     vol,
+		"mntPath": mntPath,
+	}
+	ctx.WithFields(fields).Info("volume mounted")
+
+	return mntPath, vol, nil
 }
 
 // Unmount will unmount the specified volume by volumeName or volumeID.
@@ -220,10 +296,10 @@ func (d *driver) Unmount(
 	volumeID, volumeName string,
 	opts types.Store) error {
 
-	log.WithFields(log.Fields{
+	ctx.WithFields(log.Fields{
 		"volumeName": volumeName,
 		"volumeID":   volumeID,
-		"driverName": d.Name()}).Info("unmounting volume")
+		"opts":       opts}).Info("unmounting volume")
 
 	if volumeName == "" && volumeID == "" {
 		return goof.New("missing volume name or ID")
@@ -249,12 +325,15 @@ func (d *driver) Unmount(
 	}
 
 	for _, mount := range mounts {
-		log.WithField("mount", mount).Debug("retrieved mount")
+		ctx.WithField("mount", mount).Debug("retrieved mount")
 	}
 	if len(mounts) > 0 {
-		err = ctx.Client().OS().Unmount(ctx, mounts[0].MountPoint, opts)
-		if err != nil {
-			return err
+		for _, mount := range mounts {
+			ctx.WithField("mount", mount).Debug("unmounting mount point")
+			err = ctx.Client().OS().Unmount(ctx, mount.MountPoint, opts)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -266,6 +345,10 @@ func (d *driver) Unmount(
 	if err != nil {
 		return err
 	}
+
+	ctx.WithFields(log.Fields{
+		"vol": vol}).Info("unmounted and detached volume")
+
 	return nil
 }
 
@@ -274,15 +357,19 @@ func (d *driver) Path(
 	ctx types.Context,
 	volumeID, volumeName string,
 	opts types.Store) (string, error) {
+
 	ctx.WithFields(log.Fields{
 		"volumeName": volumeName,
 		"volumeID":   volumeID,
-		"driverName": d.Name()}).Info("getting path of volume")
+		"opts":       opts}).Info("getting path to volume")
 
 	vol, err := d.volumeInspectByIDOrName(
 		ctx, volumeID, volumeName, true, opts)
 	if err != nil {
 		return "", err
+	} else if vol == nil {
+		return "", utils.NewNotFoundError(
+			fmt.Sprintf("volumeID=%s,volumeName=%s", volumeID, volumeName))
 	}
 
 	if len(vol.Attachments) == 0 {
@@ -298,7 +385,13 @@ func (d *driver) Path(
 		return "", nil
 	}
 
-	return d.volumeMountPath(mounts[0].MountPoint), nil
+	volPath := d.volumeMountPath(mounts[0].MountPoint)
+
+	ctx.WithFields(log.Fields{
+		"volPath": volPath,
+		"vol":     vol}).Info("returning path to volume")
+
+	return volPath, nil
 }
 
 // Create will create a new volume with the volumeName and opts.
@@ -306,28 +399,59 @@ func (d *driver) Create(
 	ctx types.Context,
 	volumeName string,
 	opts *types.VolumeCreateOpts) (*types.Volume, error) {
+
 	if volumeName == "" {
 		return nil, goof.New("missing volume name or ID")
 	}
 
 	optsNew := &types.VolumeCreateOpts{}
-	if !opts.Opts.IsSet("availabilityZone") {
-		*optsNew.AvailabilityZone = d.availabilityZone()
+	az := d.availabilityZone()
+	optsNew.AvailabilityZone = &az
+	i, _ := strconv.Atoi(d.size())
+	size := int64(i)
+	optsNew.Size = &size
+	volumeType := d.volumeType()
+	optsNew.Type = &volumeType
+	io, _ := strconv.Atoi(d.iops())
+	IOPS := int64(io)
+	optsNew.IOPS = &IOPS
+
+	if opts.Opts.IsSet("availabilityZone") {
+		az = opts.Opts.GetString("availabilityZone")
 	}
-	if !opts.Opts.IsSet("size") {
-		i, _ := strconv.Atoi(d.size())
-		*optsNew.Size = int64(i)
+	if opts.Opts.IsSet("size") {
+		size = opts.Opts.GetInt64("size")
 	}
-	if !opts.Opts.IsSet("volumeType") {
-		*optsNew.Type = d.volumeType()
+	if opts.Opts.IsSet("volumeType") {
+		volumeType = opts.Opts.GetString("volumeType")
 	}
-	if !opts.Opts.IsSet("iops") {
-		i, _ := strconv.Atoi(d.iops())
-		*optsNew.IOPS = int64(i)
+	if opts.Opts.IsSet("type") {
+		volumeType = opts.Opts.GetString("type")
 	}
+	if opts.Opts.IsSet("iops") {
+		IOPS = opts.Opts.GetInt64("iops")
+	}
+
 	optsNew.Opts = opts.Opts
 
-	return ctx.Client().Storage().VolumeCreate(ctx, volumeName, optsNew)
+	ctx.WithFields(log.Fields{
+		"volumeName":       volumeName,
+		"availabilityZone": az,
+		"size":             size,
+		"volumeType":       volumeType,
+		"IOPS":             IOPS,
+		"opts":             opts}).Info("creating volume")
+
+	vol, err := ctx.Client().Storage().VolumeCreate(ctx, volumeName, optsNew)
+	if err != nil {
+		return nil, err
+	}
+
+	ctx.WithFields(log.Fields{
+		"volumeName": volumeName,
+		"vol":        vol}).Info("volume created")
+
+	return vol, nil
 }
 
 // Remove will remove a volume of volumeName.
@@ -382,52 +506,46 @@ func (d *driver) NetworkName(
 }
 
 func (d *driver) volumeRootPath() string {
-	return d.config.GetString("linux.volume.rootPath")
+	return d.config.GetString(types.ConfigIgVolOpsMountRootPath)
 }
 
 func (d *driver) volumeType() string {
-	return d.config.GetString("docker.volumeType")
+	return d.config.GetString(types.ConfigIgVolOpsCreateDefaultType)
 }
 
 func (d *driver) iops() string {
-	return d.config.GetString("docker.iops")
+	return d.config.GetString(types.ConfigIgVolOpsCreateDefaultIOPS)
 }
 
 func (d *driver) size() string {
-	return d.config.GetString("docker.size")
+	return d.config.GetString(types.ConfigIgVolOpsCreateDefaultSize)
 }
 
 func (d *driver) availabilityZone() string {
-	return d.config.GetString("docker.availabilityZone")
+	return d.config.GetString(types.ConfigIgVolOpsCreateDefaultAZ)
 }
 
 func (d *driver) fsType() string {
-	return d.config.GetString("docker.fsType")
+	return d.config.GetString(types.ConfigIgVolOpsCreateDefaultFsType)
 }
 
 func (d *driver) mountDirPath() string {
-	return d.config.GetString("docker.mountDirPath")
+	return d.config.GetString(types.ConfigIgVolOpsMountPath)
 }
 
-func (d *driver) attachWaitForDevice() *time.Duration {
-	dur, err := time.ParseDuration(d.config.GetString("docker.mount.attachWaitForDevice"))
-	if err != nil {
-		dur, _ := time.ParseDuration("30s")
-		return &dur
-	}
-	return &dur
+func (d *driver) volumeCreateImplicit() bool {
+	return d.config.GetBool(types.ConfigIgVolOpsCreateImplicit)
 }
 
 func configRegistration() *gofig.Registration {
 	r := gofig.NewRegistration("Docker")
-	r.Key(gofig.String, "", "ext4", "", "docker.fsType")
-	r.Key(gofig.String, "", "", "", "docker.volumeType")
-	r.Key(gofig.String, "", "", "", "docker.iops")
-	r.Key(gofig.String, "", "", "", "docker.size")
-	r.Key(gofig.String, "", "", "", "docker.availabilityZone")
-	r.Key(gofig.String, "", "", "", "docker.attach.waitForDevice")
-	r.Key(gofig.String, "", "/var/lib/libstorage/volumes", "", "docker.mountDirPath")
-	r.Key(gofig.String, "", "30", "", "docker.attachWaitForDevice")
-	r.Key(gofig.String, "", "/data", "", "linux.volume.rootpath")
+	r.Key(gofig.String, "", "ext4", "", types.ConfigIgVolOpsCreateDefaultFsType)
+	r.Key(gofig.String, "", "", "", types.ConfigIgVolOpsCreateDefaultType)
+	r.Key(gofig.String, "", "", "", types.ConfigIgVolOpsCreateDefaultIOPS)
+	r.Key(gofig.String, "", "16", "", types.ConfigIgVolOpsCreateDefaultSize)
+	r.Key(gofig.String, "", "", "", types.ConfigIgVolOpsCreateDefaultAZ)
+	r.Key(gofig.String, "", "/var/lib/libstorage/volumes", "", types.ConfigIgVolOpsMountPath)
+	r.Key(gofig.String, "", "/data", "", types.ConfigIgVolOpsMountRootPath)
+	r.Key(gofig.Bool, "", true, "", types.ConfigIgVolOpsCreateImplicit)
 	return r
 }

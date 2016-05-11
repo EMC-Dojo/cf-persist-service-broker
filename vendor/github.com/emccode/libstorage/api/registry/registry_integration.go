@@ -6,14 +6,17 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/akutz/gofig"
 
+	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
+	apiutils "github.com/emccode/libstorage/api/utils"
 )
 
 type idm struct {
 	types.IntegrationDriver
 	sync.RWMutex
-	types.Context
-	used map[string]int
+	ctx    types.Context
+	config gofig.Config
+	used   map[string]int
 }
 
 // NewIntegrationDriverManager returns a new integration driver manager.
@@ -30,9 +33,28 @@ func (d *idm) Init(ctx types.Context, config gofig.Config) error {
 	if err := d.IntegrationDriver.Init(ctx, config); err != nil {
 		return err
 	}
-	d.Context = ctx
+
+	d.config = config
+	d.ctx = ctx
 	d.used = map[string]int{}
-	d.WithField("pathCache", "").Debug("checking volume path cache setting")
+
+	if d.pathCache() {
+		store := apiutils.NewStore()
+		store.Set("attachments", true)
+		_, _ = d.List(context.Background(), store)
+	}
+
+	ctx.WithField(types.ConfigIgVolOpsPathCache,
+		d.pathCache()).Info("cache empty path for unused volume setting")
+	ctx.WithField(types.ConfigIgVolOpsUnmountIgnoreUsed,
+		d.ignoreUsedCount()).Info("ignore used count on unmount setting")
+	ctx.WithField(types.ConfigIgVolOpsMountPreempt,
+		d.preempt()).Info("pre-emptive mount setting")
+	ctx.WithField(types.ConfigIgVolOpsCreateDisable,
+		d.disableCreate()).Info("volume creation disabled setting")
+	ctx.WithField(types.ConfigIgVolOpsRemoveDisable,
+		d.disableRemove()).Info("volume removal disabled setting")
+
 	return nil
 }
 
@@ -40,7 +62,11 @@ func (d *idm) List(
 	ctx types.Context,
 	opts types.Store) ([]types.VolumeMapping, error) {
 
-	volMaps, err := d.IntegrationDriver.List(ctx.Join(d.Context), opts)
+	fields := log.Fields{
+		"opts": opts}
+	ctx.WithFields(fields).Debug("listing volumes")
+
+	volMaps, err := d.IntegrationDriver.List(ctx.Join(d.ctx), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +96,13 @@ func (d *idm) Inspect(
 	ctx types.Context,
 	volumeName string,
 	opts types.Store) (types.VolumeMapping, error) {
-	return d.IntegrationDriver.Inspect(ctx.Join(d.Context), volumeName, opts)
+
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("inspecting volume")
+
+	return d.IntegrationDriver.Inspect(ctx.Join(d.ctx), volumeName, opts)
 }
 
 func (d *idm) Mount(
@@ -78,8 +110,14 @@ func (d *idm) Mount(
 	volumeID, volumeName string,
 	opts *types.VolumeMountOpts) (string, *types.Volume, error) {
 
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"volumeID":   volumeID,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("mounting volume")
+
 	mp, vol, err := d.IntegrationDriver.Mount(
-		ctx.Join(d.Context), volumeID, volumeName, opts)
+		ctx.Join(d.ctx), volumeID, volumeName, opts)
 	if err != nil {
 		return "", nil, err
 	}
@@ -92,13 +130,19 @@ func (d *idm) Unmount(
 	volumeID, volumeName string,
 	opts types.Store) error {
 
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"volumeID":   volumeID,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("unmounting volume")
+
 	if d.ignoreUsedCount() ||
 		d.resetCount(volumeName) ||
 		!d.isCounted(volumeName) {
 
 		d.initCount(volumeName)
 		return d.IntegrationDriver.Unmount(
-			ctx.Join(d.Context), volumeID, volumeName, opts)
+			ctx.Join(d.ctx), volumeID, volumeName, opts)
 	}
 
 	d.decCount(volumeName)
@@ -111,70 +155,91 @@ func (d *idm) Path(
 	opts types.Store) (string, error) {
 
 	fields := log.Fields{
-		"driverName": d.Name(),
 		"volumeName": volumeName,
-		"volumeID":   volumeID}
+		"volumeID":   volumeID,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("getting path to volume")
 
 	if !d.pathCache() {
 		return d.IntegrationDriver.Path(
-			ctx.Join(d.Context), volumeID, volumeName, opts)
+			ctx.Join(d.ctx), volumeID, volumeName, opts)
 	}
 
 	if !d.isCounted(volumeName) {
-		d.WithFields(fields).Debug("skipping path lookup")
+		ctx.WithFields(fields).Debug("skipping path lookup")
 		return "", nil
 	}
 
-	return d.IntegrationDriver.Path(ctx, volumeID, volumeName, opts)
+	return d.IntegrationDriver.Path(ctx.Join(d.ctx), volumeID, volumeName, opts)
 }
 
 func (d *idm) Create(
 	ctx types.Context,
 	volumeName string,
 	opts *types.VolumeCreateOpts) (*types.Volume, error) {
+
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("creating volume")
+
 	if d.disableCreate() {
+		ctx.Debug("disableRemove skipped creation")
 		return nil, nil
 	}
-	return d.IntegrationDriver.Create(ctx.Join(d.Context), volumeName, opts)
+	return d.IntegrationDriver.Create(ctx.Join(d.ctx), volumeName, opts)
 }
 
 func (d *idm) Remove(
 	ctx types.Context,
 	volumeName string,
 	opts types.Store) error {
+
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("removing volume")
+
 	if d.disableRemove() {
+		ctx.Debug("disableRemove skipped deletion")
 		return nil
 	}
-	return d.IntegrationDriver.Remove(ctx.Join(d.Context), volumeName, opts)
+	return d.IntegrationDriver.Remove(ctx.Join(d.ctx), volumeName, opts)
 }
 
 func (d *idm) Attach(
 	ctx types.Context,
 	volumeName string,
 	opts *types.VolumeAttachOpts) (string, error) {
-	return d.IntegrationDriver.Attach(ctx.Join(d.Context), volumeName, opts)
+
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("attaching volume")
+
+	return d.IntegrationDriver.Attach(ctx.Join(d.ctx), volumeName, opts)
+
 }
 
 func (d *idm) Detach(
 	ctx types.Context,
 	volumeName string,
 	opts *types.VolumeDetachOpts) error {
-	return d.IntegrationDriver.Detach(ctx.Join(d.Context), volumeName, opts)
-}
 
-func (d *idm) NetworkName(
-	ctx types.Context,
-	volumeName string,
-	opts types.Store) (string, error) {
-	return d.IntegrationDriver.NetworkName(
-		ctx.Join(d.Context), volumeName, opts)
+	fields := log.Fields{
+		"volumeName": volumeName,
+		"opts":       opts}
+	ctx.WithFields(fields).Debug("detaching volume")
+
+	return d.IntegrationDriver.Detach(ctx.Join(d.ctx), volumeName, opts)
+
 }
 
 func (d *idm) initCount(volumeName string) {
 	d.Lock()
 	defer d.Unlock()
 	d.used[volumeName] = 0
-	d.WithFields(log.Fields{
+	d.ctx.WithFields(log.Fields{
 		"volumeName": volumeName,
 		"count":      0,
 	}).Debug("init count")
@@ -185,7 +250,7 @@ func (d *idm) resetCount(volumeName string) bool {
 	defer d.Unlock()
 	c, ok := d.used[volumeName]
 	if ok && c < 2 {
-		d.WithFields(log.Fields{
+		d.ctx.WithFields(log.Fields{
 			"volumeName": volumeName,
 			"count":      c,
 		}).Info("count reset")
@@ -202,10 +267,10 @@ func (d *idm) addCount(volumeName string, delta int) {
 	if ok {
 		c = c + delta
 	} else {
-		c = 0
+		c = 1
 	}
 	d.used[volumeName] = c
-	d.WithFields(log.Fields{
+	d.ctx.WithFields(log.Fields{
 		"volumeName": volumeName,
 		"count":      c,
 	}).Debug("set count")
@@ -227,21 +292,21 @@ func (d *idm) decCount(volumeName string) {
 }
 
 func (d *idm) preempt() bool {
-	return d.GetBool(types.ConfigVolMountPreempt)
+	return d.config.GetBool(types.ConfigIgVolOpsMountPreempt)
 }
 
 func (d *idm) disableCreate() bool {
-	return d.GetBool(types.ConfigVolCreateDisable)
+	return d.config.GetBool(types.ConfigIgVolOpsCreateDisable)
 }
 
 func (d *idm) disableRemove() bool {
-	return d.GetBool(types.ConfigVolRemoveDisable)
+	return d.config.GetBool(types.ConfigIgVolOpsRemoveDisable)
 }
 
 func (d *idm) ignoreUsedCount() bool {
-	return d.GetBool(types.ConfigVolUnmountIgnoreUsed)
+	return d.config.GetBool(types.ConfigIgVolOpsUnmountIgnoreUsed)
 }
 
 func (d *idm) pathCache() bool {
-	return d.GetBool(types.ConfigVolPathCache)
+	return d.config.GetBool(types.ConfigIgVolOpsPathCache)
 }

@@ -30,14 +30,14 @@ var (
 	LogGetAndSet, _ = strconv.ParseBool(os.Getenv("GOFIG_LOG_GETSET"))
 
 	// LogSecureKey determines whether or not secure key attempts are logged.
-	LogSecureKey = false
+	LogSecureKey, _ = strconv.ParseBool(os.Getenv("GOFIG_LOG_SECUREKEY"))
 
 	// LogFlattenEnvVars determines whether or not flattening environment
 	// variables is logged.
-	LogFlattenEnvVars = false
+	LogFlattenEnvVars, _ = strconv.ParseBool(os.Getenv("GOFIG_LOG_FLATTEN"))
 
 	// LogRegKey determines whether or not key registrations are logged.
-	LogRegKey = false
+	LogRegKey, _ = strconv.ParseBool(os.Getenv("GOFIG_LOG_REGKEY"))
 )
 
 var (
@@ -62,12 +62,6 @@ func init() {
 
 // Config is the interface that enables retrieving configuration information.
 type Config interface {
-
-	// SetLogLevel sets the log level for this instance.
-	SetLogLevel(level log.Level)
-
-	// GetLogLevel gets the log level for this instance.
-	GetLogLevel() log.Level
 
 	// Parent gets the configuration's parent (if set).
 	Parent() Config
@@ -142,7 +136,6 @@ type Config interface {
 
 // config contains the configuration information
 type config struct {
-	*log.Logger
 	flagSets map[string]*flag.FlagSet
 	v        *viper.Viper
 }
@@ -199,14 +192,6 @@ func NewConfig(
 		loadGlobalConfig, loadUserConfig, configName, configType)
 }
 
-func (c *config) SetLogLevel(level log.Level) {
-	c.Level = level
-}
-
-func (c *config) GetLogLevel() log.Level {
-	return c.Level
-}
-
 func (c *scopedConfig) Parent() Config {
 	return c.Config
 }
@@ -215,6 +200,21 @@ func (c *config) Parent() Config {
 }
 
 func (c *scopedConfig) Scope(scope string) Config {
+	if log.GetLevel() == log.DebugLevel {
+		scopes := []string{}
+		var p Config = c
+		for {
+			scopes = append(scopes, p.GetScope())
+			p = p.Parent()
+			if p == nil {
+				break
+			}
+		}
+		log.WithFields(log.Fields{
+			"new":          scope,
+			"parentScopes": strings.Join(scopes, ","),
+		}).Debug("created scoped scope")
+	}
 	return &scopedConfig{Config: c, scope: scope}
 }
 func (c *config) Scope(scope string) Config {
@@ -241,7 +241,6 @@ func (c *scopedConfig) Copy() (Config, error) {
 }
 func (c *config) Copy() (Config, error) {
 	newC := newConfig()
-	newC.SetLogLevel(c.GetLogLevel())
 	m := map[string]interface{}{}
 	c.v.Unmarshal(&m)
 	for k, v := range m {
@@ -320,7 +319,7 @@ func (c *config) AllSettings() map[string]interface{} {
 
 func (c *config) GetString(k string) string {
 	if LogGetAndSet {
-		c.WithField("key", k).Debug("config.GetString")
+		log.WithField("key", k).Debug("config.GetString")
 	}
 	return c.v.GetString(k)
 }
@@ -337,7 +336,7 @@ func (c *scopedConfig) GetString(k string) string {
 
 func (c *config) GetBool(k string) bool {
 	if LogGetAndSet {
-		c.WithField("key", k).Debug("config.GetBool")
+		log.WithField("key", k).Debug("config.GetBool")
 	}
 	return c.v.GetBool(k)
 }
@@ -354,7 +353,7 @@ func (c *scopedConfig) GetBool(k string) bool {
 
 func (c *config) GetStringSlice(k string) []string {
 	if LogGetAndSet {
-		c.WithField("key", k).Debug("config.GetStringSlice")
+		log.WithField("key", k).Debug("config.GetStringSlice")
 	}
 	return c.v.GetStringSlice(k)
 }
@@ -371,7 +370,7 @@ func (c *scopedConfig) GetStringSlice(k string) []string {
 
 func (c *config) GetInt(k string) int {
 	if LogGetAndSet {
-		c.WithField("key", k).Debug("config.GetInt")
+		log.WithField("key", k).Debug("config.GetInt")
 	}
 	return c.v.GetInt(k)
 }
@@ -388,7 +387,7 @@ func (c *scopedConfig) GetInt(k string) int {
 
 func (c *config) Get(k string) interface{} {
 	if LogGetAndSet {
-		c.WithField("key", k).Debug("config.Get")
+		log.WithField("key", k).Debug("config.Get")
 	}
 	return c.v.Get(k)
 }
@@ -405,7 +404,7 @@ func (c *scopedConfig) Get(k string) interface{} {
 
 func (c *config) IsSet(k string) bool {
 	if LogGetAndSet {
-		c.WithField("key", k).Debug("config.IsSet")
+		log.WithField("key", k).Debug("config.IsSet")
 	}
 	return c.v.IsSet(k)
 }
@@ -435,13 +434,11 @@ func newConfigWithOptions(
 	configName, configType string) *config {
 
 	c := &config{
-		Logger:   log.New(),
 		v:        viper.New(),
 		flagSets: map[string]*flag.FlagSet{},
 	}
-	c.SetLogLevel(log.GetLevel())
 
-	c.Debug("initializing configuration")
+	log.Debug("initializing configuration")
 
 	c.v.SetTypeByDefaultValue(false)
 	c.v.SetConfigName(configName)
@@ -454,17 +451,17 @@ func newConfigWithOptions(
 	usrConfigFile := fmt.Sprintf("%s/%s", usrDirPath, cfgFile)
 
 	if loadGlobalConfig && gotil.FileExists(etcConfigFile) {
-		c.WithField("path", etcConfigFile).Debug("loading global config file")
+		log.WithField("path", etcConfigFile).Debug("loading global config file")
 		if err := c.ReadConfigFile(etcConfigFile); err != nil {
-			c.WithField("path", etcConfigFile).WithError(err).Debug(
+			log.WithField("path", etcConfigFile).WithError(err).Debug(
 				"error reading global config file")
 		}
 	}
 
 	if loadUserConfig && gotil.FileExists(usrConfigFile) {
-		c.WithField("path", usrConfigFile).Debug("loading user config file")
+		log.WithField("path", usrConfigFile).Debug("loading user config file")
 		if err := c.ReadConfigFile(usrConfigFile); err != nil {
-			c.WithField("path", usrConfigFile).WithError(err).Debug(
+			log.WithField("path", usrConfigFile).WithError(err).Debug(
 				"error reading user config file")
 		}
 	}
@@ -551,7 +548,7 @@ func (c *config) processRegistrations() {
 			evn := k.envVarName
 
 			if LogRegKey {
-				c.WithFields(log.Fields{
+				log.WithFields(log.Fields{
 					"keyName":      k.keyName,
 					"keyType":      k.keyType,
 					"flagName":     k.flagName,
@@ -610,7 +607,7 @@ func (c *config) flattenEnvVars(
 		ek := strings.ToUpper(strings.Replace(kk, ".", "_", -1))
 
 		if LogFlattenEnvVars {
-			c.WithFields(log.Fields{
+			log.WithFields(log.Fields{
 				"key":   kk,
 				"value": v,
 			}).Debug("flattening env vars")
@@ -657,7 +654,7 @@ func (c *config) allSettings() map[string]interface{} {
 		for fk, fv := range flat {
 			if asv, ok := as[fk]; ok && reflect.DeepEqual(asv, fv) {
 				if LogFlattenEnvVars {
-					c.WithFields(log.Fields{
+					log.WithFields(log.Fields{
 						"key":     fk,
 						"valAll":  asv,
 						"valFlat": fv,
@@ -718,7 +715,7 @@ func (c *config) isSecureKey(k string) bool {
 	kn := strings.ToLower(k)
 	_, ok := secureKeys[kn]
 	if LogSecureKey {
-		c.WithFields(log.Fields{
+		log.WithFields(log.Fields{
 			"keyName":  kn,
 			"isSecure": ok,
 		}).Debug("isSecureKey")

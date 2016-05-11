@@ -18,6 +18,9 @@ type VolumeMapping interface {
 
 	// MountPoint returns the volume's mount point.
 	MountPoint() string
+
+	// Status returns the volume's details for an inspect.
+	Status() map[string]interface{}
 }
 
 // IntegrationDriverManager is the management wrapper for an IntegrationDriver.
@@ -90,12 +93,4 @@ type IntegrationDriver interface {
 		ctx Context,
 		volumeName string,
 		opts *VolumeDetachOpts) error
-
-	// NetworkName will return an identifier of a volume that is relevant when
-	// corelating a local device to a device that is the volumeName to the
-	// local instanceID.
-	NetworkName(
-		ctx Context,
-		volumeName string,
-		opts Store) (string, error)
 }

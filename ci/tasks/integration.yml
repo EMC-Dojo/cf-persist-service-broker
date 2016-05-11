@@ -9,13 +9,16 @@ params:
   BROKER_USERNAME:                    replace-me
   BROKER_PASSWORD:                    replace-me
   SCALEIO_ENDPOINT:                   replace-me
-  LIBSTORAGE_HOST_URL:                replace-me
+  LIBSTORAGE_HOST:                    replace-me
+  LIBSTORAGE_STORAGE_DRIVER:          replace-me
   SCALEIO_USERNAME:                   replace-me
   SCALEIO_PASSWORD:                   replace-me
-  SCALEIO_SYSTEMID:                   replace-me
-  SCALEIO_SYSTEMNAME:                 replace-me
-  SCALEIO_PROTECTIONDOMAIN_ID:        replace-me
-  SCALEIO_PROTECTIONDOMAIN_NAME:      replace-me
-  SCALEIO_STORAGEPOOL_NAME:           replace-me
-  SCALEIO_THINORTHICK:                replace-me
+  SCALEIO_SYSTEM_ID:                  replace-me
+  SCALEIO_SYSTEM_NAME:                replace-me
+  SCALEIO_PROTECTION_DOMAIN_ID:       replace-me
+  SCALEIO_PROTECTION_DOMAIN_NAME:     replace-me
+  SCALEIO_STORAGE_POOL_NAME:          replace-me
+  SCALEIO_THIN_OR_THICK:              replace-me
   SCALEIO_VERSION:                    replace-me
+  SCALEIO_INSECURE:                   replace-me
+  SCALEIO_USE_CERTS:                  replace-me

@@ -9,18 +9,18 @@ import (
 
 	"github.com/akutz/gofig"
 	"github.com/akutz/goof"
-	"github.com/akutz/gotil"
 
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/api/utils"
+	"github.com/emccode/libstorage/api/utils/paths"
 )
 
 type client struct {
 	types.APIClient
 	ctx             types.Context
 	config          gofig.Config
-	svcAndLSXCache  *lss
-	lsxBinPath      string
+	serviceCache    *lss
+	lsxCache        *lss
 	instanceIDCache types.Store
 }
 
@@ -53,11 +53,6 @@ func (c *client) dial(ctx types.Context) error {
 		if _, err := c.InstanceID(ctx, store); err != nil {
 			return err
 		}
-
-		ctx.Info("initializing local devices cache")
-		if _, err := c.LocalDevices(ctx, store); err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -74,7 +69,7 @@ func getHost(proto, lAddr string, tlsConfig *tls.Config) string {
 }
 
 func (c *client) getServiceInfo(service string) (*types.ServiceInfo, error) {
-	if si := c.svcAndLSXCache.GetServiceInfo(service); si != nil {
+	if si := c.serviceCache.GetServiceInfo(service); si != nil {
 		return si, nil
 	}
 	return nil, goof.WithField("name", service, "unknown service")
@@ -84,7 +79,7 @@ func (c *client) updateExecutor(ctx types.Context) error {
 
 	ctx.Debug("updating executor")
 
-	lsxi := c.svcAndLSXCache.GetExecutorInfo(types.LSX)
+	lsxi := c.lsxCache.GetExecutorInfo(types.LSX)
 	if lsxi == nil {
 		return goof.WithField("lsx", types.LSX, "unknown executor")
 	}
@@ -100,7 +95,7 @@ func (c *client) updateExecutor(ctx types.Context) error {
 		}
 	}()
 
-	if !gotil.FileExists(c.lsxBinPath) {
+	if !paths.LSX.Exists() {
 		return c.downloadExecutor(ctx)
 	}
 
@@ -119,7 +114,7 @@ func (c *client) updateExecutor(ctx types.Context) error {
 func (c *client) getExecutorChecksum(ctx types.Context) (string, error) {
 	ctx.Debug("getting executor checksum")
 
-	f, err := os.Open(c.lsxBinPath)
+	f, err := os.Open(paths.LSX.String())
 	if err != nil {
 		return "", err
 	}
@@ -148,7 +143,7 @@ func (c *client) downloadExecutor(ctx types.Context) error {
 	ctx.Debug("downloading executor")
 
 	f, err := os.OpenFile(
-		c.lsxBinPath,
+		paths.LSX.String(),
 		os.O_CREATE|os.O_RDWR|os.O_TRUNC,
 		0755)
 	if err != nil {
