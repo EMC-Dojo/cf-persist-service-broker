@@ -1,10 +1,11 @@
 package server
 
 import (
+	"os"
+	"strings"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"strings"
 
 	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/emccode/libstorage/api/context"
@@ -27,7 +28,9 @@ var _ = Describe("Integration", func() {
 			libsClient, err = client.New(config)
 			Expect(err).ToNot(HaveOccurred())
 
-			volume, err := CreateVolume(libsClient, ctx, volumeName, "az", "pool1", 100, 8)
+			storagePoolName := os.Getenv("SCALEIO_STORAGE_POOL_NAME")
+			Expect(storagePoolName).ToNot(BeEmpty())
+			volume, err := CreateVolume(libsClient, ctx, volumeName, "az", storagePoolName, 100, 8)
 			Expect(err).ToNot(HaveOccurred())
 
 			volumeID = volume.ID
