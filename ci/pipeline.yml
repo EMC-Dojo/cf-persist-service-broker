@@ -1,3 +1,10 @@
+groups:
+- name: scaleio
+  jobs:
+  - integration
+  - lifecycle
+  - promote-candidate
+
 jobs:
 - name: integration
   serial: true
@@ -8,22 +15,22 @@ jobs:
   - task: integration
     file: cf-persist-service-broker/ci/tasks/integration.yml
     params:
-      BROKER_USERNAME:                      {{broker_username}}
       BROKER_PASSWORD:                      {{broker_password}}
+      BROKER_USERNAME:                      {{broker_username}}
       LIBSTORAGE_HOST:                      {{libstorage_host}}
       LIBSTORAGE_STORAGE_DRIVER:            {{libstorage_storage_driver}}
       SCALEIO_ENDPOINT:                     {{scaleio_endpoint}}
-      SCALEIO_USERNAME:                     {{scaleio_username}}
+      SCALEIO_INSECURE:                     {{scaleio_insecure}}
       SCALEIO_PASSWORD:                     {{scaleio_password}}
-      SCALEIO_SYSTEM_ID:                    {{scaleio_system_id}}
-      SCALEIO_SYSTEM_NAME:                  {{scaleio_system_name}}
       SCALEIO_PROTECTION_DOMAIN_ID:         {{scaleio_protection_domain_id}}
       SCALEIO_PROTECTION_DOMAIN_NAME:       {{scaleio_protection_domain_name}}
       SCALEIO_STORAGE_POOL_NAME:            {{scaleio_storage_pool_name}}
+      SCALEIO_SYSTEM_ID:                    {{scaleio_system_id}}
+      SCALEIO_SYSTEM_NAME:                  {{scaleio_system_name}}
       SCALEIO_THIN_OR_THICK:                {{scaleio_thin_or_thick}}
-      SCALEIO_VERSION:                      {{scaleio_version}}
-      SCALEIO_INSECURE:                     {{scaleio_insecure}}
       SCALEIO_USE_CERTS:                    {{scaleio_use_certs}}
+      SCALEIO_USERNAME:                     {{scaleio_username}}
+      SCALEIO_VERSION:                      {{scaleio_version}}
 
 - name: lifecycle
   serial: true
@@ -35,17 +42,17 @@ jobs:
   - task: lifecycle
     file: cf-persist-service-broker/ci/tasks/lifecycle.yml
     params:
-      CF_IP:                  {{cf_ip}}
-      CF_ENDPOINT:            {{cf_endpoint}}
-      CF_USERNAME:            {{cf_username}}
-      CF_PASSWORD:            {{cf_password}}
-      CF_ORG:                 {{cf_org}}
-      CF_SPACE:               {{cf_space}}
-      SCALEIO_ENDPOINT:       {{scaleio_endpoint}}
-      SCALEIO_USERNAME:       {{scaleio_username}}
-      SCALEIO_PASSWORD:       {{scaleio_password}}
-      BROKER_USERNAME:        {{broker_username}}
       BROKER_PASSWORD:        {{broker_password}}
+      BROKER_USERNAME:        {{broker_username}}
+      CF_ENDPOINT:            {{cf_endpoint}}
+      CF_IP:                  {{cf_ip}}
+      CF_ORG:                 {{cf_org}}
+      CF_PASSWORD:            {{cf_password}}
+      CF_SPACE:               {{cf_space}}
+      CF_USERNAME:            {{cf_username}}
+      SCALEIO_ENDPOINT:       {{scaleio_endpoint}}
+      SCALEIO_PASSWORD:       {{scaleio_password}}
+      SCALEIO_USERNAME:       {{scaleio_username}}
 
 - name: promote-candidate
   serial: true
@@ -53,13 +60,10 @@ jobs:
   - aggregate:
     - {trigger: true,   passed: [lifecycle], get: cf-persist-service-broker}
     - {trigger: false,  get: version-semver,  params: {bump: major}}
-
   - task: promote
     file: cf-persist-service-broker/ci/tasks/promote-candidate.yml
-
   - put: cf-persist-service-broker-out
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-
   - put: version-semver
     params: {file: version-semver/number}
 
