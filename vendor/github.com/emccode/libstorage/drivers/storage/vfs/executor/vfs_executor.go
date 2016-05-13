@@ -64,7 +64,13 @@ func (d *driver) Init(ctx types.Context, config gofig.Config) error {
 func (d *driver) InstanceID(
 	ctx types.Context,
 	opts types.Store) (*types.InstanceID, error) {
-	return instanceID()
+
+	hostName, err := utils.HostName()
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.InstanceID{ID: hostName, Driver: vfs.Name}, nil
 }
 
 var (
@@ -119,7 +125,7 @@ var (
 // LocalDevices returns a map of the system's local devices.
 func (d *driver) LocalDevices(
 	ctx types.Context,
-	opts *types.LocalDevicesOpts) (map[string]string, error) {
+	opts *types.LocalDevicesOpts) (*types.LocalDevices, error) {
 
 	ctx.WithFields(log.Fields{
 		"vfs.root": d.rootDir,
@@ -167,15 +173,7 @@ func (d *driver) LocalDevices(
 		localDevs[string(dev)] = string(mountPoint)
 	}
 
-	return localDevs, nil
-}
-
-func instanceID() (*types.InstanceID, error) {
-	hostName, err := utils.HostName()
-	if err != nil {
-		return nil, err
-	}
-	return &types.InstanceID{ID: hostName}, nil
+	return &types.LocalDevices{Driver: vfs.Name, DeviceMap: localDevs}, nil
 }
 
 var initialDeviceFile = []byte(`/dev/xvda

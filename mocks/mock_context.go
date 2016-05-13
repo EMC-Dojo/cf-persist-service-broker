@@ -4,15 +4,12 @@
 package mocks
 
 import (
-	fmt "fmt"
-	types "github.com/emccode/libstorage/api/types"
-	logrus "github.com/Sirupsen/logrus"
-	gofig "github.com/akutz/gofig"
-	pflag "github.com/spf13/pflag"
-	gomock "github.com/golang/mock/gomock"
-	io "io"
-	http "net/http"
 	time "time"
+
+	logrus "github.com/Sirupsen/logrus"
+	types "github.com/emccode/libstorage/api/types"
+	gomock "github.com/golang/mock/gomock"
+	context "golang.org/x/net/context"
 )
 
 // Mock of Context interface
@@ -34,47 +31,6 @@ func NewMockContext(ctrl *gomock.Controller) *MockContext {
 
 func (_m *MockContext) EXPECT() *_MockContextRecorder {
 	return _m.recorder
-}
-
-func (_m *MockContext) AllKeys() []string {
-	ret := _m.ctrl.Call(_m, "AllKeys")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) AllKeys() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "AllKeys")
-}
-
-func (_m *MockContext) AllSettings() map[string]interface{} {
-	ret := _m.ctrl.Call(_m, "AllSettings")
-	ret0, _ := ret[0].(map[string]interface{})
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) AllSettings() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "AllSettings")
-}
-
-func (_m *MockContext) Client() types.Client {
-	ret := _m.ctrl.Call(_m, "Client")
-	ret0, _ := ret[0].(types.Client)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Client() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Client")
-}
-
-func (_m *MockContext) Copy() (gofig.Config, error) {
-	ret := _m.ctrl.Call(_m, "Copy")
-	ret0, _ := ret[0].(gofig.Config)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockContextRecorder) Copy() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Copy")
 }
 
 func (_m *MockContext) Deadline() (time.Time, bool) {
@@ -133,16 +89,6 @@ func (_m *MockContext) Done() <-chan struct{} {
 
 func (_mr *_MockContextRecorder) Done() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Done")
-}
-
-func (_m *MockContext) EnvVars() []string {
-	ret := _m.ctrl.Call(_m, "EnvVars")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) EnvVars() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "EnvVars")
 }
 
 func (_m *MockContext) Err() error {
@@ -229,86 +175,6 @@ func (_mr *_MockContextRecorder) Fatalln(arg0 ...interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Fatalln", arg0...)
 }
 
-func (_m *MockContext) FlagSets() map[string]*pflag.FlagSet {
-	ret := _m.ctrl.Call(_m, "FlagSets")
-	ret0, _ := ret[0].(map[string]*pflag.FlagSet)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) FlagSets() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "FlagSets")
-}
-
-func (_m *MockContext) Get(_param0 string) interface{} {
-	ret := _m.ctrl.Call(_m, "Get", _param0)
-	ret0, _ := ret[0].(interface{})
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Get(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Get", arg0)
-}
-
-func (_m *MockContext) GetBool(_param0 string) bool {
-	ret := _m.ctrl.Call(_m, "GetBool", _param0)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) GetBool(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetBool", arg0)
-}
-
-func (_m *MockContext) GetInt(_param0 string) int {
-	ret := _m.ctrl.Call(_m, "GetInt", _param0)
-	ret0, _ := ret[0].(int)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) GetInt(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetInt", arg0)
-}
-
-func (_m *MockContext) GetLogLevel() logrus.Level {
-	ret := _m.ctrl.Call(_m, "GetLogLevel")
-	ret0, _ := ret[0].(logrus.Level)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) GetLogLevel() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetLogLevel")
-}
-
-func (_m *MockContext) GetScope() string {
-	ret := _m.ctrl.Call(_m, "GetScope")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) GetScope() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetScope")
-}
-
-func (_m *MockContext) GetString(_param0 string) string {
-	ret := _m.ctrl.Call(_m, "GetString", _param0)
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) GetString(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetString", arg0)
-}
-
-func (_m *MockContext) GetStringSlice(_param0 string) []string {
-	ret := _m.ctrl.Call(_m, "GetStringSlice", _param0)
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) GetStringSlice(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "GetStringSlice", arg0)
-}
-
 func (_m *MockContext) Info(_param0 ...interface{}) {
 	_s := []interface{}{}
 	for _, _x := range _param0 {
@@ -346,37 +212,7 @@ func (_mr *_MockContextRecorder) Infoln(arg0 ...interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Infoln", arg0...)
 }
 
-func (_m *MockContext) InstanceID() *types.InstanceID {
-	ret := _m.ctrl.Call(_m, "InstanceID")
-	ret0, _ := ret[0].(*types.InstanceID)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) InstanceID() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "InstanceID")
-}
-
-func (_m *MockContext) InstanceIDsByService() map[string]*types.InstanceID {
-	ret := _m.ctrl.Call(_m, "InstanceIDsByService")
-	ret0, _ := ret[0].(map[string]*types.InstanceID)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) InstanceIDsByService() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "InstanceIDsByService")
-}
-
-func (_m *MockContext) IsSet(_param0 string) bool {
-	ret := _m.ctrl.Call(_m, "IsSet", _param0)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) IsSet(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsSet", arg0)
-}
-
-func (_m *MockContext) Join(_param0 types.Context) types.Context {
+func (_m *MockContext) Join(_param0 context.Context) types.Context {
 	ret := _m.ctrl.Call(_m, "Join", _param0)
 	ret0, _ := ret[0].(types.Context)
 	return ret0
@@ -384,47 +220,6 @@ func (_m *MockContext) Join(_param0 types.Context) types.Context {
 
 func (_mr *_MockContextRecorder) Join(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Join", arg0)
-}
-
-func (_m *MockContext) LocalDevices() map[string]string {
-	ret := _m.ctrl.Call(_m, "LocalDevices")
-	ret0, _ := ret[0].(map[string]string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) LocalDevices() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "LocalDevices")
-}
-
-func (_m *MockContext) LocalDevicesByService() map[string]map[string]string {
-	ret := _m.ctrl.Call(_m, "LocalDevicesByService")
-	ret0, _ := ret[0].(map[string]map[string]string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) LocalDevicesByService() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "LocalDevicesByService")
-}
-
-func (_m *MockContext) Log() *logrus.Logger {
-	ret := _m.ctrl.Call(_m, "Log")
-	ret0, _ := ret[0].(*logrus.Logger)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Log() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Log")
-}
-
-func (_m *MockContext) MarshalJSON() ([]byte, error) {
-	ret := _m.ctrl.Call(_m, "MarshalJSON")
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockContextRecorder) MarshalJSON() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "MarshalJSON")
 }
 
 func (_m *MockContext) Panic(_param0 ...interface{}) {
@@ -464,16 +259,6 @@ func (_mr *_MockContextRecorder) Panicln(arg0 ...interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Panicln", arg0...)
 }
 
-func (_m *MockContext) Parent() gofig.Config {
-	ret := _m.ctrl.Call(_m, "Parent")
-	ret0, _ := ret[0].(gofig.Config)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Parent() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Parent")
-}
-
 func (_m *MockContext) Print(_param0 ...interface{}) {
 	_s := []interface{}{}
 	for _, _x := range _param0 {
@@ -509,134 +294,6 @@ func (_m *MockContext) Println(_param0 ...interface{}) {
 
 func (_mr *_MockContextRecorder) Println(arg0 ...interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Println", arg0...)
-}
-
-func (_m *MockContext) Profile() string {
-	ret := _m.ctrl.Call(_m, "Profile")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Profile() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Profile")
-}
-
-func (_m *MockContext) ReadConfig(_param0 io.Reader) error {
-	ret := _m.ctrl.Call(_m, "ReadConfig", _param0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) ReadConfig(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ReadConfig", arg0)
-}
-
-func (_m *MockContext) ReadConfigFile(_param0 string) error {
-	ret := _m.ctrl.Call(_m, "ReadConfigFile", _param0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) ReadConfigFile(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ReadConfigFile", arg0)
-}
-
-func (_m *MockContext) Route() string {
-	ret := _m.ctrl.Call(_m, "Route")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Route() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Route")
-}
-
-func (_m *MockContext) Scope(_param0 string) gofig.Config {
-	ret := _m.ctrl.Call(_m, "Scope", _param0)
-	ret0, _ := ret[0].(gofig.Config)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) Scope(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Scope", arg0)
-}
-
-func (_m *MockContext) ServerName() string {
-	ret := _m.ctrl.Call(_m, "ServerName")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) ServerName() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ServerName")
-}
-
-func (_m *MockContext) ServiceName() string {
-	ret := _m.ctrl.Call(_m, "ServiceName")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) ServiceName() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ServiceName")
-}
-
-func (_m *MockContext) Set(_param0 string, _param1 interface{}) {
-	_m.ctrl.Call(_m, "Set", _param0, _param1)
-}
-
-func (_mr *_MockContextRecorder) Set(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Set", arg0, arg1)
-}
-
-func (_m *MockContext) SetLogLevel(_param0 logrus.Level) {
-	_m.ctrl.Call(_m, "SetLogLevel", _param0)
-}
-
-func (_mr *_MockContextRecorder) SetLogLevel(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "SetLogLevel", arg0)
-}
-
-func (_m *MockContext) ToJSON() (string, error) {
-	ret := _m.ctrl.Call(_m, "ToJSON")
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockContextRecorder) ToJSON() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ToJSON")
-}
-
-func (_m *MockContext) ToJSONCompact() (string, error) {
-	ret := _m.ctrl.Call(_m, "ToJSONCompact")
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (_mr *_MockContextRecorder) ToJSONCompact() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "ToJSONCompact")
-}
-
-func (_m *MockContext) TransactionCreated() time.Time {
-	ret := _m.ctrl.Call(_m, "TransactionCreated")
-	ret0, _ := ret[0].(time.Time)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) TransactionCreated() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "TransactionCreated")
-}
-
-func (_m *MockContext) TransactionID() string {
-	ret := _m.ctrl.Call(_m, "TransactionID")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) TransactionID() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "TransactionID")
 }
 
 func (_m *MockContext) Value(_param0 interface{}) interface{} {
@@ -723,46 +380,6 @@ func (_mr *_MockContextRecorder) Warnln(arg0 ...interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Warnln", arg0...)
 }
 
-func (_m *MockContext) WithClient(_param0 types.Client) types.Context {
-	ret := _m.ctrl.Call(_m, "WithClient", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithClient(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithClient", arg0)
-}
-
-func (_m *MockContext) WithConfig(_param0 gofig.Config) types.Context {
-	ret := _m.ctrl.Call(_m, "WithConfig", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithConfig(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithConfig", arg0)
-}
-
-func (_m *MockContext) WithContextID(_param0 string, _param1 string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithContextID", _param0, _param1)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithContextID(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithContextID", arg0, arg1)
-}
-
-func (_m *MockContext) WithContextSID(_param0 fmt.Stringer, _param1 string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithContextSID", _param0, _param1)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithContextSID(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithContextSID", arg0, arg1)
-}
-
 func (_m *MockContext) WithError(_param0 error) *logrus.Entry {
 	ret := _m.ctrl.Call(_m, "WithError", _param0)
 	ret0, _ := ret[0].(*logrus.Entry)
@@ -791,106 +408,6 @@ func (_m *MockContext) WithFields(_param0 logrus.Fields) *logrus.Entry {
 
 func (_mr *_MockContextRecorder) WithFields(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithFields", arg0)
-}
-
-func (_m *MockContext) WithHTTPRequest(_param0 *http.Request) types.Context {
-	ret := _m.ctrl.Call(_m, "WithHTTPRequest", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithHTTPRequest(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithHTTPRequest", arg0)
-}
-
-func (_m *MockContext) WithInstanceID(_param0 *types.InstanceID) types.Context {
-	ret := _m.ctrl.Call(_m, "WithInstanceID", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithInstanceID(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithInstanceID", arg0)
-}
-
-func (_m *MockContext) WithInstanceIDsByService(_param0 map[string]*types.InstanceID) types.Context {
-	ret := _m.ctrl.Call(_m, "WithInstanceIDsByService", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithInstanceIDsByService(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithInstanceIDsByService", arg0)
-}
-
-func (_m *MockContext) WithLocalDevices(_param0 map[string]string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithLocalDevices", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithLocalDevices(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithLocalDevices", arg0)
-}
-
-func (_m *MockContext) WithLocalDevicesByService(_param0 map[string]map[string]string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithLocalDevicesByService", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithLocalDevicesByService(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithLocalDevicesByService", arg0)
-}
-
-func (_m *MockContext) WithProfile(_param0 string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithProfile", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithProfile(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithProfile", arg0)
-}
-
-func (_m *MockContext) WithRoute(_param0 string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithRoute", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithRoute(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithRoute", arg0)
-}
-
-func (_m *MockContext) WithServiceName(_param0 string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithServiceName", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithServiceName(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithServiceName", arg0)
-}
-
-func (_m *MockContext) WithTransactionCreated(_param0 time.Time) types.Context {
-	ret := _m.ctrl.Call(_m, "WithTransactionCreated", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithTransactionCreated(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithTransactionCreated", arg0)
-}
-
-func (_m *MockContext) WithTransactionID(_param0 string) types.Context {
-	ret := _m.ctrl.Call(_m, "WithTransactionID", _param0)
-	ret0, _ := ret[0].(types.Context)
-	return ret0
-}
-
-func (_mr *_MockContextRecorder) WithTransactionID(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "WithTransactionID", arg0)
 }
 
 func (_m *MockContext) WithValue(_param0 interface{}, _param1 interface{}) types.Context {

@@ -1,19 +1,19 @@
 package server
 
 import (
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 
+	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
-	"strings"
-	"io"
 )
 
 var scaleioClient types.Client
