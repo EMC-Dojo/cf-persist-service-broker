@@ -14,7 +14,7 @@ jobs:
       trigger: true
   - task: integration
     file: cf-persist-service-broker/ci/tasks/integration.yml
-    params:
+    params: &integration-params
       BROKER_PASSWORD:                      {{broker_password}}
       BROKER_USERNAME:                      {{broker_username}}
       LIBSTORAGE_HOST:                      {{libstorage_host}}
@@ -42,17 +42,13 @@ jobs:
   - task: lifecycle
     file: cf-persist-service-broker/ci/tasks/lifecycle.yml
     params:
-      BROKER_PASSWORD:        {{broker_password}}
-      BROKER_USERNAME:        {{broker_username}}
+      <<: *integration-params
       CF_ENDPOINT:            {{cf_endpoint}}
       CF_IP:                  {{cf_ip}}
       CF_ORG:                 {{cf_org}}
       CF_PASSWORD:            {{cf_password}}
       CF_SPACE:               {{cf_space}}
       CF_USERNAME:            {{cf_username}}
-      SCALEIO_ENDPOINT:       {{scaleio_endpoint}}
-      SCALEIO_PASSWORD:       {{scaleio_password}}
-      SCALEIO_USERNAME:       {{scaleio_username}}
 
 - name: promote-candidate
   serial: true

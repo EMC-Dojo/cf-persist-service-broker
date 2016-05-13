@@ -30,7 +30,5 @@ mkdir -p gocode/src/github.com/EMC-CMD
 cp -r cf-persist-service-broker gocode/src/github.com/EMC-CMD/cf-persist-service-broker
 
 pushd gocode/src/github.com/EMC-CMD/cf-persist-service-broker
-  godep restore
-  go run main.go &
   ginkgo -r
 popd
