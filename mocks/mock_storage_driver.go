@@ -4,8 +4,8 @@
 package mocks
 
 import (
-	types "github.com/emccode/libstorage/api/types"
 	gofig "github.com/akutz/gofig"
+	types "github.com/emccode/libstorage/api/types"
 	gomock "github.com/golang/mock/gomock"
 )
 

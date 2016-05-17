@@ -1,20 +1,22 @@
-package server
+package libstoragewrapper_test
 
 import (
 	"os"
 	"strings"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
+	"github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
 	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+  "github.com/EMC-CMD/cf-persist-service-broker/utils"
 )
 
 var _ = Describe("Integration", func() {
-	volumeName := "volumeName"
+  instance_id := "3d7e25a9-849a-4e19-bdb1-baddaf878f1c"
 
 	Describe("Libstorage Client Integration", func() {
 		var libsClient types.Client
@@ -30,14 +32,26 @@ var _ = Describe("Integration", func() {
 
 			storagePoolName := os.Getenv("SCALEIO_STORAGE_POOL_NAME")
 			Expect(storagePoolName).ToNot(BeEmpty())
-			volume, err := CreateVolume(libsClient, ctx, volumeName, "az", storagePoolName, 100, 8)
+      serviceInstance := model.ServiceInstance{
+        Parameters: map[string]interface{}{
+          "storage_pool_name" : storagePoolName,
+        },
+      }
+
+      volumeName, err := utils.GenerateVolumeName(instance_id, serviceInstance)
+      Expect(err).ToNot(HaveOccurred())
+
+      volumeCreateOpts, err := utils.CreateVolumeOpts(serviceInstance)
+      Expect(err).ToNot(HaveOccurred())
+
+			volume, err := libstoragewrapper.CreateVolume(libsClient, ctx, volumeName, volumeCreateOpts)
 			Expect(err).ToNot(HaveOccurred())
 
 			volumeID = volume.ID
 		})
 
 		AfterEach(func() {
-			err := RemoveVolume(libsClient, ctx, volumeID)
+			err := libstoragewrapper.RemoveVolume(libsClient, ctx, volumeID)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
@@ -48,18 +62,8 @@ var _ = Describe("Integration", func() {
 				}
 				volume, err := libsClient.Storage().VolumeInspect(ctx, volumeID, opts)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(volume.Name).To(Equal(volumeName))
+				Expect(volume.Name).To(Equal("3d7e25a9849a4e19bdb1baddaf878f1"))
 				Expect(volume.Size).To(Equal(int64(8)))
-			})
-		})
-	})
-
-	Describe("Service Broker Integration", func() {
-		Describe("Provision", func() {
-			Context("when provisioning request is valid", func() {
-				It("returns 200", func() {
-
-				})
 			})
 		})
 	})

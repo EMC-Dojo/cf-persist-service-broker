@@ -4,13 +4,12 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"github.com/EMC-CMD/cf-persist-service-broker/mocks"
 )
 
 func TestServer(t *testing.T) {
@@ -22,6 +21,7 @@ func TestServer(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	go startServer()
+	time.Sleep(time.Millisecond * 500)
 })
 
 func startServer() {
@@ -32,9 +32,11 @@ func startServer() {
 	if err != nil {
 		log.Panic("Unable to open ", os.DevNull, err)
 	}
+
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = devNull
 	gin.LoggerWithWriter(ioutil.Discard)
-	s.SetClient(&mocks.MockClient{})
+
+	s.Init("")
 	s.Run("9900")
 }

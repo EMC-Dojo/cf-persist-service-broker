@@ -19,18 +19,18 @@ scaleio:
 `)
 
 var Scaleio_required_configuration = []string{
-  "scaleio.endpoint",
-  "scaleio.insecure",
-  "scaleio.useCerts",
-  "scaleio.userName",
-  "scaleio.password",
-  "scaleio.systemID",
-  "scaleio.systemName",
-  "scaleio.protectionDomainID",
-  "scaleio.protectionDomainName",
-  "scaleio.storagePoolName",
-  "scaleio.thinOrThick",
-  "scaleio.version",
+	"scaleio.endpoint",
+	"scaleio.insecure",
+	"scaleio.useCerts",
+	"scaleio.userName",
+	"scaleio.password",
+	"scaleio.systemID",
+	"scaleio.systemName",
+	"scaleio.protectionDomainID",
+	"scaleio.protectionDomainName",
+	"scaleio.storagePoolName",
+	"scaleio.thinOrThick",
+	"scaleio.version",
 }
 
 func GetConfig(in io.Reader) (gofig.Config, error) {

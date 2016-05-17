@@ -5,8 +5,7 @@ type ServiceInstance struct {
 	PlanId            string      `json:"plan_id"`
 	ServiceId         string      `json:"service_id"`
 	SpaceGuid         string      `json:"space_guid"`
-	Parameters        interface{} `json:"parameters, omitempty"`
-	AcceptsIncomplete bool        `json:"accepts_incomplete, omitempty"`
+	Parameters        map[string]interface{} `json:"parameters, omitempty"`
 }
 
 type CreateServiceInstanceResponse struct {
