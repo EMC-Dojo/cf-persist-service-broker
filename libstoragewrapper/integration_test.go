@@ -16,11 +16,14 @@ import (
 )
 
 var _ = Describe("Integration", func() {
-  instance_id := "3d7e25a9-849a-4e19-bdb1-baddaf878f1c"
+  instanceID := "3d7e25a9-849a-4e19-bdb1-baddaf878f1c"
 
 	Describe("Libstorage Client Integration", func() {
 		var libsClient types.Client
 		var volumeID string
+    var storagePoolName string
+    var serviceInstance model.ServiceInstance
+
 		ctx := context.Background()
 
 		BeforeEach(func() {
@@ -30,15 +33,15 @@ var _ = Describe("Integration", func() {
 			libsClient, err = client.New(config)
 			Expect(err).ToNot(HaveOccurred())
 
-			storagePoolName := os.Getenv("SCALEIO_STORAGE_POOL_NAME")
+			storagePoolName = os.Getenv("SCALEIO_STORAGE_POOL_NAME")
 			Expect(storagePoolName).ToNot(BeEmpty())
-      serviceInstance := model.ServiceInstance{
+      serviceInstance = model.ServiceInstance{
         Parameters: map[string]interface{}{
           "storage_pool_name" : storagePoolName,
         },
       }
 
-      volumeName, err := utils.GenerateVolumeName(instance_id, serviceInstance)
+      volumeName, err := utils.GenerateVolumeName(instanceID, serviceInstance)
       Expect(err).ToNot(HaveOccurred())
 
       volumeCreateOpts, err := utils.CreateVolumeOpts(serviceInstance)
@@ -66,5 +69,13 @@ var _ = Describe("Integration", func() {
 				Expect(volume.Size).To(Equal(int64(8)))
 			})
 		})
+
+    Context("When passing in an instanceID", func() {
+      It("return a volume ID if instanceID exist", func() {
+        getVolumeID, err := utils.GetVolumeID(libsClient, instanceID, serviceInstance)
+        Expect(err).ToNot(HaveOccurred())
+        Expect(getVolumeID).To(Equal(volumeID))
+      })
+    })
 	})
 })
