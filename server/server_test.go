@@ -141,11 +141,12 @@ var _ = Describe("Unit", func() {
 	Context("when removing instances", func() {
 		Context("when request is valid", func() {
 			It("returns 200 ok", func() {
-				deprovisionInstanceRequestBody, err := os.Open(filepath.Join(utils.ProjectDirectory(), "fixtures/deprovision_instance_request.json"))
-				Expect(err).ToNot(HaveOccurred())
-
-				path := "/v2/service_instances/536b35ff-6c0e-4bed-bf55-cbcc79e175c8"
-				req, err := http.NewRequest("DELETE", serverURL+path, deprovisionInstanceRequestBody)
+				u, err := url.Parse(serverURL + "/v2/service_instances/536b35ff-6c0e-4bed-bf55-cbcc79e175c8")
+				q := u.Query()
+				q.Set("service_id", "1C12FB88-2F67-4708-8AB7-4215B8E27C3E")
+				q.Set("plan_id", "205F2EF0-2B83-492F-9840-F585D3D8D6B8")
+				u.RawQuery = q.Encode()
+				req, err := http.NewRequest("DELETE", u.String(), nil)
 				Expect(err).ToNot(HaveOccurred())
 
 				req.SetBasicAuth(brokerUser, brokerPassword)

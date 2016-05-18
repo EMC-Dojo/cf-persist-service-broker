@@ -119,15 +119,9 @@ func ProvisioningHandler(c *gin.Context) {
 }
 
 func DeprovisionHandler(c *gin.Context) {
-	reqBody, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Panic("Unable to read request body %s", err)
-	}
-
-	var serviceInstance model.ServiceInstance
-	err = json.Unmarshal(reqBody, &serviceInstance)
-	if err != nil {
-		log.Panicf("Unable to unmarshal the request body: %s. Request body %s", err, string(reqBody))
+	serviceInstance := model.ServiceInstance{
+		ServiceId: c.Param("service_id"),
+		PlanId:    c.Param("plan_id"),
 	}
 
 	instanceId := c.Param("instanceId")
