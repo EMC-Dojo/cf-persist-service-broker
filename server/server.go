@@ -8,17 +8,17 @@ import (
 	"path/filepath"
 	"strings"
 
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+
+	"encoding/json"
 
 	"github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
 	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/EMC-CMD/cf-persist-service-broker/utils"
+	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
-	"encoding/json"
-  "github.com/emccode/libstorage/api/context"
 )
 
 var libsClient types.Client
@@ -88,37 +88,59 @@ func CatalogHandler(c *gin.Context) {
 
 func ProvisioningHandler(c *gin.Context) {
 	reqBody, err := ioutil.ReadAll(c.Request.Body)
-  if err != nil {
-    log.Panic("Unable to read request body %s", err)
-  }
+	if err != nil {
+		log.Panic("Unable to read request body %s", err)
+	}
 
 	var serviceInstance model.ServiceInstance
 	err = json.Unmarshal(reqBody, &serviceInstance)
-  if err != nil {
-    log.Panic("Unable to unmarshal the request body: %s.", err)
-  }
+	if err != nil {
+		log.Panicf("Unable to unmarshal the request body: %s. Request body %s", err, string(reqBody))
+	}
 
-  instanceId := c.Param("instanceId")
-  volumeName, err := utils.GenerateVolumeName(instanceId, serviceInstance)
-  if err != nil {
-    log.Panic("Unable to generate volume name: %s.", err)
-  }
+	instanceId := c.Param("instanceId")
+	volumeName, err := utils.GenerateVolumeName(instanceId, serviceInstance)
+	if err != nil {
+		log.Panic("Unable to generate volume name: %s.", err)
+	}
 
-  volumeOpts, err := utils.CreateVolumeOpts(serviceInstance)
-  if err != nil {
-    log.Panic("Unable to create volume opts: %s.", err)
-  }
+	volumeOpts, err := utils.CreateVolumeOpts(serviceInstance)
+	if err != nil {
+		log.Panic("Unable to create volume opts: %s.", err)
+	}
 
-  ctx := context.Background()
-  _, err = libstoragewrapper.CreateVolume(libsClient, ctx, volumeName, volumeOpts)
-  if err != nil {
-    log.Panic("Unable to create volume using libstorage: %s.", err)
-  }
+	ctx := context.Background()
+	_, err = libstoragewrapper.CreateVolume(libsClient, ctx, volumeName, volumeOpts)
+	if err != nil {
+		log.Panic("Unable to create volume using libstorage: %s.", err)
+	}
 
 	c.JSON(http.StatusCreated, gin.H{})
 }
 
 func DeprovisionHandler(c *gin.Context) {
+	reqBody, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Panic("Unable to read request body %s", err)
+	}
+
+	var serviceInstance model.ServiceInstance
+	err = json.Unmarshal(reqBody, &serviceInstance)
+	if err != nil {
+		log.Panicf("Unable to unmarshal the request body: %s. Request body %s", err, string(reqBody))
+	}
+
+	instanceId := c.Param("instanceId")
+	volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceId, serviceInstance)
+	if err != nil {
+		log.Panic("Unable to find volume ID by instance Id")
+	}
+
+	ctx := context.Background()
+	err = libstoragewrapper.RemoveVolume(libsClient, ctx, volumeID)
+	if err != nil {
+		log.Panic("error removing volume using libstorage")
+	}
 
 	c.JSON(http.StatusOK, gin.H{})
 }

@@ -27,17 +27,17 @@ describe 'lifecycle', type: :lifecycle do
   end
 
   after(:all) do
-    exec_command("cf delete-service-broker scaleio -f")
-    exec_command("cf delete #{app_name} -f")
+    # exec_command("cf delete-service-broker scaleio -f")
+    # exec_command("cf delete #{app_name} -f")
   end
 
   it 'should push app to cf ' do
     get_service_catalog
     register_the_service_broker
-    # create_service_instance
+    create_service_instance
     # bind_service
     # unbind_service
-    # delete_service_instance
+    delete_service_instance
     # delete_not_created_service
   end
 end
@@ -83,7 +83,7 @@ def register_the_service_broker
 end
 
 def create_service_instance
-  output = exec_command('cf create-service scaleio small lifecycle_scaleio_service')
+  output = exec_command('cf create-service scaleio small lifecycle_scaleio_service -c \'{"storage_pool_name": "default"}\'')
   expect(output).to include('OK')
 end
 
