@@ -27,16 +27,16 @@ describe 'lifecycle', type: :lifecycle do
   end
 
   after(:all) do
-    # exec_command("cf delete-service-broker scaleio -f")
-    # exec_command("cf delete #{app_name} -f")
+    exec_command("cf delete-service-broker scaleiogo -f")
+    exec_command("cf delete #{app_name} -f")
   end
 
   it 'should push app to cf ' do
     get_service_catalog
     register_the_service_broker
     create_service_instance
-    # bind_service
-    # unbind_service
+    bind_service
+    unbind_service
     delete_service_instance
     # delete_not_created_service
   end
@@ -67,23 +67,23 @@ def get_service_catalog
 end
 
 def register_the_service_broker
-  output = exec_command("cf create-service-broker scaleio #{ENV['BROKER_USERNAME']} #{ENV['BROKER_PASSWORD']} https://#{app_name}.#{endpoint}")
+  output = exec_command("cf create-service-broker scaleiogo #{ENV['BROKER_USERNAME']} #{ENV['BROKER_PASSWORD']} https://#{app_name}.#{endpoint}")
   expect(output).to include('OK')
 
-  output = exec_command('cf enable-service-access scaleio')
+  output = exec_command('cf enable-service-access scaleiogo')
   expect(output).to include('OK')
 
   output = exec_command('cf marketplace')
-  expect(output).to include('ScaleIO')
+  expect(output).to include('scaleiogo')
   expect(output).to include('small')
 
-  output = exec_command('cf marketplace -s scaleio')
+  output = exec_command('cf marketplace -s scaleiogo')
   expect(output).to include('small')
   expect(output).to include('free')
 end
 
 def create_service_instance
-  output = exec_command('cf create-service scaleio small lifecycle_scaleio_service -c \'{"storage_pool_name": "default"}\'')
+  output = exec_command('cf create-service scaleiogo small lifecycle_scaleio_service -c \'{"storage_pool_name": "default"}\'')
   expect(output).to include('OK')
 end
 
@@ -92,7 +92,7 @@ def bind_service
   expect(output).to include('OK')
 
   output = exec_command("cf env #{app_name}")
-  expect(output).to include('ScaleIO')
+  expect(output).to include('scaleiogo')
 end
 
 def unbind_service
@@ -100,7 +100,7 @@ def unbind_service
   expect(output).to include('OK')
 
   output = exec_command("cf env #{app_name}")
-  expect(output).to_not include('ScaleIO')
+  expect(output).to_not include('scaleiogo')
 end
 
 def delete_service_instance

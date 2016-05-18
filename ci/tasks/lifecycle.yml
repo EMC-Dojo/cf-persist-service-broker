@@ -7,7 +7,6 @@ run:
   path: cf-persist-service-broker/ci/tasks/lifecycle.sh
 params:
   RACK_ENV:           ci
-  CF_IP:              replace-me
   CF_ENDPOINT:        replace-me
   CF_USERNAME:        replace-me
   CF_PASSWORD:        replace-me

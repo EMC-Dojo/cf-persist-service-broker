@@ -44,7 +44,6 @@ jobs:
     params:
       <<: *integration-params
       CF_ENDPOINT:            {{cf_endpoint}}
-      CF_IP:                  {{cf_ip}}
       CF_ORG:                 {{cf_org}}
       CF_PASSWORD:            {{cf_password}}
       CF_SPACE:               {{cf_space}}

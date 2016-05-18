@@ -19,9 +19,5 @@ check_param BROKER_PASSWORD
 
 cd cf-persist-service-broker/
 
-echo "${CF_IP} api.${CF_ENDPOINT}" >> /etc/hosts
-echo "${CF_IP} login.${CF_ENDPOINT}" >> /etc/hosts
-echo "${CF_IP} cf-persist-service-broker-lifecycle.${CF_ENDPOINT}" >> /etc/hosts
-
 bundle install
 bundle exec rspec spec --tag type:lifecycle
