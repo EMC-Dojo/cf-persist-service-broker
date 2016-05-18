@@ -72,7 +72,8 @@ var _ = Describe("Integration", func() {
 
 		Context("When passing in an instanceID", func() {
 			It("return a volume ID if instanceID exist", func() {
-				getVolumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceID, serviceInstance)
+        service_id, plan_id := "x", "y"
+				getVolumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceID, service_id, plan_id)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(getVolumeID).To(Equal(volumeID))
 			})

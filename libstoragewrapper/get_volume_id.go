@@ -5,12 +5,11 @@ import (
 
 	"github.com/emccode/libstorage/api/context"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/EMC-CMD/cf-persist-service-broker/utils"
 	"github.com/emccode/libstorage/api/types"
 )
 
-func GetVolumeID(libsClient types.Client, instanceId string, serviceInstance model.ServiceInstance) (string, error) {
+func GetVolumeID(libsClient types.Client, instanceId, service_id, plan_id string) (string, error) {
 	return getScaleIOVolumeID(libsClient, instanceId)
 }
 

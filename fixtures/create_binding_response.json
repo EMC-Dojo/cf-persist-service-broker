@@ -1,10 +1,12 @@
 {
-  "credentials": {
-    "uri": "http://dummy.com",
-    "username": "dummy-username",
-    "password": "dummy-password",
-    "host": "dummy-host",
-    "port": 1234,
-    "database": "dummy-database"
-  }
+  "volume_mounts": [
+    {
+      "container_path": "/mnt/myappsmount",
+      "mode": "rw",
+      "private":{
+        "driver": "rexray",
+        "group_id": "<%= volume_id %>",
+        "config": "{\"broker\":\"specific_values\"}"
+      }
+    }]
 }

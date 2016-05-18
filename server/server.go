@@ -119,13 +119,8 @@ func ProvisioningHandler(c *gin.Context) {
 }
 
 func DeprovisionHandler(c *gin.Context) {
-	serviceInstance := model.ServiceInstance{
-		ServiceId: c.Param("service_id"),
-		PlanId:    c.Param("plan_id"),
-	}
-
 	instanceId := c.Param("instanceId")
-	volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceId, serviceInstance)
+	volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceId, c.Param("service_id"), c.Param("plan_id"))
 	if err != nil {
 		log.Panic("Unable to find volume ID by instance Id")
 	}
@@ -140,8 +135,39 @@ func DeprovisionHandler(c *gin.Context) {
 }
 
 func BindingHandler(c *gin.Context) {
-	body, _ := ioutil.ReadFile("fixtures/create_binding_response.json")
-	c.String(http.StatusCreated, string(body))
+  instanceID := c.Param("instanceId")
+
+  reqBody, err := ioutil.ReadAll(c.Request.Body)
+  if err != nil {
+    log.Panicf("Unable to read request body %s. Body", err)
+  }
+
+  var serviceBinding model.ServiceBinding
+  err = json.Unmarshal(reqBody, &serviceBinding)
+  if err != nil {
+    log.Panicf("Unable to unmarshal service binding request %s. Request Body: %s", err, string(reqBody))
+  }
+
+  volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceID, serviceBinding.ServiceId, serviceBinding.PlanId)
+  if err != nil {
+    log.Panic("Unable to find volume ID by instance Id")
+  }
+
+  serviceBindingResp := model.CreateServiceBindingResponse{
+    VolumeMounts: []model.VolumeMount{
+      model.VolumeMount{
+        ContainerPath: "/mnt/myappmount",
+        Mode: "rw",
+        Private: model.VolumeMountPrivateDetails{
+          Driver: "rexray",
+          GroupId: volumeID,
+          Config: "{\"broker\":\"specific_values\"}",
+        },
+      },
+    },
+  }
+
+	c.JSON(http.StatusCreated, serviceBindingResp)
 }
 
 func UnbindingHandler(c *gin.Context) {

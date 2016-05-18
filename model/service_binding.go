@@ -1,21 +1,25 @@
 package model
 
 type ServiceBinding struct {
-	Id                string `json:"id"`
 	ServiceId         string `json:"service_id"`
-	AppId             string `json:"app_id"`
-	ServicePlanId     string `json:"service_plan_id"`
-	PrivateKey        string `json:"private_key"`
-	ServiceInstanceId string `json:"service_instance_id"`
+	AppId             string `json:"app_guid"`
+  PlanId            string `json:"plan_id"`
+  BindResource      map[string]string `json:"bind_resource"`
+  Parameters        map[string]interface{} `json:"parameters"`
 }
 
 type CreateServiceBindingResponse struct {
-	// SyslogDrainUrl string      `json:"syslog_drain_url, omitempty"`
-	Credentials interface{} `json:"credentials"`
+  VolumeMounts []VolumeMount `json:"volume_mounts"`
 }
 
-type Credential struct {
-	PublicIP   string `json:"public_ip"`
-	UserName   string `json:"username"`
-	PrivateKey string `json:"private_key"`
+type VolumeMount struct {
+  ContainerPath string                    `json:"container_path"`
+  Mode          string                    `json:"mode"`
+  Private       VolumeMountPrivateDetails `json:"private"`
+}
+
+type VolumeMountPrivateDetails struct {
+  Driver  string     `json:"driver"`
+  GroupId string     `json:"group_id"`
+  Config  string `json:"config"`
 }
