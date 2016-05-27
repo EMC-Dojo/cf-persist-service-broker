@@ -4,6 +4,7 @@
     "name": "scaleiogo",
     "description": "Attach volumes to your apps",
     "bindable": true,
+    "requires": ["volume_mount"],
     "plans": [{
       "id": "92798c7d-e7b0-49d6-8872-4aeafbb193ef",
       "name": "small",

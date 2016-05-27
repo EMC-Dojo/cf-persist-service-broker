@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -12,10 +13,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
 	"github.com/EMC-CMD/cf-persist-service-broker/model"
 	"github.com/EMC-CMD/cf-persist-service-broker/utils"
-  "github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
-  "github.com/emccode/libstorage/client"
+	"github.com/emccode/libstorage/client"
 )
 
 var _ = Describe("Unit", func() {
@@ -84,29 +85,33 @@ var _ = Describe("Unit", func() {
 	Context("when creating bindings", func() {
 		Context("when request is valid", func() {
 			It("returns the binding authorization parameters with status 201", func() {
-        configReader := strings.NewReader("")
-        config, err := model.GetConfig(configReader)
-        Expect(err).ToNot(HaveOccurred())
+				configReader := strings.NewReader("")
+				config, err := model.GetConfig(configReader)
+				Expect(err).ToNot(HaveOccurred())
 
-        libsClient, err := client.New(config)
-        Expect(err).ToNot(HaveOccurred())
+				libsClient, err := client.New(config)
+				Expect(err).ToNot(HaveOccurred())
 
-        volume_id, err := libstoragewrapper.GetVolumeID(libsClient, "536b35ff-6c0e-4bed-bf55-cbcc79e175c8", "47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1", "205F2EF0-2B83-492F-9840-F585D3D8D6B8")
-        Expect(err).ToNot(HaveOccurred())
+				volume_id, err := libstoragewrapper.GetVolumeID(libsClient, "536b35ff-6c0e-4bed-bf55-cbcc79e175c8", "47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1", "205F2EF0-2B83-492F-9840-F585D3D8D6B8")
+				Expect(err).ToNot(HaveOccurred())
 
-        expectedStructure := model.CreateServiceBindingResponse{
-          VolumeMounts: []model.VolumeMount {
-            model.VolumeMount {
-              ContainerPath: "/mnt/myappmount",
-              Mode: "rw",
-              Private: model.VolumeMountPrivateDetails{
-                Driver: "rexray",
-                GroupId: volume_id,
-                Config: "{\"broker\":\"specific_values\"}",
-              },
-            },
-          },
-        }
+				expectedStructure := model.CreateServiceBindingResponse{
+					Credentials: model.CreateServiceBindingCredentials{
+						URI: "dummy",
+					},
+					VolumeMounts: []model.VolumeMount{
+						model.VolumeMount{
+							ContainerPath: fmt.Sprintf("/var/vcap/store/scaleio/%s", volume_id),
+							Mode:          "rw",
+							Private: model.VolumeMountPrivateDetails{
+								Driver:  "rexray",
+								GroupId: volume_id,
+								Config:  "{\"broker\":\"specific_values\"}",
+							},
+						},
+					},
+				}
+
 				provisionInstanceRequestBody, err := os.Open(filepath.Join(utils.ProjectDirectory(), "fixtures/create_binding_request.json"))
 				Expect(err).ToNot(HaveOccurred())
 
@@ -126,7 +131,7 @@ var _ = Describe("Unit", func() {
 				var binding model.CreateServiceBindingResponse
 				err = json.Unmarshal(body, &binding)
 				Expect(err).ToNot(HaveOccurred())
-        Expect(binding).To(Equal(expectedStructure))
+				Expect(binding).To(Equal(expectedStructure))
 			})
 		})
 	})

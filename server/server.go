@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -135,37 +136,40 @@ func DeprovisionHandler(c *gin.Context) {
 }
 
 func BindingHandler(c *gin.Context) {
-  instanceID := c.Param("instanceId")
+	instanceID := c.Param("instanceId")
 
-  reqBody, err := ioutil.ReadAll(c.Request.Body)
-  if err != nil {
-    log.Panicf("Unable to read request body %s. Body", err)
-  }
+	reqBody, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Panicf("Unable to read request body %s. Body", err)
+	}
 
-  var serviceBinding model.ServiceBinding
-  err = json.Unmarshal(reqBody, &serviceBinding)
-  if err != nil {
-    log.Panicf("Unable to unmarshal service binding request %s. Request Body: %s", err, string(reqBody))
-  }
+	var serviceBinding model.ServiceBinding
+	err = json.Unmarshal(reqBody, &serviceBinding)
+	if err != nil {
+		log.Panicf("Unable to unmarshal service binding request %s. Request Body: %s", err, string(reqBody))
+	}
 
-  volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceID, serviceBinding.ServiceId, serviceBinding.PlanId)
-  if err != nil {
-    log.Panic("Unable to find volume ID by instance Id")
-  }
+	volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceID, serviceBinding.ServiceId, serviceBinding.PlanId)
+	if err != nil {
+		log.Panic("Unable to find volume ID by instance Id")
+	}
 
-  serviceBindingResp := model.CreateServiceBindingResponse{
-    VolumeMounts: []model.VolumeMount{
-      model.VolumeMount{
-        ContainerPath: "/mnt/myappmount",
-        Mode: "rw",
-        Private: model.VolumeMountPrivateDetails{
-          Driver: "rexray",
-          GroupId: volumeID,
-          Config: "{\"broker\":\"specific_values\"}",
-        },
-      },
-    },
-  }
+	serviceBindingResp := model.CreateServiceBindingResponse{
+		Credentials: model.CreateServiceBindingCredentials{
+			URI: "dummy",
+		},
+		VolumeMounts: []model.VolumeMount{
+			model.VolumeMount{
+				ContainerPath: fmt.Sprintf("/var/vcap/store/scaleio/%s", volumeID),
+				Mode:          "rw",
+				Private: model.VolumeMountPrivateDetails{
+					Driver:  "rexray",
+					GroupId: volumeID,
+					Config:  "{\"broker\":\"specific_values\"}",
+				},
+			},
+		},
+	}
 
 	c.JSON(http.StatusCreated, serviceBindingResp)
 }
