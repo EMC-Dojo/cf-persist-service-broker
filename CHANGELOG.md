@@ -7,3 +7,5 @@ v8cee9155abeb71d0f38359f2c834240f21461ea1 Resolve depencies problem on libstorag
 v39a8ed044f1e16e21c78182f36b711ca2163b1a2 Fix integration test script
 ## v4
 vbdfe5338002907e8638c1aa94ddce01257000efd Add bind, unbind, deprovision, provision into service broker
+## v5
+vbad235205fce7458ec536602ceb2bc624342c4a8 Modified catalog and binding for service broker to match that of cf-scaleio-broker
