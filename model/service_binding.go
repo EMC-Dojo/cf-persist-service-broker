@@ -14,7 +14,12 @@ type CreateServiceBindingResponse struct {
 }
 
 type CreateServiceBindingCredentials struct {
-	URI string `json:"uri"`
+	Database string `json:"database"`
+	Host     string `json:"host"`
+	Password string `json:"password"`
+	Port     int    `json:"port"`
+	URI      string `json:"uri"`
+	Username string `json:"username"`
 }
 
 type VolumeMount struct {

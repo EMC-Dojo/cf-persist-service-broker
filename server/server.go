@@ -129,7 +129,7 @@ func DeprovisionHandler(c *gin.Context) {
 	ctx := context.Background()
 	err = libstoragewrapper.RemoveVolume(libsClient, ctx, volumeID)
 	if err != nil {
-		log.Panic("error removing volume using libstorage")
+		log.Panic("error removing volume using libstorage", err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{})
@@ -154,9 +154,19 @@ func BindingHandler(c *gin.Context) {
 		log.Panic("Unable to find volume ID by instance Id")
 	}
 
+	volumeName, err := utils.CreateNameForScaleIO(instanceID)
+	if err != nil {
+		log.Panicf("Unable to encode instanceID to volume Name %s", err)
+	}
+
 	serviceBindingResp := model.CreateServiceBindingResponse{
 		Credentials: model.CreateServiceBindingCredentials{
-			URI: "dummy",
+			Database: "dummy",
+			Host:     "dummy",
+			Password: "dummy",
+			Port:     3306,
+			URI:      "dummy",
+			Username: "dummy",
 		},
 		VolumeMounts: []model.VolumeMount{
 			model.VolumeMount{
@@ -164,7 +174,7 @@ func BindingHandler(c *gin.Context) {
 				Mode:          "rw",
 				Private: model.VolumeMountPrivateDetails{
 					Driver:  "rexray",
-					GroupId: volumeID,
+					GroupId: volumeName,
 					Config:  "{\"broker\":\"specific_values\"}",
 				},
 			},
