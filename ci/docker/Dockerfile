@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN apt-get -y update
-RUN apt-get install -y git wget
+RUN apt-get install -y git wget curl
 
 RUN wget https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz
 RUN tar zxvf go1.6.2.linux-amd64.tar.gz -C /usr/local/
