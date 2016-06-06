@@ -1,0 +1,15 @@
+---
+platform: linux
+image: docker:///emccmd/persist-sb
+inputs:
+- name: cf-persist-service-broker
+- name: scaleio-acceptance-app
+run:
+  path: cf-persist-service-broker/ci/tasks/acceptance.sh
+params:
+  CF_ENDPOINT:                    replace-me
+  CF_USERNAME:                    replace-me
+  CF_PASSWORD:                    replace-me
+  CF_ORG:                         replace-me
+  CF_SPACE:                       replace-me
+  CF_SCALEIO_SERVICE_BROKER:      replace-me

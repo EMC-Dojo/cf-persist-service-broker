@@ -8,3 +8,14 @@ check_param() {
     exit 1
   fi
 }
+
+check_persistent() {
+  local uploaded_data=$1
+  echo $2
+  data=$(curl --insecure $2)
+
+  if [ "${uploaded_data}" != "${data}" ]; then
+    echo "data is not persist"
+    exit 1
+  fi
+}
