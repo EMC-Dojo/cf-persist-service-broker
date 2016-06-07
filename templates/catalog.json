@@ -10,5 +10,17 @@
       "name": "small",
       "description": "A shared filesystem in a 2GB volume on ScaleIO"
     }]
+  },
+  {
+    "id": "EF4537F4-AC80-4C2A-B63E-7EC477AB2065",
+    "name": "scaleiogo-ci",
+    "description": "ci",
+    "bindable": true,
+    "requires": ["volume_mount"],
+    "plans": [{
+      "id": "4B3601E3-343E-4D28-BD06-8A1CA9F35B0B",
+      "name": "ci",
+      "description": "A shared filesystem in a 2GB volume on ScaleIO"
+    }]
   }]
 }

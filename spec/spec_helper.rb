@@ -2,10 +2,6 @@
 require 'rspec'
 require 'json'
 
-def app_name
-  "cf-persist-service-broker-lifecycle"
-end
-
 def endpoint
   ENV['CF_ENDPOINT']
 end
