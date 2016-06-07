@@ -10,7 +10,8 @@ check_param CF_USERNAME
 check_param CF_PASSWORD
 check_param CF_ORG
 check_param CF_SPACE
-check_param CF_SCALEIO_SERVICE_BROKER
+check_param CF_SCALEIO_SB_APP
+check_param CF_SCALEIO_SB_SERVICE
 
 uploaded_data='IAMADATA'
 app='scaleio-acceptance-app'
@@ -47,5 +48,6 @@ pushd scaleio-acceptance-app
 
   cf unbind-service ${app} ${service}
   cf delete-service ${service} -f
-  cf delete-service-broker ${CF_SCALEIO_SERVICE_BROKER} -f
+  cf delete-service-broker ${CF_SCALEIO_SB_SERVICE} -f
+  cf delete ${CF_SCALEIO_SB_APP} -f
 popd

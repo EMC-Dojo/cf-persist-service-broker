@@ -12,4 +12,5 @@ params:
   CF_PASSWORD:                    replace-me
   CF_ORG:                         replace-me
   CF_SPACE:                       replace-me
-  CF_SCALEIO_SERVICE_BROKER:      replace-me
+  CF_SCALEIO_SB_APP:              replace-me
+  CF_SCALEIO_SB_SERVICE:          replace-me

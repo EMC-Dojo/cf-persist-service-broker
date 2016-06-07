@@ -42,13 +42,29 @@ jobs:
       passed: [integration]
   - task: lifecycle
     file: cf-persist-service-broker/ci/tasks/lifecycle.yml
-    params:
+    params: &lifecycle-params
       <<: *integration-params
       CF_ENDPOINT:            {{cf_endpoint}}
       CF_ORG:                 {{cf_org}}
       CF_PASSWORD:            {{cf_password}}
       CF_SPACE:               {{cf_space}}
       CF_USERNAME:            {{cf_username}}
+      CF_SCALEIO_SB_APP:      {{cf_scaleio_sb_app}}
+      CF_SCALEIO_SB_SERVICE:  {{cf_scaleio_sb_service}}
+
+- name: acceptance
+  serial: true
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+      passed: [lifecycle]
+    - get: scaleio-acceptance-app
+      trigger: false
+  - task: acceptance
+    file: cf-persist-service-broker/ci/tasks/acceptance.yml
+    params:
+      <<: *lifecycle-params
 
 - name: acceptance
   serial: true
@@ -92,14 +108,15 @@ resources:
 - name: scaleio-acceptance-app
   type: git
   source:
-    uri: https://github.com/EMC-CMD/scaleio-io-test
+    uri: git@github.com:EMC-CMD/scaleio-io-test.git
     branch: master
+    private_key: {{github_scaleio_acceptance_private_key}}
 
 - name: cf-persist-service-broker-out
   type: git
   source:
     uri: git@github.com:EMC-CMD/cf-persist-service-broker.git
-    branch: master
+    branch: ci
     private_key: {{github_private_key}}
 
 - name: version-semver
