@@ -40,11 +40,11 @@ pushd scaleio-acceptance-app
   curl --insecure -X POST https://${app}.${CF_ENDPOINT}/data -d "${uploaded_data}" -H "Content-Type: text/plain"
   check_persistent ${uploaded_data} ${download_url}
 
-  cf stop ${app}
-  cf start ${app}
+  cf restage ${app}
   check_persistent ${uploaded_data} ${download_url}
 
-  cf restage ${app}
+  cf stop ${app}
+  cf start ${app}
   check_persistent ${uploaded_data} ${download_url}
 
   cf unbind-service ${app} ${service}
