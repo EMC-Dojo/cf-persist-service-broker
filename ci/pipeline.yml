@@ -58,31 +58,13 @@ jobs:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [lifecycle]
+      # passed: [lifecycle]
     - get: scaleio-acceptance-app
       trigger: false
   - task: acceptance
     file: cf-persist-service-broker/ci/tasks/acceptance.yml
     params:
       <<: *lifecycle-params
-
-- name: acceptance
-  serial: true
-  plan:
-  - aggregate:
-    - get: cf-persist-service-broker
-      trigger: true
-      passed: [lifecycle]
-    - get: scaleio-acceptance-app
-      trigger: false
-  - task: acceptance
-    file: cf-persist-service-broker/ci/tasks/acceptance.yml
-    params:
-      CF_ENDPOINT:            {{cf_endpoint}}
-      CF_ORG:                 {{cf_org}}
-      CF_PASSWORD:            {{cf_password}}
-      CF_SPACE:               {{cf_space}}
-      CF_USERNAME:            {{cf_username}}
 
 - name: promote-candidate
   serial: true

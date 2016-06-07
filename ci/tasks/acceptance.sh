@@ -18,6 +18,14 @@ app='scaleio-acceptance-app'
 service='scaleio-acceptance-service'
 download_url=https://${app}.${CF_ENDPOINT}/data
 
+function cleanup {
+  cf unbind-service ${app} ${service} || true
+  cf delete-service ${service} -f || true
+  cf delete-service-broker ${CF_SCALEIO_SB_SERVICE} -f || true
+  cf delete ${CF_SCALEIO_SB_APP} -f
+}
+trap cleanup EXIT
+
 pushd scaleio-acceptance-app
   cf api https://api.${CF_ENDPOINT} --skip-ssl-validation
   cf auth ${CF_USERNAME} ${CF_PASSWORD}
@@ -45,9 +53,4 @@ pushd scaleio-acceptance-app
   cf bind-service ${app} ${service}
   cf start ${app}
   check_persistent ${uploaded_data} ${download_url}
-
-  cf unbind-service ${app} ${service}
-  cf delete-service ${service} -f
-  cf delete-service-broker ${CF_SCALEIO_SB_SERVICE} -f
-  cf delete ${CF_SCALEIO_SB_APP} -f
 popd
