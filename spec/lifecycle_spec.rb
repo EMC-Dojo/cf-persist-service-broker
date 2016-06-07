@@ -29,11 +29,6 @@ describe 'lifecycle', type: :lifecycle do
     exec_command("cf start #{@app_name}")
   end
 
-  after(:all) do
-    # exec_command("cf delete-service-broker #{@service_name} -f")
-    # exec_command("cf delete #{@app_name} -f")
-  end
-
   it 'should push app to cf ' do
     get_service_catalog
     register_the_service_broker
@@ -41,7 +36,6 @@ describe 'lifecycle', type: :lifecycle do
     bind_service
     unbind_service
     delete_service_instance
-    # delete_not_created_service
   end
 end
 
@@ -78,15 +72,15 @@ def register_the_service_broker
 
   output = exec_command('cf marketplace')
   expect(output).to include(@service_name)
-  expect(output).to include('small')
+  expect(output).to include('ci')
 
   output = exec_command("cf marketplace -s #{@service_name}")
-  expect(output).to include('small')
+  expect(output).to include('ci')
   expect(output).to include('free')
 end
 
 def create_service_instance
-  output = exec_command("cf create-service #{@service_name} small lifecycle_scaleio_service -c \'{\"storage_pool_name\": \"default\"}\'")
+  output = exec_command("cf create-service #{@service_name} ci lifecycle_scaleio_service -c \'{\"storage_pool_name\": \"default\"}\'")
   expect(output).to include('OK')
 end
 
@@ -109,10 +103,4 @@ end
 def delete_service_instance
   output = exec_command('cf delete-service lifecycle_scaleio_service -f')
   expect(output).to include('OK')
-end
-
-def delete_not_created_service
-  output = exec_command('cf delete-service notcreatedservice -f')
-  puts "The output is #{output}"
-  expect(output).to include('Service notcreatedservice does not exist.')
 end
