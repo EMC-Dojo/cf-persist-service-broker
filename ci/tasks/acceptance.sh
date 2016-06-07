@@ -25,7 +25,7 @@ pushd scaleio-acceptance-app
 
   cf push ${app} --no-start
   cf env ${app}
-  cf create-service scaleiogo-ci small ${service} -c '{"storage_pool_name": "default"}'
+  cf create-service scaleiogo-ci ci ${service} -c '{"storage_pool_name": "default"}'
   cf bind-service ${app} ${service}
   cf start ${app}
 
