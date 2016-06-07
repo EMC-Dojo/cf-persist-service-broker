@@ -11,3 +11,5 @@ vbdfe5338002907e8638c1aa94ddce01257000efd Add bind, unbind, deprovision, provisi
 vbad235205fce7458ec536602ceb2bc624342c4a8 Modified catalog and binding for service broker to match that of cf-scaleio-broker
 ## v6
 v5b20ade2d236ecea4b628aad0a8efefcc6a4e9a4 Change service broker to use volumeName for Binding
+## v8
+v88dc765d825417ce657ada3be5c43330f351d2a1 Reuse service broker instance from lifecycle test
