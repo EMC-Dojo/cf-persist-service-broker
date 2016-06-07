@@ -78,15 +78,15 @@ def register_the_service_broker
 
   output = exec_command('cf marketplace')
   expect(output).to include(@service_name)
-  expect(output).to include('small')
+  expect(output).to include('ci')
 
   output = exec_command("cf marketplace -s #{@service_name}")
-  expect(output).to include('small')
+  expect(output).to include('ci')
   expect(output).to include('free')
 end
 
 def create_service_instance
-  output = exec_command("cf create-service #{@service_name} small lifecycle_scaleio_service -c \'{\"storage_pool_name\": \"default\"}\'")
+  output = exec_command("cf create-service #{@service_name} ci lifecycle_scaleio_service -c \'{\"storage_pool_name\": \"default\"}\'")
   expect(output).to include('OK')
 end
 
