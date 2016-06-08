@@ -15,3 +15,5 @@ v5b20ade2d236ecea4b628aad0a8efefcc6a4e9a4 Change service broker to use volumeNam
 v88dc765d825417ce657ada3be5c43330f351d2a1 Reuse service broker instance from lifecycle test
 ## v9
 va5ed98d54ea2e083e4cfc1bdfd5f95746d54e827 Change to non-interactive for delete app
+## v10
+v2d5fe573ecbf0eb974b9167f4cc4a13db54e6a87 Change delete app to restage app
