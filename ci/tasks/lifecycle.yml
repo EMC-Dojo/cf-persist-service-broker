@@ -3,6 +3,7 @@ platform: linux
 image: docker:///emccmd/persist-sb
 inputs:
 - name: cf-persist-service-broker
+- name: scaleio-acceptance-app
 run:
   path: cf-persist-service-broker/ci/tasks/lifecycle.sh
 params:

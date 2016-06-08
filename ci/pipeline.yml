@@ -3,7 +3,6 @@ groups:
   jobs:
   - integration
   - lifecycle
-  - acceptance
   - promote-candidate
 
 jobs:
@@ -40,6 +39,8 @@ jobs:
     - get: cf-persist-service-broker
       trigger: true
       passed: [integration]
+    - get: scaleio-acceptance-app
+      trigger: false
   - task: lifecycle
     file: cf-persist-service-broker/ci/tasks/lifecycle.yml
     params: &lifecycle-params
@@ -52,25 +53,11 @@ jobs:
       CF_SCALEIO_SB_APP:      {{cf_scaleio_sb_app}}
       CF_SCALEIO_SB_SERVICE:  {{cf_scaleio_sb_service}}
 
-- name: acceptance
-  serial: true
-  plan:
-  - aggregate:
-    - get: cf-persist-service-broker
-      trigger: true
-      passed: [lifecycle]
-    - get: scaleio-acceptance-app
-      trigger: false
-  - task: acceptance
-    file: cf-persist-service-broker/ci/tasks/acceptance.yml
-    params:
-      <<: *lifecycle-params
-
 - name: promote-candidate
   serial: true
   plan:
   - aggregate:
-    - {trigger: true,   passed: [acceptance], get: cf-persist-service-broker}
+    - {trigger: true,   passed: [lifecycle], get: cf-persist-service-broker}
     - {trigger: false,  get: version-semver,  params: {bump: major}}
   - task: promote
     file: cf-persist-service-broker/ci/tasks/promote-candidate.yml
