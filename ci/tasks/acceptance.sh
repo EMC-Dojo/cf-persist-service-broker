@@ -19,9 +19,9 @@ service='scaleio-acceptance-service'
 download_url=https://${app}.${CF_ENDPOINT}/data
 
 function cleanup {
-  cf unbind-service ${app} ${service} || true
-  cf delete-service ${service} -f || true
-  cf delete-service-broker ${CF_SCALEIO_SB_SERVICE} -f || true
+  cf unbind-service ${app} ${service}
+  cf delete-service ${service} -f
+  cf delete-service-broker ${CF_SCALEIO_SB_SERVICE} -f
   cf delete ${CF_SCALEIO_SB_APP} -f
 }
 trap cleanup EXIT
