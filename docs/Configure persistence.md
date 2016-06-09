@@ -10,12 +10,12 @@
 
 Rexray combines all of EMC storage solutions under one single interface. To read more about rexray, please go to the docs at [Rexray](http://rexray.readthedocs.io/en/v0.4.0-docs/).
 
-<img src="" alt="Rexray">
+<img src="https://raw.githubusercontent.com/EMC-Dojo/cf-persist-service-broker/master/docs/images/Rexray.png" alt="Rexray" height="200px">
 #### What is ScaleIO SDC?
 
 ScaleIO SDC is a component of ScaleIO that allow a VM to map to a ScaleIO volume. After, users can mount this volume to their system and use it.
 
-<img src="" alt="Diego Cell">
+<img src="https://raw.githubusercontent.com/EMC-Dojo/cf-persist-service-broker/master/docs/images/DiegoCell.png" alt="Diego Cell" height="200px">
 
 #### Configure ScaleIO SDC and RexRay in Diego Manifest
 
