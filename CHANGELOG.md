@@ -25,3 +25,5 @@ vde0ffcd82e6956aca93b5422e5db52ed3d0cb60e Changed EMC-CMD to EMC-Dojo
 v710575ae06bd28fcfa28699d705e3999cda85376 Add configure persistence docs
 ## v14
 vd043756be46d96a5d9f8d1dd038206cc5b0a5c46 copy README.md inside docs folder
+## v15
+v49339eb278b1e73c2bf389896ac8764d3743683b Format configure persistence document
