@@ -13,9 +13,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
-	"github.com/EMC-CMD/cf-persist-service-broker/utils"
+	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
+	"github.com/EMC-Dojo/cf-persist-service-broker/model"
+	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
 	"github.com/emccode/libstorage/client"
 )
 

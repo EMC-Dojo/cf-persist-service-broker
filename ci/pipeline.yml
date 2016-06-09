@@ -70,7 +70,7 @@ resources:
 - name: cf-persist-service-broker
   type: git
   source:
-    uri: git@github.com:EMC-CMD/cf-persist-service-broker.git
+    uri: git@github.com:EMC-Dojo/cf-persist-service-broker.git
     branch: master
     private_key: {{github_private_key}}
 
@@ -84,7 +84,7 @@ resources:
 - name: cf-persist-service-broker-out
   type: git
   source:
-    uri: git@github.com:EMC-CMD/cf-persist-service-broker.git
+    uri: git@github.com:EMC-Dojo/cf-persist-service-broker.git
     branch: master
     private_key: {{github_private_key}}
 

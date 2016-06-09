@@ -5,8 +5,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
-	"github.com/EMC-CMD/cf-persist-service-broker/mocks"
+	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
+	"github.com/EMC-Dojo/cf-persist-service-broker/mocks"
 )
 
 var _ = Describe("Controller", func() {

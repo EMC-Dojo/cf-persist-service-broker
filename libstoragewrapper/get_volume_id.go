@@ -5,7 +5,7 @@ import (
 
 	"github.com/emccode/libstorage/api/context"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/utils"
+	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
 	"github.com/emccode/libstorage/api/types"
 )
 

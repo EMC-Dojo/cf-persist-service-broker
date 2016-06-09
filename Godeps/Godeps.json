@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/EMC-CMD/cf-persist-service-broker",
+	"ImportPath": "github.com/EMC-Dojo/cf-persist-service-broker",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v66",
 	"Packages": [

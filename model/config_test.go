@@ -1,14 +1,15 @@
 package model_test
 
 import (
-	. "github.com/EMC-CMD/cf-persist-service-broker/model"
+	. "github.com/EMC-Dojo/cf-persist-service-broker/model"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/utils"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Config", func() {

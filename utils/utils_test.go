@@ -1,9 +1,9 @@
 package utils_test
 
 import (
-	"github.com/EMC-CMD/cf-persist-service-broker/utils"
+	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
+	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

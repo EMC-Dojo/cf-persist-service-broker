@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"flag"
-	"github.com/EMC-CMD/cf-persist-service-broker/server"
+	"github.com/EMC-Dojo/cf-persist-service-broker/server"
 	log "github.com/Sirupsen/logrus"
 )
 

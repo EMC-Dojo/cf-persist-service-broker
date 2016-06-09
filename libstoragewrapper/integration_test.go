@@ -4,13 +4,13 @@ import (
 	"os"
 	"strings"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/libstoragewrapper"
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
+	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
+	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
 	"github.com/emccode/libstorage/client"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/utils"
+	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

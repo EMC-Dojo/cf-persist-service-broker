@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/EMC-CMD/cf-persist-service-broker/model"
+	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	"github.com/emccode/libstorage/api/types"
 )
 
 func ProjectDirectory() string {
-	return filepath.Join(os.Getenv("GOPATH"), "src/github.com/EMC-CMD/cf-persist-service-broker")
+	return filepath.Join(os.Getenv("GOPATH"), "src/github.com/EMC-Dojo/cf-persist-service-broker")
 }
 
 func GenerateVolumeName(instanceId string, serviceInstance model.ServiceInstance) (string, error) {
