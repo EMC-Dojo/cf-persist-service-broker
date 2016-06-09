@@ -1,5 +1,5 @@
 # CF-Persistence Service Broker
-This service broker provides the necessarily binding to orchestrate Cloud Controller and Diego Volume Manager. By using this service broker, Cloud Foundry applications can gain access to persistence service as if using a local filesystem. The orchestration uses [RexRay](https://github.com/emccode/rexray) and [libstorage](https://github.com/emccode/libstorage) internally. In theory, the service broker should be able to orchestrate all types of persistence provided by RexRay when configured correctly. We have tested orchestrating EMC ScaleIO and are currently in process of testing EMC Isilon and VMAX. Please check out our documentation and [blog](http://dojoblog.emc.com) for more updates. 
+This service broker provides the necessarily binding to orchestrate Cloud Controller and Diego Volume Manager. By using this service broker, Cloud Foundry applications can gain access to persistence service as if using a local filesystem. The orchestration uses [RexRay](https://github.com/emccode/rexray) and [libstorage](https://github.com/emccode/libstorage) internally. In theory, the service broker should be able to orchestrate all types of persistence provided by RexRay when configured correctly. We have tested orchestrating EMC ScaleIO and are currently in process of testing EMC Isilon and VMAX. Please check out our documentation and [blog](http://dojoblog.emc.com) for more updates.
 
 ### Setup
 When starting the Service Broker you need to set a username and password. This is done by setting the environment variables `BROKER_USERNAME` and `BROKER_PASSWORD`.
@@ -61,6 +61,6 @@ More documentation coming soon.
 ### Contact
 - Slack Channel:
   - Organization: <http://cloudfoundry.slack.com>
-  - Channel: `#general`
-- Contact: [Peter Blum](mailto:peter.blum@emc.com) [@EMCDojo](https://twitter.com/hashtag/emcdojo)
+  - Channel: `#persi`
+- Contact: [EMC Dojo](mailto:emcdojo@emc.com) [@EMCDojo](https://twitter.com/hashtag/emcdojo)
 - Blog: [EMC Dojo Blog](dojoblog.emc.com)
