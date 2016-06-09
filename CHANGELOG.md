@@ -19,3 +19,5 @@ va5ed98d54ea2e083e4cfc1bdfd5f95746d54e827 Change to non-interactive for delete a
 v2d5fe573ecbf0eb974b9167f4cc4a13db54e6a87 Change delete app to restage app
 ## v11
 v48f8eb128e036f37b15c2a489abab31101dfbe35 Combine acceptance tests to lifecycle
+## v12
+vde0ffcd82e6956aca93b5422e5db52ed3d0cb60e Changed EMC-CMD to EMC-Dojo
