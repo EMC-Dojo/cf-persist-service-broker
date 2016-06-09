@@ -23,3 +23,5 @@ v48f8eb128e036f37b15c2a489abab31101dfbe35 Combine acceptance tests to lifecycle
 vde0ffcd82e6956aca93b5422e5db52ed3d0cb60e Changed EMC-CMD to EMC-Dojo
 ## v13
 v710575ae06bd28fcfa28699d705e3999cda85376 Add configure persistence docs
+## v14
+vd043756be46d96a5d9f8d1dd038206cc5b0a5c46 copy README.md inside docs folder
