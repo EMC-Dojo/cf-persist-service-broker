@@ -1,4 +1,5 @@
 # CF-Persistence Service Broker
+This service broker provides the necessarily binding to orchestrate Cloud Controller and Diego Volume Manager. By using this service broker, Cloud Foundry applications can gain access to persistence service as if using a local filesystem. The orchestration uses [RexRay](https://github.com/emccode/rexray) and [libstorage](https://github.com/emccode/libstorage) internally. In theory, the service broker should be able to orchestrate all types of persistence provided by RexRay when configured correctly. We have tested orchestrating EMC ScaleIO and are currently in process of testing EMC Isilon and VMAX. Please check out our documentation and [blog](http://dojoblog.emc.com) for more updates. 
 
 ### Setup
 When starting the Service Broker you need to set a username and password. This is done by setting the environment variables `BROKER_USERNAME` and `BROKER_PASSWORD`.
@@ -10,7 +11,7 @@ This is an example of how we do this on CF.
  cf set-env persist BROKER_PASSWORD broker
  ```
 
- ### Configuration
+### Configuration
 
 CF Persistence Service broker requires configuration to enable communication with [libstorage](https://github.com/emccode/libstorage). It can be configured using environment variables or a configuration file. Specify a configuration file using `-config path/to/file.yml`.  Here is an example configuration file:
 
