@@ -27,3 +27,5 @@ v710575ae06bd28fcfa28699d705e3999cda85376 Add configure persistence docs
 vd043756be46d96a5d9f8d1dd038206cc5b0a5c46 copy README.md inside docs folder
 ## v15
 v49339eb278b1e73c2bf389896ac8764d3743683b Format configure persistence document
+## v16
+v94e735020a0f7cdefed34de1eea487604ce266d3 Error handling for delete service instance when service is still attached to App [#121134559](https://www.pivotaltracker.com/story/show/121134559)
