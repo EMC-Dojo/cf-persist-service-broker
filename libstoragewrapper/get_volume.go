@@ -9,6 +9,20 @@ import (
 	"github.com/emccode/libstorage/api/types"
 )
 
+func GetVolumeAttachments(ctx types.Context, libsClient types.Client, volumeId string) ([]*types.VolumeAttachment, error) {
+
+	volumeInspectOpts := types.VolumeInspectOpts{
+		Attachments: true,
+	}
+
+	volume, err := libsClient.Storage().VolumeInspect(ctx, volumeId, &volumeInspectOpts)
+	if err != nil {
+		return nil, fmt.Errorf("error unable to get volume with ID %s. %s", volumeId, err)
+	}
+
+	return volume.Attachments, nil
+}
+
 func GetVolumeID(libsClient types.Client, instanceId, service_id, plan_id string) (string, error) {
 	return getScaleIOVolumeID(libsClient, instanceId)
 }

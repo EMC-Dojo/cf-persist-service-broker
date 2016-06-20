@@ -123,16 +123,26 @@ func DeprovisionHandler(c *gin.Context) {
 	instanceId := c.Param("instanceId")
 	volumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceId, c.Param("service_id"), c.Param("plan_id"))
 	if err != nil {
-		log.Panic("Unable to find volume ID by instance Id")
+		log.Panicf("error service instance with ID %s does not exists. %s", instanceId, err)
 	}
 
 	ctx := context.Background()
-	err = libstoragewrapper.RemoveVolume(libsClient, ctx, volumeID)
+	attachments, err := libstoragewrapper.GetVolumeAttachments(ctx, libsClient, volumeID)
 	if err != nil {
-		log.Panic("error removing volume using libstorage", err)
+		log.Panicf("error getting attachments of volume with volumeID %s. %s", volumeID, err)
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	if len(attachments) > 0 {
+		log.Panic("error volume being deleted is still attached", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"description": "Sorry, but the service instance you are deleting is still attached. Please remove the service from your application and try again."})
+	} else {
+		err = libstoragewrapper.RemoveVolume(libsClient, ctx, volumeID)
+		if err != nil {
+			log.Panic("error removing volume using libstorage", err)
+		}
+
+		c.JSON(http.StatusOK, gin.H{})
+	}
 }
 
 func BindingHandler(c *gin.Context) {
