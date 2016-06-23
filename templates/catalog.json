@@ -1,26 +1,23 @@
 {
-  "services": [{
-    "id": "c8ddac0a-36d3-41f7-bf72-990fe65b8d16",
-    "name": "scaleiogo",
-    "description": "Attach volumes to your apps",
-    "bindable": true,
-    "requires": ["volume_mount"],
-    "plans": [{
-      "id": "92798c7d-e7b0-49d6-8872-4aeafbb193ef",
-      "name": "small",
-      "description": "A shared filesystem in a 2GB volume on ScaleIO"
-    }]
-  },
-  {
-    "id": "EF4537F4-AC80-4C2A-B63E-7EC477AB2065",
-    "name": "scaleiogo-ci",
-    "description": "ci",
-    "bindable": true,
-    "requires": ["volume_mount"],
-    "plans": [{
-      "id": "4B3601E3-343E-4D28-BD06-8A1CA9F35B0B",
-      "name": "ci",
-      "description": "A shared filesystem in a 2GB volume on ScaleIO"
-    }]
-  }]
+  "services": [
+    {
+      "id": "c8ddac0a-36d3-41f7-bf72-990fe65b8d16",
+      "name": "Persistence",
+      "description": "Attach volumes to your apps",
+      "bindable": true,
+      "requires": ["volume_mount"],
+      "plans": [
+        {
+          "id": "92798c7d-e7b0-49d6-8872-4aeafbb193ef",
+          "name": "ScaleIO",
+          "description": "A shared filesystem in a 2GB volume on ScaleIO"
+        },
+        {
+          "id": "6BF9BD41-D436-4DDC-9F7B-7A597A9CCBBB",
+          "name": "Isilon",
+          "description": "A shared filesystem in a 2GB volume in Isilon"
+        }
+      ]
+    }
+  ]
 }
