@@ -46,7 +46,7 @@ func (v *volumeMapping) Status() map[string]interface{} {
 
 func init() {
 	registry.RegisterIntegrationDriver(providerName, newDriver)
-	gofig.Register(configRegistration())
+	registerConfig()
 }
 
 func newDriver() types.IntegrationDriver {
@@ -56,23 +56,16 @@ func newDriver() types.IntegrationDriver {
 func (d *driver) Init(ctx types.Context, config gofig.Config) error {
 	d.config = config
 
-	ctx.WithField(types.ConfigIgVolOpsMountRootPath, d.volumeRootPath()).Info(
-		"subdirectory to append to the mounted volume path")
-	ctx.WithField(types.ConfigIgVolOpsCreateDefaultType, d.volumeType()).Info(
-		"default volume type")
-	ctx.WithField(types.ConfigIgVolOpsCreateDefaultIOPS, d.iops()).Info(
-		"default DefaultIOPS")
-	ctx.WithField(types.ConfigIgVolOpsCreateDefaultSize, d.size()).Info(
-		"default size in gb")
-	ctx.WithField(types.ConfigIgVolOpsCreateDefaultAZ, d.availabilityZone()).Info(
-		"default availability zone")
-	ctx.WithField(types.ConfigIgVolOpsCreateDefaultFsType, d.fsType()).Info(
-		"default filesystem type")
-	ctx.WithField(types.ConfigIgVolOpsMountPath, d.mountDirPath()).Info(
-		"default path for mounting volumes")
-	ctx.WithField(types.ConfigIgVolOpsCreateImplicit,
-		d.volumeCreateImplicit()).Info(
-		"create a volume if it does not exist on mount")
+	ctx.WithFields(log.Fields{
+		types.ConfigIgVolOpsMountRootPath:       d.volumeRootPath(),
+		types.ConfigIgVolOpsCreateDefaultType:   d.volumeType(),
+		types.ConfigIgVolOpsCreateDefaultIOPS:   d.iops(),
+		types.ConfigIgVolOpsCreateDefaultSize:   d.size(),
+		types.ConfigIgVolOpsCreateDefaultAZ:     d.availabilityZone(),
+		types.ConfigIgVolOpsCreateDefaultFsType: d.fsType(),
+		types.ConfigIgVolOpsMountPath:           d.mountDirPath(),
+		types.ConfigIgVolOpsCreateImplicit:      d.volumeCreateImplicit(),
+	}).Info("docker integration driver successfully initialized")
 
 	return nil
 }
@@ -170,10 +163,9 @@ func (d *driver) Mount(
 	opts *types.VolumeMountOpts) (string, *types.Volume, error) {
 
 	ctx.WithFields(log.Fields{
-		"volumeName":  volumeName,
-		"volumeID":    volumeID,
-		"overwriteFS": opts.OverwriteFS,
-		"newFSType":   opts.NewFSType}).Info("mounting volume")
+		"volumeName": volumeName,
+		"volumeID":   volumeID,
+		"opts":       opts}).Info("mounting volume")
 
 	vol, err := d.volumeInspectByIDOrName(
 		ctx, volumeID, volumeName, true, opts.Opts)
@@ -182,7 +174,8 @@ func (d *driver) Mount(
 		if vol, err = d.Create(ctx, volumeName, &types.VolumeCreateOpts{
 			Opts: utils.NewStore(),
 		}); err != nil {
-			return "", nil, goof.WithError("problem creating volume implicitly", err)
+			return "", nil, goof.WithError(
+				"problem creating volume implicitly", err)
 		}
 	} else if err != nil {
 		return "", nil, err
@@ -193,7 +186,7 @@ func (d *driver) Mount(
 	}
 
 	client := context.MustClient(ctx)
-	if len(vol.Attachments) == 0 {
+	if len(vol.Attachments) == 0 || opts.Preempt {
 		mp, err := d.getVolumeMountPath(vol.Name)
 		if err != nil {
 			return "", nil, err
@@ -212,18 +205,21 @@ func (d *driver) Mount(
 			return "", nil, err
 		}
 
-		opts := &types.WaitForDeviceOpts{
-			LocalDevicesOpts: types.LocalDevicesOpts{
-				ScanType: apiconfig.DeviceScanType(d.config),
-				Opts:     opts.Opts,
-			},
-			Token:   token,
-			Timeout: apiconfig.DeviceAttachTimeout(d.config),
-		}
+		if token != "" {
+			opts := &types.WaitForDeviceOpts{
+				LocalDevicesOpts: types.LocalDevicesOpts{
+					ScanType: apiconfig.DeviceScanType(d.config),
+					Opts:     opts.Opts,
+				},
+				Token:   token,
+				Timeout: apiconfig.DeviceAttachTimeout(d.config),
+			}
 
-		_, _, err = client.Executor().WaitForDevice(ctx, opts)
-		if err != nil {
-			return "", nil, goof.WithError("problem with device discovery", err)
+			_, _, err = client.Executor().WaitForDevice(ctx, opts)
+			if err != nil {
+				return "", nil, goof.WithError(
+					"problem with device discovery", err)
+			}
 		}
 
 		vol, err = d.volumeInspectByIDOrName(
@@ -238,12 +234,28 @@ func (d *driver) Mount(
 		return "", nil, goof.New("volume did not attach")
 	}
 
-	if vol.Attachments[0].DeviceName == "" {
+	inst, err := client.Storage().InstanceInspect(ctx, utils.NewStore())
+	if err != nil {
+		return "", nil, goof.New("problem getting instance ID")
+	}
+	var ma *types.VolumeAttachment
+	for _, att := range vol.Attachments {
+		if att.InstanceID.ID == inst.InstanceID.ID {
+			ma = att
+			break
+		}
+	}
+
+	if ma == nil {
+		return "", nil, goof.New("no local attachment found")
+	}
+
+	if ma.DeviceName == "" {
 		return "", nil, goof.New("no device name returned")
 	}
 
 	mounts, err := client.OS().Mounts(
-		ctx, vol.Attachments[0].DeviceName, "", opts.Opts)
+		ctx, ma.DeviceName, "", opts.Opts)
 	if err != nil {
 		return "", nil, err
 	}
@@ -258,7 +270,7 @@ func (d *driver) Mount(
 
 	if err := client.OS().Format(
 		ctx,
-		vol.Attachments[0].DeviceName,
+		ma.DeviceName,
 		&types.DeviceFormatOpts{
 			NewFSType:   opts.NewFSType,
 			OverwriteFS: opts.OverwriteFS,
@@ -277,7 +289,7 @@ func (d *driver) Mount(
 
 	if err := client.OS().Mount(
 		ctx,
-		vol.Attachments[0].DeviceName,
+		ma.DeviceName,
 		mountPath,
 		&types.DeviceMountOpts{}); err != nil {
 		return "", nil, err
@@ -319,13 +331,30 @@ func (d *driver) Unmount(
 		return nil
 	}
 
-	if vol.Attachments[0].DeviceName == "" {
+	client := context.MustClient(ctx)
+
+	inst, err := client.Storage().InstanceInspect(ctx, utils.NewStore())
+	if err != nil {
+		return goof.New("problem getting instance ID")
+	}
+	var ma *types.VolumeAttachment
+	for _, att := range vol.Attachments {
+		if att.InstanceID.ID == inst.InstanceID.ID {
+			ma = att
+			break
+		}
+	}
+
+	if ma == nil {
+		return goof.New("no attachment found for instance")
+	}
+
+	if ma.DeviceName == "" {
 		return goof.New("no device name found for attachment")
 	}
 
-	client := context.MustClient(ctx)
-
-	mounts, err := client.OS().Mounts(ctx, vol.Attachments[0].DeviceName, "", opts)
+	mounts, err := client.OS().Mounts(
+		ctx, ma.DeviceName, "", opts)
 	if err != nil {
 		return err
 	}
@@ -385,7 +414,8 @@ func (d *driver) Path(
 
 	client := context.MustClient(ctx)
 
-	mounts, err := client.OS().Mounts(ctx, vol.Attachments[0].DeviceName, "", opts)
+	mounts, err := client.OS().Mounts(
+		ctx, vol.Attachments[0].DeviceName, "", opts)
 	if err != nil {
 		return "", err
 	}
@@ -549,15 +579,18 @@ func (d *driver) volumeCreateImplicit() bool {
 	return d.config.GetBool(types.ConfigIgVolOpsCreateImplicit)
 }
 
-func configRegistration() *gofig.Registration {
+func registerConfig() {
 	r := gofig.NewRegistration("Docker")
-	r.Key(gofig.String, "", "ext4", "", types.ConfigIgVolOpsCreateDefaultFsType)
+	r.Key(gofig.String, "", "ext4", "",
+		types.ConfigIgVolOpsCreateDefaultFsType)
 	r.Key(gofig.String, "", "", "", types.ConfigIgVolOpsCreateDefaultType)
 	r.Key(gofig.String, "", "", "", types.ConfigIgVolOpsCreateDefaultIOPS)
 	r.Key(gofig.String, "", "16", "", types.ConfigIgVolOpsCreateDefaultSize)
 	r.Key(gofig.String, "", "", "", types.ConfigIgVolOpsCreateDefaultAZ)
-	r.Key(gofig.String, "", "/var/lib/libstorage/volumes", "", types.ConfigIgVolOpsMountPath)
+	r.Key(gofig.String, "", types.Lib.Join("volumes"), "",
+		types.ConfigIgVolOpsMountPath)
 	r.Key(gofig.String, "", "/data", "", types.ConfigIgVolOpsMountRootPath)
 	r.Key(gofig.Bool, "", true, "", types.ConfigIgVolOpsCreateImplicit)
-	return r
+	r.Key(gofig.Bool, "", false, "", types.ConfigIgVolOpsMountPreempt)
+	gofig.Register(r)
 }

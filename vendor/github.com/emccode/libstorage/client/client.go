@@ -1,11 +1,15 @@
 package client
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/akutz/gofig"
+
+	gocontext "golang.org/x/net/context"
 
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/registry"
 	"github.com/emccode/libstorage/api/types"
+	"github.com/emccode/libstorage/api/utils"
 	apicnfg "github.com/emccode/libstorage/api/utils/config"
 
 	// load the local imports
@@ -23,7 +27,7 @@ type client struct {
 }
 
 // New returns a new libStorage client.
-func New(config gofig.Config) (types.Client, error) {
+func New(goCtx gocontext.Context, config gofig.Config) (types.Client, error) {
 
 	if config == nil {
 		var err error
@@ -33,7 +37,6 @@ func New(config gofig.Config) (types.Client, error) {
 	}
 
 	config = config.Scope(types.ConfigClient)
-
 	types.BackCompat(config)
 
 	var (
@@ -41,8 +44,19 @@ func New(config gofig.Config) (types.Client, error) {
 		err error
 	)
 
-	c = &client{ctx: context.Background(), config: config}
+	c = &client{ctx: context.New(goCtx), config: config}
 	c.ctx = c.ctx.WithValue(context.ClientKey, c)
+
+	logFields := log.Fields{}
+	logConfig, err := utils.ParseLoggingConfig(
+		config, logFields, "libstorage.client")
+	if err != nil {
+		return nil, err
+	}
+
+	// always update the server context's log level
+	context.SetLogLevel(c.ctx, logConfig.Level)
+	c.ctx.WithFields(logFields).Info("configured logging")
 
 	if config.IsSet(types.ConfigService) {
 		c.ctx = c.ctx.WithValue(

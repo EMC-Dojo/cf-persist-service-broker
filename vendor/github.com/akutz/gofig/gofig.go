@@ -38,6 +38,19 @@ var (
 
 	// LogRegKey determines whether or not key registrations are logged.
 	LogRegKey, _ = strconv.ParseBool(os.Getenv("GOFIG_LOG_REGKEY"))
+
+	// DisableEnvVarSubstitution determines whether or not Gofig will replace
+	// environment variables with their actual values. This transformation is
+	// applied only to the values returned by the GetString and GetStringSlice
+	// functions. Environment variable substitution is not applied to config
+	// keys for example.
+	//
+	// New Config instances inherit this value at the time of the instance
+	// creation. However, this value has no effect on existing config instances.
+	// Those instances have a function named DisableEnvVarSubstitution that is
+	// able to disable/enable the feature for that instance.
+	DisableEnvVarSubstitution, _ = strconv.ParseBool(
+		os.Getenv("GOFIG_DISABLE_ENVVAR_SUBSTITUTION"))
 )
 
 var (
@@ -61,7 +74,14 @@ func init() {
 }
 
 // Config is the interface that enables retrieving configuration information.
+// The variations of the Get function, the Set, IsSet, and Scope functions
+// all take an interface{} as their first parameter. However, the param must be
+// either a string or a fmt.Stringer, otherwise the function will panic.
 type Config interface {
+
+	// DisableEnvVarSubstitution is the same as the global flag,
+	// DisableEnvVarSubstitution.
+	DisableEnvVarSubstitution(disable bool)
 
 	// Parent gets the configuration's parent (if set).
 	Parent() Config
@@ -72,7 +92,7 @@ type Config interface {
 	// operate as they would for the non-scoped configuration instance. This
 	// includes the AllSettings and AllKeys functions as well; they are *not*
 	// scoped.
-	Scope(scope string) Config
+	Scope(scope interface{}) Config
 
 	// GetScope returns the config's current scope (if any).
 	GetScope() string
@@ -81,26 +101,26 @@ type Config interface {
 	FlagSets() map[string]*flag.FlagSet
 
 	// GetString returns the value associated with the key as a string
-	GetString(k string) string
+	GetString(k interface{}) string
 
 	// GetBool returns the value associated with the key as a bool
-	GetBool(k string) bool
+	GetBool(k interface{}) bool
 
 	// GetStringSlice returns the value associated with the key as a string
 	// slice.
-	GetStringSlice(k string) []string
+	GetStringSlice(k interface{}) []string
 
 	// GetInt returns the value associated with the key as an int
-	GetInt(k string) int
+	GetInt(k interface{}) int
 
 	// Get returns the value associated with the key
-	Get(k string) interface{}
+	Get(k interface{}) interface{}
 
 	// Set sets an override value
-	Set(k string, v interface{})
+	Set(k interface{}, v interface{})
 
 	// IsSet returns a flag indicating whether or not a key is set.
-	IsSet(k string) bool
+	IsSet(k interface{}) bool
 
 	// Copy creates a copy of this Config instance
 	Copy() (Config, error)
@@ -136,8 +156,9 @@ type Config interface {
 
 // config contains the configuration information
 type config struct {
-	flagSets map[string]*flag.FlagSet
-	v        *viper.Viper
+	v                         *viper.Viper
+	flagSets                  map[string]*flag.FlagSet
+	disableEnvVarSubstitution bool
 }
 
 // scopedConfig is a scoped configuration information
@@ -192,6 +213,10 @@ func NewConfig(
 		loadGlobalConfig, loadUserConfig, configName, configType)
 }
 
+func (c *config) DisableEnvVarSubstitution(disable bool) {
+	c.disableEnvVarSubstitution = disable
+}
+
 func (c *scopedConfig) Parent() Config {
 	return c.Config
 }
@@ -199,7 +224,20 @@ func (c *config) Parent() Config {
 	return nil
 }
 
-func (c *scopedConfig) Scope(scope string) Config {
+func toString(i interface{}) string {
+	switch ti := i.(type) {
+	case string:
+		return ti
+	case *string:
+		return *ti
+	case fmt.Stringer:
+		return ti.String()
+	}
+	panic(fmt.Errorf("invalid type=%[1]T,val=%#[1]v", i))
+}
+
+func (c *scopedConfig) Scope(scope interface{}) Config {
+	szScope := toString(scope)
 	if log.GetLevel() == log.DebugLevel {
 		scopes := []string{}
 		var p Config = c
@@ -211,14 +249,15 @@ func (c *scopedConfig) Scope(scope string) Config {
 			}
 		}
 		log.WithFields(log.Fields{
-			"new":          scope,
+			"new":          szScope,
 			"parentScopes": strings.Join(scopes, ","),
 		}).Debug("created scoped scope")
 	}
-	return &scopedConfig{Config: c, scope: scope}
+	return &scopedConfig{Config: c, scope: szScope}
 }
-func (c *config) Scope(scope string) Config {
-	return &scopedConfig{Config: c, scope: scope}
+func (c *config) Scope(scope interface{}) Config {
+	szScope := toString(scope)
+	return &scopedConfig{Config: c, scope: szScope}
 }
 
 func (c *scopedConfig) GetScope() string {
@@ -317,112 +356,146 @@ func (c *config) AllSettings() map[string]interface{} {
 	return c.allSettings()
 }
 
-func (c *config) GetString(k string) string {
-	if LogGetAndSet {
-		log.WithField("key", k).Debug("config.GetString")
+func (c *config) replaceEnvVars(s string, envVars []string) string {
+	if c.disableEnvVarSubstitution {
+		return s
 	}
-	return c.v.GetString(k)
+
+	for _, evPair := range envVars {
+		evParts := strings.Split(evPair, "=")
+		evKey := fmt.Sprintf("$%s", evParts[0])
+		evVal := evParts[1]
+		s = strings.Replace(s, evKey, evVal, -1)
+	}
+	return s
 }
-func (c *scopedConfig) GetString(k string) string {
-	sk := fmt.Sprintf("%s.%s", c.scope, k)
+
+func (c *config) GetString(k interface{}) string {
+	szK := toString(k)
+	if LogGetAndSet {
+		log.WithField("key", szK).Debug("config.GetString")
+	}
+	return c.replaceEnvVars(c.v.GetString(szK), os.Environ())
+}
+func (c *scopedConfig) GetString(k interface{}) string {
+	szK := toString(k)
+	sk := fmt.Sprintf("%s.%s", c.scope, szK)
 	if c.Config.IsSet(sk) {
 		return c.Config.GetString(sk)
 	}
 	if c.Parent() != nil {
-		return c.Parent().GetString(k)
+		return c.Parent().GetString(szK)
 	}
 	return ""
 }
 
-func (c *config) GetBool(k string) bool {
+func (c *config) GetBool(k interface{}) bool {
+	szK := toString(k)
 	if LogGetAndSet {
-		log.WithField("key", k).Debug("config.GetBool")
+		log.WithField("key", szK).Debug("config.GetBool")
 	}
-	return c.v.GetBool(k)
+	return c.v.GetBool(szK)
 }
-func (c *scopedConfig) GetBool(k string) bool {
-	sk := fmt.Sprintf("%s.%s", c.scope, k)
+func (c *scopedConfig) GetBool(k interface{}) bool {
+	szK := toString(k)
+	sk := fmt.Sprintf("%s.%s", c.scope, szK)
 	if c.Config.IsSet(sk) {
 		return c.Config.GetBool(sk)
 	}
 	if c.Parent() != nil {
-		return c.Parent().GetBool(k)
+		return c.Parent().GetBool(szK)
 	}
 	return false
 }
 
-func (c *config) GetStringSlice(k string) []string {
+func (c *config) GetStringSlice(k interface{}) []string {
+	szK := toString(k)
 	if LogGetAndSet {
-		log.WithField("key", k).Debug("config.GetStringSlice")
+		log.WithField("key", szK).Debug("config.GetStringSlice")
 	}
-	return c.v.GetStringSlice(k)
+	ss := c.v.GetStringSlice(szK)
+	rss := []string{}
+	envVars := os.Environ()
+	for _, s := range ss {
+		rss = append(rss, c.replaceEnvVars(s, envVars))
+	}
+	return rss
 }
-func (c *scopedConfig) GetStringSlice(k string) []string {
-	sk := fmt.Sprintf("%s.%s", c.scope, k)
+func (c *scopedConfig) GetStringSlice(k interface{}) []string {
+	szK := toString(k)
+	sk := fmt.Sprintf("%s.%s", c.scope, szK)
 	if c.Config.IsSet(sk) {
 		return c.Config.GetStringSlice(sk)
 	}
 	if c.Parent() != nil {
-		return c.Parent().GetStringSlice(k)
+		return c.Parent().GetStringSlice(szK)
 	}
 	return nil
 }
 
-func (c *config) GetInt(k string) int {
+func (c *config) GetInt(k interface{}) int {
+	szK := toString(k)
 	if LogGetAndSet {
-		log.WithField("key", k).Debug("config.GetInt")
+		log.WithField("key", szK).Debug("config.GetInt")
 	}
-	return c.v.GetInt(k)
+	return c.v.GetInt(szK)
 }
-func (c *scopedConfig) GetInt(k string) int {
-	sk := fmt.Sprintf("%s.%s", c.scope, k)
+func (c *scopedConfig) GetInt(k interface{}) int {
+	szK := toString(k)
+	sk := fmt.Sprintf("%s.%s", c.scope, szK)
 	if c.Config.IsSet(sk) {
 		return c.Config.GetInt(sk)
 	}
 	if c.Parent() != nil {
-		return c.Parent().GetInt(k)
+		return c.Parent().GetInt(szK)
 	}
 	return 0
 }
 
-func (c *config) Get(k string) interface{} {
+func (c *config) Get(k interface{}) interface{} {
+	szK := toString(k)
 	if LogGetAndSet {
-		log.WithField("key", k).Debug("config.Get")
+		log.WithField("key", szK).Debug("config.Get")
 	}
-	return c.v.Get(k)
+	return c.v.Get(szK)
 }
-func (c *scopedConfig) Get(k string) interface{} {
-	sk := fmt.Sprintf("%s.%s", c.scope, k)
+func (c *scopedConfig) Get(k interface{}) interface{} {
+	szK := toString(k)
+	sk := fmt.Sprintf("%s.%s", c.scope, szK)
 	if c.Config.IsSet(sk) {
 		return c.Config.Get(sk)
 	}
 	if c.Parent() != nil {
-		return c.Parent().Get(k)
+		return c.Parent().Get(szK)
 	}
 	return nil
 }
 
-func (c *config) IsSet(k string) bool {
+func (c *config) IsSet(k interface{}) bool {
+	szK := toString(k)
 	if LogGetAndSet {
-		log.WithField("key", k).Debug("config.IsSet")
+		log.WithField("key", szK).Debug("config.IsSet")
 	}
-	return c.v.IsSet(k)
+	return c.v.IsSet(szK)
 }
-func (c *scopedConfig) IsSet(k string) bool {
-	if c.Config.IsSet(fmt.Sprintf("%s.%s", c.scope, k)) {
+func (c *scopedConfig) IsSet(k interface{}) bool {
+	szK := toString(k)
+	if c.Config.IsSet(fmt.Sprintf("%s.%s", c.scope, szK)) {
 		return true
 	}
 	if c.Parent() != nil {
-		return c.Parent().IsSet(k)
+		return c.Parent().IsSet(szK)
 	}
 	return false
 }
 
-func (c *config) Set(k string, v interface{}) {
-	c.v.Set(k, v)
+func (c *config) Set(k interface{}, v interface{}) {
+	szK := toString(k)
+	c.v.Set(szK, v)
 }
-func (c *scopedConfig) Set(k string, v interface{}) {
-	c.Config.Set(fmt.Sprintf("%s.%s", c.scope, k), v)
+func (c *scopedConfig) Set(k interface{}, v interface{}) {
+	szK := toString(k)
+	c.Config.Set(fmt.Sprintf("%s.%s", c.scope, szK), v)
 }
 
 func newConfig() *config {
@@ -434,8 +507,9 @@ func newConfigWithOptions(
 	configName, configType string) *config {
 
 	c := &config{
-		v:        viper.New(),
-		flagSets: map[string]*flag.FlagSet{},
+		v:                         viper.New(),
+		flagSets:                  map[string]*flag.FlagSet{},
+		disableEnvVarSubstitution: DisableEnvVarSubstitution,
 	}
 
 	log.Debug("initializing configuration")

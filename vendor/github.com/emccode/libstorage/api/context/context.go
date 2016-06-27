@@ -38,17 +38,33 @@ func (ctx *lsc) rightSide() context.Context {
 	return ctx.right
 }
 
+// New returns a new context with the provided parent.
+func New(parent context.Context) types.Context {
+
+	if parent == nil {
+		parent = context.Background()
+	}
+
+	var ctx types.Context = newContext(parent, nil, nil)
+
+	_, ok := ctx.Value(LoggerKey).(*log.Logger)
+	if !ok {
+		ctx = ctx.WithValue(LoggerKey,
+			&log.Logger{
+				Formatter: log.StandardLogger().Formatter,
+				Out:       log.StandardLogger().Out,
+				Hooks:     log.StandardLogger().Hooks,
+				Level:     log.StandardLogger().Level,
+			},
+		)
+	}
+
+	return ctx
+}
+
 // Background returns a new context with logging capabilities.
 func Background() types.Context {
-	ctx := newContext(context.Background(), nil, nil)
-	return ctx.WithValue(LoggerKey,
-		&log.Logger{
-			Formatter: log.StandardLogger().Formatter,
-			Out:       log.StandardLogger().Out,
-			Hooks:     log.StandardLogger().Hooks,
-			Level:     log.StandardLogger().Level,
-		},
-	)
+	return New(nil)
 }
 
 // WithRequestRoute returns a new context with the injected *http.Request
@@ -91,6 +107,9 @@ func WithStorageService(
 // WithValue returns a copy of parent in which the value associated with
 // key is val.
 func WithValue(ctx context.Context, key, val interface{}) types.Context {
+	if customKeyID, ok := isCustomKey(key); ok {
+		key = customKeyID
+	}
 	return newContext(context.WithValue(ctx, key, val), nil, nil)
 }
 
@@ -106,6 +125,10 @@ func Value(ctx context.Context, key interface{}) interface{} {
 }
 
 func (ctx *lsc) Value(key interface{}) interface{} {
+
+	if customKeyID, ok := isCustomKey(key); ok {
+		key = customKeyID
+	}
 
 	if key == HTTPRequestKey {
 		return ctx.req

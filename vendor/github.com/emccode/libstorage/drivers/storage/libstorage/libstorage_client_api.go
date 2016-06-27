@@ -6,36 +6,34 @@ import (
 	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/registry"
 	"github.com/emccode/libstorage/api/types"
+	"github.com/emccode/libstorage/api/utils"
 )
 
 func (c *client) Instances(
 	ctx types.Context) (map[string]*types.Instance, error) {
 
-	ctx = c.withAllInstanceIDs(c.requireCtx(ctx))
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "Instances")
+	}
 
-	imap, err := c.APIClient.Instances(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for service, i := range imap {
-		i.InstanceID.Formatted = true
-		c.instanceIDCache.Set(service, i)
-	}
-	return imap, nil
+	ctx = c.withAllInstanceIDs(c.requireCtx(ctx))
+	return c.APIClient.Instances(ctx)
 }
 
 func (c *client) InstanceInspect(
 	ctx types.Context, service string) (*types.Instance, error) {
 
-	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "InstanceInspect")
+	}
 
+	ctx = c.withInstanceID(c.requireCtx(ctx), service)
 	i, err := c.APIClient.InstanceInspect(ctx, service)
 	if err != nil {
 		return nil, err
 	}
-	i.InstanceID.Driver = c.serviceCache.GetServiceInfo(service).Driver.Name
-	i.InstanceID.Formatted = true
-	c.instanceIDCache.Set(service, i)
 	return i, nil
 }
 
@@ -73,15 +71,11 @@ func (c *client) Volumes(
 
 	ctx = c.requireCtx(ctx)
 
-	if attachments {
-		ctxA, err := c.withAllLocalDevices(ctx)
-		if err != nil {
-			return nil, err
-		}
-		ctx = ctxA
-
-		ctx = c.withAllInstanceIDs(ctx)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
 	}
+	ctx = c.withAllInstanceIDs(ctxA)
 
 	return c.APIClient.Volumes(ctx, attachments)
 }
@@ -91,16 +85,12 @@ func (c *client) VolumesByService(
 	service string,
 	attachments bool) (types.VolumeMap, error) {
 
-	ctx = c.requireCtx(ctx).WithValue(context.ServiceKey, service)
-
-	if attachments {
-		ctxA, err := c.withAllLocalDevices(ctx)
-		if err != nil {
-			return nil, err
-		}
-		ctx = ctxA
-		ctx = c.withInstanceID(ctx, service)
+	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
 	}
+	ctx = ctxA
 
 	return c.APIClient.VolumesByService(ctx, service, attachments)
 }
@@ -110,16 +100,12 @@ func (c *client) VolumeInspect(
 	service, volumeID string,
 	attachments bool) (*types.Volume, error) {
 
-	ctx = c.requireCtx(ctx).WithValue(context.ServiceKey, service)
-
-	if attachments {
-		ctxA, err := c.withAllLocalDevices(ctx)
-		if err != nil {
-			return nil, err
-		}
-		ctx = ctxA
-		ctx = c.withInstanceID(ctx, service)
+	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
 	}
+	ctx = ctxA
 
 	return c.APIClient.VolumeInspect(ctx, service, volumeID, attachments)
 }
@@ -129,7 +115,12 @@ func (c *client) VolumeCreate(
 	service string,
 	request *types.VolumeCreateRequest) (*types.Volume, error) {
 
-	ctx = c.requireCtx(ctx).WithValue(context.ServiceKey, service)
+	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ctx = ctxA
 
 	lsd, _ := registry.NewClientDriver(service)
 	if lsd != nil {
@@ -254,7 +245,18 @@ func (c *client) VolumeAttach(
 	volumeID string,
 	request *types.VolumeAttachRequest) (*types.Volume, string, error) {
 
+	if c.isController() {
+		return nil, "", utils.NewUnsupportedForClientTypeError(
+			c.clientType, "VolumeAttach")
+	}
+
 	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, "", err
+	}
+	ctx = ctxA
+
 	return c.APIClient.VolumeAttach(ctx, service, volumeID, request)
 }
 
@@ -264,7 +266,18 @@ func (c *client) VolumeDetach(
 	volumeID string,
 	request *types.VolumeDetachRequest) (*types.Volume, error) {
 
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "VolumeDetach")
+	}
+
 	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ctx = ctxA
+
 	return c.APIClient.VolumeDetach(ctx, service, volumeID, request)
 }
 
@@ -272,7 +285,18 @@ func (c *client) VolumeDetachAll(
 	ctx types.Context,
 	request *types.VolumeDetachRequest) (types.ServiceVolumeMap, error) {
 
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "VolumeDetachAll")
+	}
+
 	ctx = c.withAllInstanceIDs(c.requireCtx(ctx))
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ctx = ctxA
+
 	return c.APIClient.VolumeDetachAll(ctx, request)
 }
 
@@ -281,7 +305,18 @@ func (c *client) VolumeDetachAllForService(
 	service string,
 	request *types.VolumeDetachRequest) (types.VolumeMap, error) {
 
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "VolumeDetachAllForService")
+	}
+
 	ctx = c.withInstanceID(c.requireCtx(ctx), service)
+	ctxA, err := c.withAllLocalDevices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ctx = ctxA
+
 	return c.APIClient.VolumeDetachAllForService(ctx, service, request)
 }
 
@@ -337,6 +372,11 @@ func (c *client) SnapshotCopy(
 func (c *client) Executors(
 	ctx types.Context) (map[string]*types.ExecutorInfo, error) {
 
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "Executors")
+	}
+
 	ctx = c.requireCtx(ctx)
 	lsxInfo, err := c.APIClient.Executors(ctx)
 	if err != nil {
@@ -352,12 +392,22 @@ func (c *client) ExecutorHead(
 	ctx types.Context,
 	name string) (*types.ExecutorInfo, error) {
 
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "ExecutorHead")
+	}
+
 	ctx = c.requireCtx(ctx)
 	return c.APIClient.ExecutorHead(ctx, name)
 }
 
 func (c *client) ExecutorGet(
 	ctx types.Context, name string) (io.ReadCloser, error) {
+
+	if c.isController() {
+		return nil, utils.NewUnsupportedForClientTypeError(
+			c.clientType, "ExecutorGet")
+	}
 
 	ctx = c.requireCtx(ctx)
 	return c.APIClient.ExecutorGet(ctx, name)

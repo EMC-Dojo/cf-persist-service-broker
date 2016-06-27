@@ -8,6 +8,13 @@ import (
 // a function is not implemented.
 var ErrNotImplemented = goof.New("not implemented")
 
+// ErrUnsupportedForClientType is the error that occurs when an operation is
+// invoked that is unsupported for the current client type.
+type ErrUnsupportedForClientType struct{ goof.Goof }
+
+// ErrBadAdminToken occurs when a bad admin token is provided.
+type ErrBadAdminToken struct{ goof.Goof }
+
 // ErrNotFound occurs when a Driver inspects or sends an operation to a
 // resource that cannot be found.
 type ErrNotFound struct{ goof.Goof }

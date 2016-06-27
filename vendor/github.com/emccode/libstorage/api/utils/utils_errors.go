@@ -6,6 +6,24 @@ import (
 	"github.com/emccode/libstorage/api/types"
 )
 
+// NewUnsupportedForClientTypeError returns a new ErrUnsupportedForClientType
+// error.
+func NewUnsupportedForClientTypeError(
+	clientType types.ClientType, op string) error {
+	return &types.ErrUnsupportedForClientType{
+		Goof: goof.WithFields(goof.Fields{
+			"clientType": clientType,
+			"operation":  op,
+		}, "unsupported op for client type")}
+}
+
+// NewBadAdminTokenError returns a new ErrBadAdminToken error.
+func NewBadAdminTokenError(token string) error {
+	return &types.ErrBadAdminToken{
+		Goof: goof.WithField("token", token, "invalid admin token"),
+	}
+}
+
 // NewNotFoundError returns a new ErrNotFound error.
 func NewNotFoundError(resourceID string) error {
 	return &types.ErrNotFound{

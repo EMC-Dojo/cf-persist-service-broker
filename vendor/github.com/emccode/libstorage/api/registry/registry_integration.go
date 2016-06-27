@@ -44,16 +44,13 @@ func (d *idm) Init(ctx types.Context, config gofig.Config) error {
 		_, _ = d.List(context.Background(), store)
 	}
 
-	ctx.WithField(types.ConfigIgVolOpsPathCache,
-		d.pathCache()).Info("cache empty path for unused volume setting")
-	ctx.WithField(types.ConfigIgVolOpsUnmountIgnoreUsed,
-		d.ignoreUsedCount()).Info("ignore used count on unmount setting")
-	ctx.WithField(types.ConfigIgVolOpsMountPreempt,
-		d.preempt()).Info("pre-emptive mount setting")
-	ctx.WithField(types.ConfigIgVolOpsCreateDisable,
-		d.disableCreate()).Info("volume creation disabled setting")
-	ctx.WithField(types.ConfigIgVolOpsRemoveDisable,
-		d.disableRemove()).Info("volume removal disabled setting")
+	ctx.WithFields(log.Fields{
+		types.ConfigIgVolOpsPathCache:         d.pathCache(),
+		types.ConfigIgVolOpsUnmountIgnoreUsed: d.ignoreUsedCount(),
+		types.ConfigIgVolOpsMountPreempt:      d.preempt(),
+		types.ConfigIgVolOpsCreateDisable:     d.disableCreate(),
+		types.ConfigIgVolOpsRemoveDisable:     d.disableRemove(),
+	}).Info("libStorage integration driver successfully initialized")
 
 	return nil
 }
@@ -110,6 +107,8 @@ func (d *idm) Mount(
 	volumeID, volumeName string,
 	opts *types.VolumeMountOpts) (string, *types.Volume, error) {
 
+	opts.Preempt = d.preempt()
+
 	fields := log.Fields{
 		"volumeName": volumeName,
 		"volumeID":   volumeID,
@@ -121,6 +120,13 @@ func (d *idm) Mount(
 	if err != nil {
 		return "", nil, err
 	}
+
+	// if the volume has attachments assign the new mount point to the
+	// MountPoint field of the first attachment element
+	if len(vol.Attachments) > 0 {
+		vol.Attachments[0].MountPoint = mp
+	}
+
 	d.incCount(volumeName)
 	return mp, vol, err
 }

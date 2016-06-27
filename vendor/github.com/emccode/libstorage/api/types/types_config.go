@@ -3,6 +3,11 @@ package types
 // ConfigKey is a configuration key.
 type ConfigKey string
 
+// String returns the string-representation of the ConfigKey.
+func (k ConfigKey) String() string {
+	return string(k)
+}
+
 const (
 	// ConfigRoot is a config key.
 	ConfigRoot = "libstorage"
@@ -12,6 +17,9 @@ const (
 
 	// ConfigClient is a config key.
 	ConfigClient = ConfigRoot + ".client"
+
+	// ConfigClientType is a config key.
+	ConfigClientType = ConfigClient + ".type"
 
 	// ConfigHost is a config key.
 	ConfigHost = ConfigRoot + ".host"
@@ -31,20 +39,23 @@ const (
 	// ConfigIntegrationDriver is a config key.
 	ConfigIntegrationDriver = ConfigRoot + ".integration.driver"
 
+	// ConfigLogging is a config key.
+	ConfigLogging = ConfigRoot + ".logging"
+
 	// ConfigLogLevel is a config key.
-	ConfigLogLevel = ConfigRoot + ".logging.level"
+	ConfigLogLevel = ConfigLogging + ".level"
 
 	// ConfigLogStdout is a config key.
-	ConfigLogStdout = ConfigRoot + ".logging.stdout"
+	ConfigLogStdout = ConfigLogging + ".stdout"
 
 	// ConfigLogStderr is a config key.
-	ConfigLogStderr = ConfigRoot + ".logging.stderr"
+	ConfigLogStderr = ConfigLogging + ".stderr"
 
 	// ConfigLogHTTPRequests is a config key.
-	ConfigLogHTTPRequests = ConfigRoot + ".logging.httpRequests"
+	ConfigLogHTTPRequests = ConfigLogging + ".httpRequests"
 
 	// ConfigLogHTTPResponses is a config key.
-	ConfigLogHTTPResponses = ConfigRoot + ".logging.httpResponses"
+	ConfigLogHTTPResponses = ConfigLogging + ".httpResponses"
 
 	// ConfigHTTPDisableKeepAlive is a config key.
 	ConfigHTTPDisableKeepAlive = ConfigRoot + ".http.disableKeepAlive"
@@ -57,6 +68,9 @@ const (
 
 	// ConfigServices is a config key.
 	ConfigServices = ConfigServer + ".services"
+
+	// ConfigServerAutoEndpointMode is a config key.
+	ConfigServerAutoEndpointMode = ConfigServer + ".autoEndpointMode"
 
 	// ConfigEndpoints is a config key.
 	ConfigEndpoints = ConfigServer + ".endpoints"
