@@ -18,8 +18,8 @@ jobs:
       image_resource:
           type: docker-image
           source:
-            repository: '{{docker_registry_ip}}:{{docker_registry_port}}/persist-sb'
-            insecure_registries: ['{{docker_registry_ip}}:{{docker_registry_port}}']
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
       inputs:
       - name: cf-persist-service-broker
       run:
@@ -56,8 +56,8 @@ jobs:
       image_resource:
           type: docker-image
           source:
-            repository: '{{docker_registry_ip}}:{{docker_registry_port}}/persist-sb'
-            insecure_registries: ['{{docker_registry_ip}}:{{docker_registry_port}}']
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
       platform: linux
       inputs:
       - name: cf-persist-service-broker
@@ -86,8 +86,8 @@ jobs:
       image_resource:
           type: docker-image
           source:
-            repository: '{{docker_registry_ip}}:{{docker_registry_port}}/persist-sb'
-            insecure_registries: ['{{docker_registry_ip}}:{{docker_registry_port}}']
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
       inputs:
       - name: cf-persist-service-broker
       - name: version-semver
