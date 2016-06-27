@@ -13,24 +13,34 @@ jobs:
     - get: cf-persist-service-broker
       trigger: true
   - task: integration
-    file: cf-persist-service-broker/ci/tasks/integration.yml
-    params: &integration-params
-      BROKER_PASSWORD:                      {{broker_password}}
-      BROKER_USERNAME:                      {{broker_username}}
-      LIBSTORAGE_HOST:                      {{libstorage_host}}
-      LIBSTORAGE_STORAGE_DRIVER:            {{libstorage_storage_driver}}
-      SCALEIO_ENDPOINT:                     {{scaleio_endpoint}}
-      SCALEIO_INSECURE:                     {{scaleio_insecure}}
-      SCALEIO_PASSWORD:                     {{scaleio_password}}
-      SCALEIO_PROTECTION_DOMAIN_ID:         {{scaleio_protection_domain_id}}
-      SCALEIO_PROTECTION_DOMAIN_NAME:       {{scaleio_protection_domain_name}}
-      SCALEIO_STORAGE_POOL_NAME:            {{scaleio_storage_pool_name}}
-      SCALEIO_SYSTEM_ID:                    {{scaleio_system_id}}
-      SCALEIO_SYSTEM_NAME:                  {{scaleio_system_name}}
-      SCALEIO_THIN_OR_THICK:                {{scaleio_thin_or_thick}}
-      SCALEIO_USE_CERTS:                    {{scaleio_use_certs}}
-      SCALEIO_USERNAME:                     {{scaleio_username}}
-      SCALEIO_VERSION:                      {{scaleio_version}}
+    config:
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: '{{docker_registry_ip}}:{{docker_registry_port}}/persist-sb'
+            insecure_registries: ['{{docker_registry_ip}}:{{docker_registry_port}}']
+      inputs:
+      - name: cf-persist-service-broker
+      run:
+        path: cf-persist-service-broker/ci/tasks/integration.sh
+      params: &integration-params
+        BROKER_PASSWORD:                      {{broker_password}}
+        BROKER_USERNAME:                      {{broker_username}}
+        LIBSTORAGE_HOST:                      {{libstorage_host}}
+        LIBSTORAGE_STORAGE_DRIVER:            {{libstorage_storage_driver}}
+        SCALEIO_ENDPOINT:                     {{scaleio_endpoint}}
+        SCALEIO_INSECURE:                     {{scaleio_insecure}}
+        SCALEIO_PASSWORD:                     {{scaleio_password}}
+        SCALEIO_PROTECTION_DOMAIN_ID:         {{scaleio_protection_domain_id}}
+        SCALEIO_PROTECTION_DOMAIN_NAME:       {{scaleio_protection_domain_name}}
+        SCALEIO_STORAGE_POOL_NAME:            {{scaleio_storage_pool_name}}
+        SCALEIO_SYSTEM_ID:                    {{scaleio_system_id}}
+        SCALEIO_SYSTEM_NAME:                  {{scaleio_system_name}}
+        SCALEIO_THIN_OR_THICK:                {{scaleio_thin_or_thick}}
+        SCALEIO_USE_CERTS:                    {{scaleio_use_certs}}
+        SCALEIO_USERNAME:                     {{scaleio_username}}
+        SCALEIO_VERSION:                      {{scaleio_version}}
 
 - name: lifecycle
   serial: true
@@ -42,16 +52,27 @@ jobs:
     - get: scaleio-acceptance-app
       trigger: false
   - task: lifecycle
-    file: cf-persist-service-broker/ci/tasks/lifecycle.yml
-    params: &lifecycle-params
-      <<: *integration-params
-      CF_ENDPOINT:            {{cf_endpoint}}
-      CF_ORG:                 {{cf_org}}
-      CF_PASSWORD:            {{cf_password}}
-      CF_SPACE:               {{cf_space}}
-      CF_USERNAME:            {{cf_username}}
-      CF_SCALEIO_SB_APP:      {{cf_scaleio_sb_app}}
-      CF_SCALEIO_SB_SERVICE:  {{cf_scaleio_sb_service}}
+    config:
+      image_resource:
+          type: docker-image
+          source:
+            repository: '{{docker_registry_ip}}:{{docker_registry_port}}/persist-sb'
+            insecure_registries: ['{{docker_registry_ip}}:{{docker_registry_port}}']
+      platform: linux
+      inputs:
+      - name: cf-persist-service-broker
+      - name: scaleio-acceptance-app
+      run:
+        path: cf-persist-service-broker/ci/tasks/lifecycle.sh
+      params: &lifecycle-params
+        <<: *integration-params
+        CF_ENDPOINT:            {{cf_endpoint}}
+        CF_ORG:                 {{cf_org}}
+        CF_PASSWORD:            {{cf_password}}
+        CF_SPACE:               {{cf_space}}
+        CF_USERNAME:            {{cf_username}}
+        CF_SCALEIO_SB_APP:      {{cf_scaleio_sb_app}}
+        CF_SCALEIO_SB_SERVICE:  {{cf_scaleio_sb_service}}
 
 - name: promote-candidate
   serial: true
@@ -60,33 +81,45 @@ jobs:
     - {trigger: true,   passed: [lifecycle], get: cf-persist-service-broker}
     - {trigger: false,  get: version-semver,  params: {bump: major}}
   - task: promote
-    file: cf-persist-service-broker/ci/tasks/promote-candidate.yml
+    config:
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: '{{docker_registry_ip}}:{{docker_registry_port}}/persist-sb'
+            insecure_registries: ['{{docker_registry_ip}}:{{docker_registry_port}}']
+      inputs:
+      - name: cf-persist-service-broker
+      - name: version-semver
+      outputs:
+      - name: promote
+      run:
+        path: cf-persist-service-broker/ci/tasks/promote-candidate.sh
+      params:
   - put: cf-persist-service-broker-out
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: version-semver
     params: {file: version-semver/number}
 
+
 resources:
 - name: cf-persist-service-broker
   type: git
   source:
-    uri: git@github.com:EMC-Dojo/cf-persist-service-broker.git
+    uri: https://{{github_user}}:{{github_password}}@github.com/EMC-Dojo/cf-persist-service-broker.git
     branch: master
-    private_key: {{github_private_key}}
 
 - name: scaleio-acceptance-app
   type: git
   source:
-    uri: git@github.com:EMC-CMD/scaleio-io-test.git
+    uri: https://{{github_user}}:{{github_password}}@github.com/EMC-CMD/scaleio-io-test.git
     branch: master
-    private_key: {{github_scaleio_acceptance_private_key}}
 
 - name: cf-persist-service-broker-out
   type: git
   source:
-    uri: git@github.com:EMC-Dojo/cf-persist-service-broker.git
+    uri: '--repo https://{{github_user}}:{{github_password}}@github.com/EMC-Dojo/cf-persist-service-broker.git'
     branch: master
-    private_key: {{github_private_key}}
 
 - name: version-semver
   type: semver
