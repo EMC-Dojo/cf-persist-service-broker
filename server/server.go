@@ -117,7 +117,7 @@ func ProvisioningHandler(c *gin.Context) {
 
 	_, err = libstoragewrapper.CreateVolume(NewLibsClient(), serviceName, volumeCreateRequest)
 	if err != nil {
-		log.Panic(fmt.Sprintf("Unable to create volume using libstorage: %s.", err))
+		log.Panic(fmt.Sprintf("Unable to create volume %+v using libstorage: %s.", volumeCreateRequest, err))
 	}
 
 	c.JSON(http.StatusCreated, gin.H{})

@@ -20,20 +20,21 @@ jobs:
           source:
             repository: {{docker_repo}}
             insecure_registries: [{{docker_registry}}]
+      params: &integration-params
+        TEST_INSTANCE_ID:                     {{test_instance_id}}
+        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+        TEST_SIZE:                            {{test_size}}
+        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        BROKER_PASSWORD:                      {{broker_password}}
+        BROKER_USERNAME:                      {{broker_username}}
+        BROKER_PORT:                          {{broker_port}}
+        LIBSTORAGE_URI:                       {{libstorage_uri}}
+        LIBSTORAGE_DRIVER_TYPE:               {{libstorage_driver_type}}
       inputs:
       - name: cf-persist-service-broker
       run:
         path: cf-persist-service-broker/ci/tasks/integration.sh
-        params: &integration-params
-          TEST_INSTANCE_ID:                     {{test_instance_id}}
-          PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-          TEST_SIZE:                            {{test_size}}
-          STORAGE_POOL_NAME:                    {{storage_pool_name}}
-          BROKER_PASSWORD:                      {{broker_password}}
-          BROKER_USERNAME:                      {{broker_username}}
-          BROKER_PORT:                          {{broker_port}}
-          LIBSTORAGE_URI:                       {{libstorage_uri}}
-          LIBSTORAGE_DRIVER_TYPE:               {{libstorage_driver_type}}
+
 
 # - name: lifecycle
 #   serial: true

@@ -22,44 +22,39 @@ import (
 )
 
 var _ = Describe("Unit", func() {
-	var serverURL string
-	var brokerUser string
-	var brokerPassword string
+	var serverURL, brokerUser, brokerPassword, instanceID, planIDString, libsHostServiceName, appGUID, bindingID, serviceBindingPath, driverType, storagePool string
 	var libsClient types.APIClient
-	var instanceID string
-	var planIDString string
-	var libsHostServiceName string
-	var appGUID string
-	var bindingID string
-	var serviceBindingPath string
+
 	type PlanID model.PlanID
 	type ProvisionInstanceRequest model.ServiceInstance
-
-	BeforeEach(func() {
+	BeforeSuite(func() {
 		var err error
 		appGUID = "aaaa-bbbb-ccc-dddd"
-		instanceID = os.Getenv("TEST_INSTANCE_ID") //3c653bce-8752-451b-96d9-a8a1a925b118
 		bindingID = "47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1"
-		libsHostServiceName = "josh"
-		serviceBindingPath = "/v2/service_instances/" + instanceID + "/service_bindings/" + bindingID
-
-		planIDString, err = utils.CreatePlanIDString(libsHostServiceName)
-		Expect(err).To(BeNil())
+		storagePool = os.Getenv("STORAGE_POOL_NAME")
+		Expect(storagePool).ToNot(BeEmpty())
+		instanceID = os.Getenv("TEST_INSTANCE_ID") //3c653bce-8752-451b-96d9-a8a1a925b118
+		Expect(instanceID).ToNot(BeEmpty())
+		driverType = os.Getenv("LIBSTORAGE_DRIVER_TYPE")
+		Expect(driverType).ToNot(BeEmpty())
 		libsServerHost := os.Getenv("LIBSTORAGE_URI")
 		Expect(libsServerHost).ToNot(BeEmpty())
-
 		port := os.Getenv("BROKER_PORT")
 		Expect(port).ToNot(BeEmpty())
-		serverURL = "http://localhost:" + port
-
 		brokerUser = os.Getenv("BROKER_USERNAME")
 		Expect(serverURL).ToNot(BeEmpty())
 		brokerPassword = os.Getenv("BROKER_PASSWORD")
 		Expect(serverURL).ToNot(BeEmpty())
-
+		serverURL = "http://localhost:" + port
+		serviceBindingPath = "/v2/service_instances/" + instanceID + "/service_bindings/" + bindingID
 		libsClient = client.New(libsServerHost, &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		})
+
+		libsHostServiceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
+		Expect(err).ToNot(HaveOccurred())
+		planIDString, err = utils.CreatePlanIDString(libsHostServiceName)
+		Expect(err).ToNot(HaveOccurred())
 		AllowInsecureConnections()
 	})
 
@@ -125,7 +120,7 @@ var _ = Describe("Unit", func() {
 			ServiceID:        instanceID,
 			SpaceGUID:        "A2331788-A736-479D-A9FB-114336F144C3",
 			Parameters: map[string]string{
-				"storage_pool_name": "default",
+				"storage_pool_name": storagePool,
 			},
 			AcceptsIncomplete: true,
 		}
