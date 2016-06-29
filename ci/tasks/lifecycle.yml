@@ -17,7 +17,7 @@ params:
   CF_SCALEIO_SB_SERVICE:                replace-me
   CF_SPACE:                             replace-me
   CF_USERNAME:                          replace-me
-  LIBSTORAGE_HOST:                      replace-me
+  LIBSTORAGE_URI:                      replace-me
   LIBSTORAGE_STORAGE_DRIVER:            replace-me
   SCALEIO_ENDPOINT:                     replace-me
   SCALEIO_INSECURE:                     replace-me

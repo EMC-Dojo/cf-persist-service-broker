@@ -127,10 +127,12 @@ func (c *client) VolumeCreate(
 	request *types.VolumeCreateRequest) (*types.Volume, error) {
 
 	reply := types.Volume{}
-	if _, err := c.httpPost(ctx,
-		fmt.Sprintf("/volumes/%s", service), request, &reply); err != nil {
+
+	_, err := c.httpPost(ctx, fmt.Sprintf("/volumes/%s", service), request, &reply)
+	if err != nil {
 		return nil, err
 	}
+
 	return &reply, nil
 }
 

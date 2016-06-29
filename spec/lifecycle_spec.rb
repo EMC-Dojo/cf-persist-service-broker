@@ -74,7 +74,7 @@ end
 def set_env
   exec_command("cf set-env #{@persist_service_broker_app} BROKER_PASSWORD #{ENV['BROKER_PASSWORD']}")
   exec_command("cf set-env #{@persist_service_broker_app} BROKER_USERNAME #{ENV['BROKER_USERNAME']}")
-  exec_command("cf set-env #{@persist_service_broker_app} LIBSTORAGE_HOST #{ENV['LIBSTORAGE_HOST']}")
+  exec_command("cf set-env #{@persist_service_broker_app} LIBSTORAGE_URI #{ENV['LIBSTORAGE_URI']}")
   exec_command("cf set-env #{@persist_service_broker_app} LIBSTORAGE_STORAGE_DRIVER #{ENV['LIBSTORAGE_STORAGE_DRIVER']}")
   exec_command("cf set-env #{@persist_service_broker_app} SCALEIO_ENDPOINT #{ENV['SCALEIO_ENDPOINT']}")
   exec_command("cf set-env #{@persist_service_broker_app} SCALEIO_INSECURE #{ENV['SCALEIO_INSECURE']}")

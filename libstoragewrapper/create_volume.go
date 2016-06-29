@@ -1,9 +1,11 @@
 package libstoragewrapper
 
 import (
+	"github.com/emccode/libstorage/api/context"
 	"github.com/emccode/libstorage/api/types"
 )
 
-func CreateVolume(c types.Client, ctx types.Context, volumeName string, volumeCreateOpts types.VolumeCreateOpts) (*types.Volume, error) {
-  return c.Storage().VolumeCreate(ctx, volumeName, &volumeCreateOpts)
+// CreateVolume : Creates Volume with Libstorage API
+func CreateVolume(c types.APIClient, serviceName string, volumeCreateRequest types.VolumeCreateRequest) (*types.Volume, error) {
+	return c.VolumeCreate(context.Background(), serviceName, &volumeCreateRequest)
 }

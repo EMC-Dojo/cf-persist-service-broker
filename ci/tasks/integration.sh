@@ -6,7 +6,7 @@ source cf-persist-service-broker/ci/tasks/util.sh
 
 check_param BROKER_USERNAME
 check_param BROKER_PASSWORD
-check_param LIBSTORAGE_HOST
+check_param LIBSTORAGE_URI
 check_param LIBSTORAGE_STORAGE_DRIVER
 check_param SCALEIO_ENDPOINT
 check_param SCALEIO_USERNAME

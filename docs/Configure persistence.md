@@ -69,7 +69,7 @@ Host the service broker to Cloud Foundry or third-party hosting. Below is the co
 cf push #{service_broker_app_name} --no-start
 cf set-env #{service_broker_app_name} BROKER_PASSWORD #{broker_password}
 cf set-env #{service_broker_app_name} BROKER_USERNAME #{broker_username}
-cf set-env #{service_broker_app_name} LIBSTORAGE_HOST #{libstorage_host}
+cf set-env #{service_broker_app_name} LIBSTORAGE_URI #{libstorage_uri}
 cf set-env #{service_broker_app_name} LIBSTORAGE_STORAGE_DRIVER #{libstorage_storage_driver}
 cf set-env #{service_broker_app_name} SCALEIO_ENDPOINT #{scaleio_endpoint}
 cf set-env #{service_broker_app_name} SCALEIO_INSECURE #{scaleio_insecure}

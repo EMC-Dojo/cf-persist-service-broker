@@ -1,4 +1,4 @@
-package server
+package server_test
 
 import (
 	"io/ioutil"
@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/EMC-Dojo/cf-persist-service-broker/server"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
@@ -26,8 +27,9 @@ var _ = BeforeSuite(func() {
 
 func startServer() {
 	os.Chdir("..")
-	os.Setenv("PORT", "9900")
+	os.Setenv("BROKER_PORT", "9900")
 	s := Server{}
+
 	devNull, err := os.Open(os.DevNull)
 	if err != nil {
 		log.Panic("Unable to open ", os.DevNull, err)
@@ -37,6 +39,5 @@ func startServer() {
 	gin.DefaultWriter = devNull
 	gin.LoggerWithWriter(ioutil.Discard)
 
-	s.Init("")
 	s.Run("9900")
 }

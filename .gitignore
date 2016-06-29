@@ -9,3 +9,6 @@ Icon
 ._*
 .secrets.env
 test.env
+
+#dev.env secrets
+dev.env

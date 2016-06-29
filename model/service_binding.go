@@ -1,9 +1,9 @@
 package model
 
 type ServiceBinding struct {
-	ServiceId    string                 `json:"service_id"`
-	AppId        string                 `json:"app_guid"`
-	PlanId       string                 `json:"plan_id"`
+	ServiceID    string                 `json:"service_id"`
+	AppID        string                 `json:"app_guid"`
+	PlanID       string                 `json:"plan_id"`
 	BindResource map[string]string      `json:"bind_resource"`
 	Parameters   map[string]interface{} `json:"parameters"`
 }

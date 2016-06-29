@@ -1,14 +1,13 @@
 package libstoragewrapper_test
 
 import (
+	"net/http"
 	"os"
-	"strings"
+	"strconv"
 
 	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
-	"github.com/EMC-Dojo/cf-persist-service-broker/model"
-	"github.com/emccode/libstorage/api/context"
+	"github.com/emccode/libstorage/api/client"
 	"github.com/emccode/libstorage/api/types"
-	"github.com/emccode/libstorage/client"
 
 	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
 	. "github.com/onsi/ginkgo"
@@ -16,64 +15,62 @@ import (
 )
 
 var _ = Describe("Integration", func() {
-	instanceID := "3d7e25a9-849a-4e19-bdb1-baddaf878f1c"
 
 	Describe("Libstorage Client Integration", func() {
-		var libsClient types.Client
-		var volumeID string
-		var storagePoolName string
-		var serviceInstance model.ServiceInstance
+		var libsClient types.APIClient
+		var instanceID, storagePool, driverType, volumeID, libStorageURI, serviceName string
+		var size int64
+		var err error
 
-		ctx := context.Background()
+		BeforeSuite(func() {
+			instanceID = os.Getenv("TEST_INSTANCE_ID") //InstanceID comes from CC we translate into VolumeName 3c653bce-8752-451b-96d9-a8a1a925b118
+			Expect(instanceID).ToNot(BeEmpty())
+			storagePool = os.Getenv("STORAGE_POOL_NAME")
+			Expect(storagePool).ToNot(BeEmpty())
+			size, err = strconv.ParseInt(os.Getenv("TEST_SIZE"), 10, 64)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(size).ToNot(Equal(int64(0)))
+			driverType = os.Getenv("LIBSTORAGE_DRIVER_TYPE") //DriverType is the type of storage system we will use for this test
+			Expect(driverType).ToNot(BeEmpty())
+			libStorageURI = os.Getenv("LIBSTORAGE_URI")
+			Expect(libStorageURI).ToNot(BeEmpty())
+
+			libsClient = client.New(libStorageURI, &http.Transport{})
+			serviceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
+			Expect(err).ToNot(HaveOccurred())
+
+		})
 
 		BeforeEach(func() {
-			config, err := model.GetConfig(strings.NewReader(""))
-			Expect(err).NotTo(HaveOccurred())
 
-			libsClient, err = client.New(config)
+			volumeRequest, err := utils.CreateVolumeRequest(instanceID, storagePool, int64(8))
 			Expect(err).ToNot(HaveOccurred())
 
-			storagePoolName = os.Getenv("SCALEIO_STORAGE_POOL_NAME")
-			Expect(storagePoolName).ToNot(BeEmpty())
-			serviceInstance = model.ServiceInstance{
-				Parameters: map[string]string{
-					"storage_pool_name": storagePoolName,
-				},
-			}
-
-			volumeName, err := utils.GenerateVolumeName(instanceID, serviceInstance)
-			Expect(err).ToNot(HaveOccurred())
-
-			volumeCreateOpts, err := utils.CreateVolumeOpts(serviceInstance)
-			Expect(err).ToNot(HaveOccurred())
-
-			volume, err := libstoragewrapper.CreateVolume(libsClient, ctx, volumeName, volumeCreateOpts)
+			volume, err := libstoragewrapper.CreateVolume(libsClient, serviceName, volumeRequest)
 			Expect(err).ToNot(HaveOccurred())
 
 			volumeID = volume.ID
 		})
 
 		AfterEach(func() {
-			err := libstoragewrapper.RemoveVolume(libsClient, ctx, volumeID)
+			err := libstoragewrapper.RemoveVolume(libsClient, serviceName, volumeID)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		Context("when inspecting a volume", func() {
 			It("returns the volume", func() {
-				opts := &types.VolumeInspectOpts{
-					Attachments: true,
-				}
-				volume, err := libsClient.Storage().VolumeInspect(ctx, volumeID, opts)
+				volume, err := libstoragewrapper.GetVolumeByID(libsClient, serviceName, volumeID)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(volume.Name).To(Equal("3d7e25a9849a4e19bdb1baddaf878f1"))
+				parsedVolumeName, err := utils.CreateNameForVolume(instanceID)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(volume.Name).To(Equal(parsedVolumeName))
 				Expect(volume.Size).To(Equal(int64(8)))
 			})
 		})
 
 		Context("When passing in an instanceID", func() {
 			It("return a volume ID if instanceID exist", func() {
-        service_id, plan_id := "x", "y"
-				getVolumeID, err := libstoragewrapper.GetVolumeID(libsClient, instanceID, service_id, plan_id)
+				getVolumeID, err := libstoragewrapper.GetVolumeID(libsClient, serviceName, instanceID)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(getVolumeID).To(Equal(volumeID))
 			})

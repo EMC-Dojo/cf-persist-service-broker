@@ -37,7 +37,7 @@ scaleio:
 
 Alternatively, you can specify values using environment variables.  The variables should be named as follows:
 ```
-LIBSTORAGE_HOST=tcp://file_fake_host:9000
+LIBSTORAGE_URI=tcp://file_fake_host:9000
 LIBSTORAGE_STORAGE_DRIVER=scaleio
 SCALEIO_ENDPOINT=https://file_fake_endpoint/api
 SCALEIO_INSECURE=true

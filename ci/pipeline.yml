@@ -15,22 +15,15 @@ jobs:
   - task: integration
     file: cf-persist-service-broker/ci/tasks/integration.yml
     params: &integration-params
+      TEST_INSTANCE_ID:                     {{test_instance_id}}
+      PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+      TEST_SIZE:                            {{test_size}}
+      STORAGE_POOL_NAME:                    {{storage_pool_name}}
       BROKER_PASSWORD:                      {{broker_password}}
       BROKER_USERNAME:                      {{broker_username}}
-      LIBSTORAGE_HOST:                      {{libstorage_host}}
-      LIBSTORAGE_STORAGE_DRIVER:            {{libstorage_storage_driver}}
-      SCALEIO_ENDPOINT:                     {{scaleio_endpoint}}
-      SCALEIO_INSECURE:                     {{scaleio_insecure}}
-      SCALEIO_PASSWORD:                     {{scaleio_password}}
-      SCALEIO_PROTECTION_DOMAIN_ID:         {{scaleio_protection_domain_id}}
-      SCALEIO_PROTECTION_DOMAIN_NAME:       {{scaleio_protection_domain_name}}
-      SCALEIO_STORAGE_POOL_NAME:            {{scaleio_storage_pool_name}}
-      SCALEIO_SYSTEM_ID:                    {{scaleio_system_id}}
-      SCALEIO_SYSTEM_NAME:                  {{scaleio_system_name}}
-      SCALEIO_THIN_OR_THICK:                {{scaleio_thin_or_thick}}
-      SCALEIO_USE_CERTS:                    {{scaleio_use_certs}}
-      SCALEIO_USERNAME:                     {{scaleio_username}}
-      SCALEIO_VERSION:                      {{scaleio_version}}
+      BROKER_PORT:                          {{broker_port}}
+      LIBSTORAGE_URI:                       {{libstorage_uri}}
+      LIBSTORAGE_DRIVER_TYPE:               {{libstorage_driver_type}}
 
 - name: lifecycle
   serial: true

@@ -14,7 +14,7 @@ check_param CF_SCALEIO_SB_APP
 check_param CF_SCALEIO_SB_SERVICE
 check_param CF_SPACE
 check_param CF_USERNAME
-check_param LIBSTORAGE_HOST
+check_param LIBSTORAGE_URI
 check_param LIBSTORAGE_STORAGE_DRIVER
 check_param SCALEIO_ENDPOINT
 check_param SCALEIO_INSECURE
