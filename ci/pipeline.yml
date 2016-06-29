@@ -2,8 +2,8 @@ groups:
 - name: EMC-Persistence-Broker
   jobs:
   - integration
-  - lifecycle
-  - promote-candidate
+  # - lifecycle
+  # - promote-candidate
 
 jobs:
 - name: integration
@@ -35,64 +35,64 @@ jobs:
           LIBSTORAGE_URI:                       {{libstorage_uri}}
           LIBSTORAGE_DRIVER_TYPE:               {{libstorage_driver_type}}
 
-- name: lifecycle
-  serial: true
-  plan:
-  - aggregate:
-    - get: cf-persist-service-broker
-      trigger: true
-      passed: [integration]
-    - get: scaleio-acceptance-app
-      trigger: false
-  - task: lifecycle
-    config:
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
-      platform: linux
-      inputs:
-      - name: cf-persist-service-broker
-      - name: scaleio-acceptance-app
-      run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle.sh
-      params: &lifecycle-params
-        <<: *integration-params
-        CF_ENDPOINT:            {{cf_endpoint}}
-        CF_ORG:                 {{cf_org}}
-        CF_PASSWORD:            {{cf_password}}
-        CF_SPACE:               {{cf_space}}
-        CF_USERNAME:            {{cf_username}}
-        CF_SCALEIO_SB_APP:      {{cf_scaleio_sb_app}}
-        CF_SCALEIO_SB_SERVICE:  {{cf_scaleio_sb_service}}
-
-- name: promote-candidate
-  serial: true
-  plan:
-  - aggregate:
-    - {trigger: true,   passed: [lifecycle], get: cf-persist-service-broker}
-    - {trigger: false,  get: version-semver,  params: {bump: major}}
-  - task: promote
-    config:
-      platform: linux
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
-      inputs:
-      - name: cf-persist-service-broker
-      - name: version-semver
-      outputs:
-      - name: promote
-      run:
-        path: cf-persist-service-broker/ci/tasks/promote-candidate.sh
-      params:
-  - put: cf-persist-service-broker-out
-    params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-  - put: version-semver
-    params: {file: version-semver/number}
+# - name: lifecycle
+#   serial: true
+#   plan:
+#   - aggregate:
+#     - get: cf-persist-service-broker
+#       trigger: true
+#       passed: [integration]
+#     - get: scaleio-acceptance-app
+#       trigger: false
+#   - task: lifecycle
+#     config:
+#       image_resource:
+#           type: docker-image
+#           source:
+#             repository: {{docker_repo}}
+#             insecure_registries: [{{docker_registry}}]
+#       platform: linux
+#       inputs:
+#       - name: cf-persist-service-broker
+#       - name: scaleio-acceptance-app
+#       run:
+#         path: cf-persist-service-broker/ci/tasks/lifecycle.sh
+#       params: &lifecycle-params
+#         <<: *integration-params
+#         CF_ENDPOINT:            {{cf_endpoint}}
+#         CF_ORG:                 {{cf_org}}
+#         CF_PASSWORD:            {{cf_password}}
+#         CF_SPACE:               {{cf_space}}
+#         CF_USERNAME:            {{cf_username}}
+#         CF_SCALEIO_SB_APP:      {{cf_scaleio_sb_app}}
+#         CF_SCALEIO_SB_SERVICE:  {{cf_scaleio_sb_service}}
+#
+# - name: promote-candidate
+#   serial: true
+#   plan:
+#   - aggregate:
+#     - {trigger: true,   passed: [lifecycle], get: cf-persist-service-broker}
+#     - {trigger: false,  get: version-semver,  params: {bump: major}}
+#   - task: promote
+#     config:
+#       platform: linux
+#       image_resource:
+#           type: docker-image
+#           source:
+#             repository: {{docker_repo}}
+#             insecure_registries: [{{docker_registry}}]
+#       inputs:
+#       - name: cf-persist-service-broker
+#       - name: version-semver
+#       outputs:
+#       - name: promote
+#       run:
+#         path: cf-persist-service-broker/ci/tasks/promote-candidate.sh
+#       params:
+#   - put: cf-persist-service-broker-out
+#     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
+#   - put: version-semver
+#     params: {file: version-semver/number}
 
 
 resources:
