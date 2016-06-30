@@ -18,11 +18,11 @@ check_param INSECURE
 export GOPATH=$PWD/gocode
 export PATH=$PATH:$GOPATH/bin
 
+go get github.com/onsi/ginkgo/ginkgo
 
 mkdir -p gocode/src/github.com/EMC-Dojo
 cp -r cf-persist-service-broker gocode/src/github.com/EMC-Dojo
 
 pushd gocode/src/github.com/EMC-Dojo/cf-persist-service-broker
-  godep restore
   ginkgo -r
 popd
