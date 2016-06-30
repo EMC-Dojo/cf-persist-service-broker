@@ -22,7 +22,7 @@ go get github.com/onsi/ginkgo/ginkgo  # installs the ginkgo CLI
 go get github.com/onsi/gomega         # fetches the matcher library
 go get github.com/golang/mock/gomock  # gets the mocking library
 mkdir -p gocode/src/github.com/EMC-Dojo
-cp -r cf-persist-service-broker gocode/src/github.com/EMC-Dojo/cf-persist-service-broker
+cp -r cf-persist-service-broker gocode/src/github.com/EMC-Dojo
 
 pushd gocode/src/github.com/EMC-Dojo/cf-persist-service-broker
   ginkgo -r
