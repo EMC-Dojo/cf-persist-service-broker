@@ -154,7 +154,14 @@ func BindingHandler(c *gin.Context) {
 		log.Panicf("Unable to unmarshal service binding request %s. Request Body: %s", err, string(reqBody))
 	}
 
-	volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), serviceBinding.ServiceID, instanceID)
+	var planInfo = model.PlanID{}
+	err = json.Unmarshal([]byte(serviceBinding.PlanID), &planInfo)
+	if err != nil {
+		log.Panic(fmt.Sprintf("Unable to unmarshal PlanID: %s", err))
+	}
+	serviceName := planInfo.LibsServiceName
+
+	volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), serviceName, instanceID)
 	if err != nil {
 		log.Panicf("Unable to find volume ID by instance Id: %s", err)
 	}
