@@ -2,22 +2,24 @@ package server
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
 	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
-	"github.com/emccode/libstorage/api/client"
 	"github.com/emccode/libstorage/api/types"
 )
 
@@ -28,7 +30,8 @@ var _ = Describe("Unit", func() {
 	type PlanID model.PlanID
 	type ProvisionInstanceRequest model.ServiceInstance
 	BeforeSuite(func() {
-		var err error
+
+		//First Setup Variables we will use through the tests
 		appGUID = "aaaa-bbbb-ccc-dddd"
 		bindingID = "47E843FC-1A3A-4846-BC5D-E5F08BBD1CF1"
 		storagePool = os.Getenv("STORAGE_POOL_NAME")
@@ -39,23 +42,41 @@ var _ = Describe("Unit", func() {
 		Expect(driverType).ToNot(BeEmpty())
 		libsServerHost := os.Getenv("LIBSTORAGE_URI")
 		Expect(libsServerHost).ToNot(BeEmpty())
+		brokerUser = os.Getenv("BROKER_USERNAME")
+		Expect(brokerUser).ToNot(BeEmpty())
+		brokerPassword = os.Getenv("BROKER_PASSWORD")
+		Expect(brokerPassword).ToNot(BeEmpty())
 		port := os.Getenv("BROKER_PORT")
 		Expect(port).ToNot(BeEmpty())
-		brokerUser = os.Getenv("BROKER_USERNAME")
-		Expect(serverURL).ToNot(BeEmpty())
-		brokerPassword = os.Getenv("BROKER_PASSWORD")
-		Expect(serverURL).ToNot(BeEmpty())
+		insecureEnv := os.Getenv("INSECURE")
+		Expect(insecureEnv).ToNot(BeEmpty())
+		insecure, err := strconv.ParseBool(insecureEnv)
+		Expect(err).ToNot(HaveOccurred())
+
 		serverURL = "http://localhost:" + port
 		serviceBindingPath = "/v2/service_instances/" + instanceID + "/service_bindings/" + bindingID
-		libsClient = client.New(libsServerHost, &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		})
+		//Second Start Local Server for tests!
+		os.Chdir("..")
+		s := Server{}
 
+		devNull, err := os.Open(os.DevNull)
+		if err != nil {
+			log.Panic("Unable to open ", os.DevNull, err)
+		}
+
+		gin.SetMode(gin.ReleaseMode)
+		gin.DefaultWriter = devNull
+		gin.LoggerWithWriter(ioutil.Discard)
+
+		s.Run(insecure, brokerUser, brokerPassword, port)
+		time.Sleep(time.Millisecond * 500)
+
+		libsClient = NewLibsClient()
 		libsHostServiceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
 		Expect(err).ToNot(HaveOccurred())
 		planIDString, err = utils.CreatePlanIDString(libsHostServiceName)
 		Expect(err).ToNot(HaveOccurred())
-		AllowInsecureConnections()
+
 	})
 
 	AfterEach(func() {

@@ -13,6 +13,7 @@ check_param BROKER_USERNAME
 check_param BROKER_PORT
 check_param LIBSTORAGE_URI
 check_param LIBSTORAGE_DRIVER_TYPE
+check_param INSECURE
 
 export GOPATH=$PWD/gocode
 export PATH=$PATH:$GOPATH/bin

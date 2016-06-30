@@ -19,30 +19,30 @@ import (
 	"github.com/emccode/libstorage/api/types"
 )
 
-var allowInsecureConnections bool
+var insecure bool
 
 // Server : Service Broker Server
 type Server struct {
 }
 
-// AllowInsecureConnections : override to allow insecure connections to libstorage server
-func AllowInsecureConnections() {
-	allowInsecureConnections = true
-}
-
 // NewLibsClient : creates a client used to communicate with libstorage.uri
 func NewLibsClient() types.APIClient {
-	return client.New(model.GetConfig()["libstorage.uri"], &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: allowInsecureConnections},
+	libstorageHost := os.Getenv("LIBSTORAGE_URI")
+	if libstorageHost == "" {
+		log.Panic("A libstorage storage host must be specified with ENV[LIBSTORAGE_URI]")
+	}
+	return client.New(libstorageHost, &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 	})
 }
 
 // Run the Service Broker
-func (s Server) Run(port string) {
+func (s Server) Run(insecureEnv bool, username, password, port string) {
+	insecure = insecureEnv
 	server := gin.Default()
 	gin.SetMode("release")
 	authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
-		os.Getenv("BROKER_USERNAME"): os.Getenv("BROKER_PASSWORD"),
+		username: password,
 	}))
 
 	authorized.GET("/v2/catalog", CatalogHandler)

@@ -28,6 +28,7 @@ jobs:
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
         BROKER_PORT:                          {{broker_port}}
+        INSECURE:                             {{insecure}}
         LIBSTORAGE_URI:                       {{libstorage_uri}}
         LIBSTORAGE_DRIVER_TYPE:               {{libstorage_driver_type}}
       inputs:

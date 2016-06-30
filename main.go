@@ -19,6 +19,16 @@ func main() {
 
 	s.Init(*configPath)
 
-	log.Info("Starting service at port ", os.Getenv("BROKER_PORT"))
-	s.Run(os.Getenv("BROKER_PORT"))
+	username := os.Getenv("BROKER_USERNAME")
+	Expect(username).ToNot(BeEmpty())
+	password := os.Getenv("BROKER_PASSWORD")
+	Expect(password).ToNot(BeEmpty())
+	port := os.Getenv("BROKER_PORT")
+	Expect(port).ToNot(BeEmpty())
+	insecure := os.Getenv("INSECURE")
+	Expect(insecure).ToNot(BeEmpty())
+
+	log.Info("Starting EMC Persistance Service Broker at Port %s", port)
+
+	s.Run(insecure, username, password, port)
 }
