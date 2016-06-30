@@ -24,7 +24,6 @@ var _ = Describe("Utils/Utils", func() {
 		Expect(storagePool).ToNot(BeEmpty())
 		size, err = strconv.ParseInt(os.Getenv("TEST_SIZE"), 10, 64)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(size).ToNot(Equal(int64(0)))
 	})
 
 	Describe("Generate Volume Name", func() {

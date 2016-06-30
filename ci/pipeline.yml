@@ -1,12 +1,13 @@
 groups:
 - name: EMC-Persistence-Broker
   jobs:
-  - integration
+  - ScaleIO-Integration
+  - Isilon-Integration
   # - lifecycle
   # - promote-candidate
 
 jobs:
-- name: integration
+- name: ScaleIO-Integration
   serial: true
   plan:
   - aggregate:
@@ -23,14 +24,44 @@ jobs:
       params: &integration-params
         TEST_INSTANCE_ID:                     {{test_instance_id}}
         PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-        TEST_SIZE:                            {{test_size}}
+        TEST_SIZE:                            8
         STORAGE_POOL_NAME:                    {{storage_pool_name}}
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
         BROKER_PORT:                          {{broker_port}}
-        INSECURE:                             {{insecure}}
+        INSECURE:                             true
         LIBSTORAGE_URI:                       {{libstorage_uri}}
-        LIBSTORAGE_DRIVER_TYPE:               {{libstorage_driver_type}}
+        LIBSTORAGE_DRIVER_TYPE:               scaleio
+      inputs:
+      - name: cf-persist-service-broker
+      run:
+        path: cf-persist-service-broker/ci/tasks/integration.sh
+
+- name: Isilon-Integration
+  serial: true
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+  - task: integration
+    config:
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      params: &integration-params
+        TEST_INSTANCE_ID:                     {{test_instance_id}}
+        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+        TEST_SIZE:                            0
+        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        BROKER_PASSWORD:                      {{broker_password}}
+        BROKER_USERNAME:                      {{broker_username}}
+        BROKER_PORT:                          {{broker_port}}
+        INSECURE:                             true
+        LIBSTORAGE_URI:                       {{libstorage_uri}}
+        LIBSTORAGE_DRIVER_TYPE:               isilon
       inputs:
       - name: cf-persist-service-broker
       run:

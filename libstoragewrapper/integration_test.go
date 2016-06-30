@@ -25,10 +25,8 @@ var _ = Describe("Integration", func() {
 			instanceID = os.Getenv("TEST_INSTANCE_ID") //InstanceID comes from CC we translate into VolumeName 3c653bce-8752-451b-96d9-a8a1a925b118
 			Expect(instanceID).ToNot(BeEmpty())
 			storagePool = os.Getenv("STORAGE_POOL_NAME")
-			Expect(storagePool).ToNot(BeEmpty())
 			size, err = strconv.ParseInt(os.Getenv("TEST_SIZE"), 10, 64)
 			Expect(err).ToNot(HaveOccurred())
-			Expect(size).ToNot(Equal(int64(0)))
 			driverType = os.Getenv("LIBSTORAGE_DRIVER_TYPE") //DriverType is the type of storage system we will use for this test
 			Expect(driverType).ToNot(BeEmpty())
 			libStorageURI = os.Getenv("LIBSTORAGE_URI")
@@ -63,7 +61,7 @@ var _ = Describe("Integration", func() {
 				parsedVolumeName, err := utils.CreateNameForVolume(instanceID)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(volume.Name).To(Equal(parsedVolumeName))
-				Expect(volume.Size).To(Equal(int64(8)))
+				Expect(volume.Size).To(Equal(int64(size)))
 			})
 		})
 
