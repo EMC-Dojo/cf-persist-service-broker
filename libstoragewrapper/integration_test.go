@@ -1,12 +1,11 @@
 package libstoragewrapper_test
 
 import (
-	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
-	"github.com/emccode/libstorage/api/client"
+	"github.com/EMC-Dojo/cf-persist-service-broker/server"
 	"github.com/emccode/libstorage/api/types"
 
 	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
@@ -35,7 +34,7 @@ var _ = Describe("Integration", func() {
 			libStorageURI = os.Getenv("LIBSTORAGE_URI")
 			Expect(libStorageURI).ToNot(BeEmpty())
 
-			libsClient = client.New(libStorageURI, &http.Transport{})
+			libsClient = server.NewLibsClient()
 			serviceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
 			Expect(err).ToNot(HaveOccurred())
 
