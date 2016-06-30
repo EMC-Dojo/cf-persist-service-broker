@@ -70,7 +70,7 @@ func (r *Registration) Key(
 	short string,
 	defVal interface{},
 	description string,
-	keys ...interface{}) {
+	keys ...string) {
 
 	lk := len(keys)
 	if lk == 0 {
@@ -82,7 +82,7 @@ func (r *Registration) Key(
 		short:   short,
 		desc:    description,
 		defVal:  defVal,
-		keyName: toString(keys[0]),
+		keyName: keys[0],
 	}
 
 	if keyType == SecureString {
@@ -109,7 +109,7 @@ func (r *Registration) Key(
 		}
 		rk.flagName = strings.Join(kp, "")
 	} else {
-		rk.flagName = toString(keys[1])
+		rk.flagName = keys[1]
 	}
 
 	if lk < 3 {
@@ -119,7 +119,7 @@ func (r *Registration) Key(
 		}
 		rk.envVarName = strings.Join(kp, "_")
 	} else {
-		rk.envVarName = toString(keys[2])
+		rk.envVarName = keys[2]
 	}
 
 	r.keys = append(r.keys, rk)

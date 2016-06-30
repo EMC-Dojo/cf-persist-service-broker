@@ -1,22 +1,22 @@
 {
 	"ImportPath": "github.com/EMC-Dojo/cf-persist-service-broker",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v62",
+	"GodepVersion": "v74",
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
-			"Comment": "v0.2.0",
-			"Rev": "bbd5bb678321a0d6e58f1099321dfa73391c1b6f"
+			"Comment": "v0.2.0-9-gf0aeabc",
+			"Rev": "f0aeabca5a127c4078abb8c8d64298b147264b55"
 		},
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.10.0",
-			"Rev": "4b6ea7319e214d98c938f12692336f7ca9348d6b"
+			"Comment": "v0.10.0-19-gf3cfb45",
+			"Rev": "f3cfb454f4c209e6668c95216c4744b8fddb2356"
 		},
 		{
 			"ImportPath": "github.com/akutz/gofig",
-			"Comment": "v0.1.4",
-			"Rev": "697c16916338166671910eeaccc50f21e3c10726"
+			"Comment": "v0.1.2-17-g021bbef",
+			"Rev": "021bbefbfe234a3b72dc9137847483f5b997cbd0"
 		},
 		{
 			"ImportPath": "github.com/akutz/golf",
@@ -41,8 +41,8 @@
 		},
 		{
 			"ImportPath": "github.com/asaskevich/govalidator",
-			"Comment": "v3-7-gd1e14c5",
-			"Rev": "d1e14c504700969ddf41264c7f3e084c7b99de59"
+			"Comment": "v4-6-gdf81827",
+			"Rev": "df81827fdd59d8b4fb93d8910b286ab7a3919520"
 		},
 		{
 			"ImportPath": "github.com/cesanta/ucl",
@@ -62,285 +62,205 @@
 		},
 		{
 			"ImportPath": "github.com/emccode/goscaleio",
-			"Rev": "53ea76f52205380ab52b9c1f4ad89321c286bb95"
+			"Rev": "078cbeceb76e791223b782313cc69aa306ddfafe"
 		},
 		{
 			"ImportPath": "github.com/emccode/goscaleio/types/v1",
-			"Rev": "53ea76f52205380ab52b9c1f4ad89321c286bb95"
+			"Rev": "078cbeceb76e791223b782313cc69aa306ddfafe"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/client",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/context",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/registry",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/executors",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/handlers",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/httputils",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/executor",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/help",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/root",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/service",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/snapshot",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/tasks",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/router/volume",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/server/services",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/types",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/api/utils/config",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils/filters",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/api/utils/schema",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/client",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/drivers/integration/docker",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/drivers/os/darwin",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/drivers/os/linux",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/isilon",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/isilon/executor",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/isilon/storage",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/drivers/storage/libstorage",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio/executor",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/scaleio/storage",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vbox",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vbox/executor",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vbox/storage",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/client",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/executor",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/drivers/storage/vfs/storage",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/imports/config",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/imports/executors",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
-		},
-		{
-			"ImportPath": "github.com/emccode/libstorage/imports/local",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/imports/remote",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/emccode/libstorage/imports/routers",
-			"Comment": "v0.1.3",
-			"Rev": "182a626937677a081b89651598ee2eac839308e7"
+			"Comment": "v0.1.3-1-gefa4735",
+			"Rev": "efa473539c577d225ea701a90201112134f14d1f"
 		},
 		{
 			"ImportPath": "github.com/gin-gonic/gin",
-			"Comment": "v1.0rc1-262-g5caaac4",
-			"Rev": "5caaac4c5c712a9e7a7de29e6c24ef46c753017f"
+			"Comment": "v1.0rc1-268-gf931d1e",
+			"Rev": "f931d1ea80ae95a6fc739213cdd9399bd2967fb6"
 		},
 		{
 			"ImportPath": "github.com/gin-gonic/gin/binding",
-			"Comment": "v1.0rc1-262-g5caaac4",
-			"Rev": "5caaac4c5c712a9e7a7de29e6c24ef46c753017f"
+			"Comment": "v1.0rc1-268-gf931d1e",
+			"Rev": "f931d1ea80ae95a6fc739213cdd9399bd2967fb6"
 		},
 		{
 			"ImportPath": "github.com/gin-gonic/gin/render",
-			"Comment": "v1.0rc1-262-g5caaac4",
-			"Rev": "5caaac4c5c712a9e7a7de29e6c24ef46c753017f"
+			"Comment": "v1.0rc1-268-gf931d1e",
+			"Rev": "f931d1ea80ae95a6fc739213cdd9399bd2967fb6"
 		},
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",
-			"Rev": "f0a097ddac24fb00e07d2ac17f8671423f3ea47c"
+			"Rev": "0c1f6d65b5a189c2250d10e71a5506f06f9fa0a0"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
-			"Rev": "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/hcl/ast",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/hcl/parser",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/hcl/scanner",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/hcl/strconv",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/hcl/token",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/json/parser",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/json/scanner",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
-		},
-		{
-			"ImportPath": "github.com/hashicorp/hcl/json/token",
-			"Rev": "27a57f2605e04995c111273c263d51cee60d9bc4"
+			"Comment": "v1.1-4-gaed02d1",
+			"Rev": "aed02d124ae4a0e94fea4541c8effd05bf0c8296"
 		},
 		{
 			"ImportPath": "github.com/jteeuwen/go-bindata",
@@ -358,7 +278,7 @@
 		},
 		{
 			"ImportPath": "github.com/kr/text",
-			"Rev": "bb797dc4fb8320488f47bf11de07a733d7233e1f"
+			"Rev": "7cafcd837844e784b526369c9bce262804aebc60"
 		},
 		{
 			"ImportPath": "github.com/magiconair/properties",
@@ -383,28 +303,28 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "8f6a28b0916586e7f22fe931ae2fcfc380b1c0e6"
+			"Rev": "cb88ea77998c3f024757528e3305022ab50b43be"
 		},
 		{
 			"ImportPath": "github.com/spf13/viper",
-			"Rev": "c975dc1b4eacf4ec7fdbf0873638de5d090ba323"
+			"Rev": "d8a428b8a30606e1d0b355d91edf282609ade1a6"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "fb93926129b8ec0056f2f458b1f519654814edf0"
+			"Rev": "c4c3ea71919de159c9e246d7be66deb7f0a39a58"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context/ctxhttp",
-			"Rev": "fb93926129b8ec0056f2f458b1f519654814edf0"
+			"Rev": "c4c3ea71919de159c9e246d7be66deb7f0a39a58"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "b776ec39b3e54652e09028aaaaac9757f4f8211a"
+			"Rev": "076b546753157f758b316e59bcb51e6807c04057"
 		},
 		{
 			"ImportPath": "gopkg.in/fsnotify.v1",
-			"Comment": "v1.2.11",
-			"Rev": "836bfd95fecc0f1511dd66bdbf2b5b61ab8b00b6"
+			"Comment": "v1.3.1",
+			"Rev": "a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb"
 		},
 		{
 			"ImportPath": "gopkg.in/go-playground/validator.v8",
