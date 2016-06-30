@@ -11,7 +11,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	. "github.com/onsi/ginkgo"
@@ -69,7 +68,7 @@ var _ = Describe("Unit", func() {
 		gin.LoggerWithWriter(ioutil.Discard)
 
 		s.Run(insecure, brokerUser, brokerPassword, port)
-		time.Sleep(time.Millisecond * 500)
+		//	time.Sleep(time.Millisecond * 500)
 
 		libsClient = NewLibsClient()
 		libsHostServiceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
