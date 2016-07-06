@@ -51,3 +51,5 @@ while read service
 done;
 
 cf delete-service-broker $BROKER_NAME -f
+
+cf delete $BROKER_NAME -f
