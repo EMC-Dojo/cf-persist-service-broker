@@ -19,3 +19,16 @@ check_persistent() {
     exit 1
   fi
 }
+
+get_cf_services() {
+  local output=("yes")
+  ct=0
+  cf marketplace -s EMC-Persistence |
+  # augment marketplace output to get service names
+  while read line;
+    do ((ct+=1));
+    if ((ct>4))
+      then echo $line | awk '{print $1;}';
+    fi
+  done
+}

@@ -1,6 +1,6 @@
 ---
 applications:
-- name: go-persistence-service-broker
+- name: EMC-Persistence-broker
   memory: 512M
   command: cf-persist-service-broker
   buildpack: go_buildpack

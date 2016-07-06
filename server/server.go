@@ -125,13 +125,20 @@ func ProvisioningHandler(c *gin.Context) {
 
 // DeprovisionHandler : Deprovisions service instances (e.g. destroys volumes; used by cloud controller)
 func DeprovisionHandler(c *gin.Context) {
+	var planInfo = model.PlanID{}
+	err := json.Unmarshal([]byte(c.Query("plan_id")), &planInfo)
+	if err != nil {
+		log.Panic(fmt.Sprintf("Unable to unmarshal PlanID: %s", err))
+	}
+	serviceName := planInfo.LibsServiceName
+
 	instanceID := c.Param("instanceID")
-	volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), c.Query("service_id"), instanceID)
+	volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), serviceName, instanceID)
 	if err != nil {
 		log.Panicf("error service instance with ID %s does not exist. %s", instanceID, err)
 	}
 
-	err = libstoragewrapper.RemoveVolume(NewLibsClient(), c.Query("service_id"), volumeID)
+	err = libstoragewrapper.RemoveVolume(NewLibsClient(), serviceName, volumeID)
 	if err != nil {
 		log.Panic("error removing volume using libstorage", err)
 	}
