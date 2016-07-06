@@ -1,6 +1,8 @@
 ---
 applications:
 - name: EMC-Persistence-broker
-  memory: 512M
   command: cf-persist-service-broker
+  env:
+    GOVERSION: go1.6
+    GOPACKAGENAME: github.com/EMC-Dojo/cf-persist-service-broker
   buildpack: go_buildpack
