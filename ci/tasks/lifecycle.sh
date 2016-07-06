@@ -33,7 +33,7 @@ cf set-env $BROKER_NAME LIBSTORAGE_URI $LIBSTORAGE_URI
 cf set-env $BROKER_NAME INSECURE $INSECURE
 
 #Start EMC-Persistence broker with correct ENVironment
-cf start
+cf start $BROKER_NAME
 
 #Create Service Broker for use with CF
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD http://$BROKER_NAME.$CF_ENDPOINT
