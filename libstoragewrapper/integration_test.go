@@ -17,7 +17,7 @@ var _ = Describe("Integration", func() {
 
 	Describe("Libstorage Client Integration", func() {
 		var libsClient types.APIClient
-		var instanceID, storagePool, driverType, volumeID, libStorageURI, serviceName string
+		var instanceID, storagePool, volumeID, libStorageURI, serviceName string
 		var size int64
 		var err error
 
@@ -27,13 +27,11 @@ var _ = Describe("Integration", func() {
 			storagePool = os.Getenv("STORAGE_POOL_NAME")
 			size, err = strconv.ParseInt(os.Getenv("TEST_SIZE"), 10, 64)
 			Expect(err).ToNot(HaveOccurred())
-			driverType = os.Getenv("LIBSTORAGE_DRIVER_TYPE") //DriverType is the type of storage system we will use for this test
-			Expect(driverType).ToNot(BeEmpty())
+			serviceName = os.Getenv("LIB_STOR_SERVICE")
+			Expect(serviceName).ToNot(BeEmpty())
 			libStorageURI = os.Getenv("LIBSTORAGE_URI")
 			Expect(libStorageURI).ToNot(BeEmpty())
-
 			libsClient = server.NewLibsClient()
-			serviceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
 			Expect(err).ToNot(HaveOccurred())
 
 		})

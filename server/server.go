@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"regexp"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,7 @@ import (
 	"github.com/emccode/libstorage/api/types"
 )
 
-var insecure bool
+var serviceUUID, libStorageServiceName, libstorageHost, driverName string
 
 // Server : Service Broker Server
 type Server struct {
@@ -27,7 +28,8 @@ type Server struct {
 
 // NewLibsClient : creates a client used to communicate with libstorage.uri
 func NewLibsClient() types.APIClient {
-	libstorageHost := os.Getenv("LIBSTORAGE_URI")
+	insecure := (os.Getenv("INSECURE") == "true")
+	libstorageHost = os.Getenv("LIBSTORAGE_URI")
 	if libstorageHost == "" {
 		log.Panic("A libstorage storage host must be specified with ENV[LIBSTORAGE_URI]")
 	}
@@ -37,13 +39,25 @@ func NewLibsClient() types.APIClient {
 }
 
 // Run the Service Broker
-func (s Server) Run(insecureEnv bool, username, password, port string) {
-	insecure = insecureEnv
+func (s Server) Run() {
+	username := os.Getenv("BROKER_USERNAME")
+	password := os.Getenv("BROKER_PASSWORD")
+	port := os.Getenv("PORT")
 	server := gin.Default()
 	gin.SetMode("release")
 	authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
 		username: password,
 	}))
+
+	libStorageServiceName = os.Getenv("LIB_STOR_SERVICE")
+	driverName = os.Getenv("DIEGO_DRIVER_SPEC")
+	serviceUUID = os.Getenv("EMC_SERVICE_UUID")
+
+	fmt.Println("LibstorageServiceName: ", libStorageServiceName, "driverName", driverName, "serviceUUID", serviceUUID)
+	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
+	if !r.MatchString(serviceUUID) {
+		log.Panic(fmt.Sprintf("The UUID given from ENV[EMC_SERVICE_UUID]= %s either was not set or is not a valid UUID", os.Getenv("EMC_SERVICE_UUID")))
+	}
 
 	authorized.GET("/v2/catalog", CatalogHandler)
 	authorized.PUT("/v2/service_instances/:instanceID", ProvisioningHandler)
@@ -52,6 +66,7 @@ func (s Server) Run(insecureEnv bool, username, password, port string) {
 	authorized.DELETE("/v2/service_instances/:instanceID", DeprovisionHandler)
 
 	server.Run(":" + port)
+	log.Info("Starting EMC Persistance Service Broker at Port ", port)
 }
 
 // CatalogHandler : Shows a catalog of available service plans
@@ -63,23 +78,34 @@ func CatalogHandler(c *gin.Context) {
 	}
 	var plans []model.Plan
 	for _, service := range services {
-		planID, err := utils.CreatePlanIDString(service.Name)
-		if err != nil {
-			log.Panicf("Error creating PlanID from name %s : (%s)", service.Name, err)
+		if service.Name == libStorageServiceName {
+			planID, err := utils.CreatePlanIDString(service.Name)
+			if err != nil {
+				log.Panic(fmt.Sprintf("Error creating PlanID from name %s : (%s)", service.Name, err))
+			}
+			plans = append(plans, model.Plan{
+				ID:          planID, // UUID made from JSON Marshalled Libstorage Host IP/service name
+				Name:        service.Name,
+				Description: service.Driver.Name,
+			})
 		}
-		plans = append(plans, model.Plan{
-			ID:          planID, // UUID made from JSON Marshalled Libstorage Host IP/service name
-			Name:        service.Name,
-			Description: service.Driver.Name,
-		})
+	}
+	if len(plans) < 1 {
+		log.Panic(fmt.Sprintf("Service %s was not found on the LibStorage Server %s", libStorageServiceName, libstorageHost))
+	}
+
+	serviceName := os.Getenv("EMC_SERVICE_NAME")
+
+	if serviceName == "" {
+		serviceName = "EMC-Persistence"
 	}
 
 	catalogResponse := model.Catalog{
 		Services: []model.Service{
 			model.Service{
-				ID:          "c8ddac0a-36d3-41f7-bf72-990fe65b8d16",
-				Name:        "EMC-Persistence",
-				Description: "EMC-Persistent Storage",
+				ID:          serviceUUID,
+				Name:        serviceName,
+				Description: "Supports EMC ScaleIO & Isilon Storage Arrays for use with CloudFoundry",
 				Bindable:    true,
 				Requires:    []string{"volume_mount"},
 				Plans:       plans,
@@ -135,7 +161,7 @@ func DeprovisionHandler(c *gin.Context) {
 	instanceID := c.Param("instanceID")
 	volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), serviceName, instanceID)
 	if err != nil {
-		log.Panicf("error service instance with ID %s does not exist. %s", instanceID, err)
+		log.Panic(fmt.Sprintf("error service instance with ID %s does not exist. %s", instanceID, err))
 	}
 
 	err = libstoragewrapper.RemoveVolume(NewLibsClient(), serviceName, volumeID)
@@ -152,13 +178,13 @@ func BindingHandler(c *gin.Context) {
 
 	reqBody, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		log.Panicf("Unable to read request body %s. Body", err)
+		log.Panic(fmt.Sprintf("Unable to read request body %s. Body", err))
 	}
 
 	var serviceBinding model.ServiceBinding
 	err = json.Unmarshal(reqBody, &serviceBinding)
 	if err != nil {
-		log.Panicf("Unable to unmarshal service binding request %s. Request Body: %s", err, string(reqBody))
+		log.Panic(fmt.Sprintf("Unable to unmarshal service binding request %s. Request Body: %s", err, string(reqBody)))
 	}
 
 	var planInfo = model.PlanID{}
@@ -170,13 +196,15 @@ func BindingHandler(c *gin.Context) {
 
 	volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), serviceName, instanceID)
 	if err != nil {
-		log.Panicf("Unable to find volume ID by instance Id: %s", err)
+		log.Panic(fmt.Sprintf("Unable to find volume ID by instance Id: %s", err))
 	}
 
 	volumeName, err := utils.CreateNameForVolume(instanceID)
 	if err != nil {
-		log.Panicf("Unable to encode instanceID to volume Name %s", err)
+		log.Panic(fmt.Sprintf("Unable to encode instanceID to volume Name %s", err))
 	}
+
+	brokerName := os.Getenv("EMC_SERVICE_NAME")
 
 	serviceBindingResp := model.CreateServiceBindingResponse{
 		Credentials: model.CreateServiceBindingCredentials{
@@ -189,17 +217,17 @@ func BindingHandler(c *gin.Context) {
 		},
 		VolumeMounts: []model.VolumeMount{
 			model.VolumeMount{
-				ContainerPath: fmt.Sprintf("/var/vcap/store/scaleio/%s", volumeID),
+				//should we be using volumeID?
+				ContainerPath: fmt.Sprintf("/var/vcap/store/%s/%s", brokerName, volumeID),
 				Mode:          "rw",
 				Private: model.VolumeMountPrivateDetails{
-					Driver:  "rexray",
+					Driver:  driverName,
 					GroupId: volumeName,
 					Config:  "{\"broker\":\"specific_values\"}",
 				},
 			},
 		},
 	}
-
 	c.JSON(http.StatusCreated, serviceBindingResp)
 }
 

@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -24,7 +23,7 @@ import (
 )
 
 var _ = Describe("Unit", func() {
-	var serverURL, brokerUser, brokerPassword, instanceID, planIDString, libsHostServiceName, appGUID, bindingID, serviceBindingPath, driverType, storagePool string
+	var serverURL, brokerUser, brokerPassword, instanceID, planIDString, appGUID, bindingID, serviceBindingPath, serviceName, storagePool, diegoDriverSpec string
 	var libsClient types.APIClient
 
 	type PlanID model.PlanID
@@ -38,20 +37,18 @@ var _ = Describe("Unit", func() {
 		Expect(storagePool).ToNot(BeEmpty())
 		instanceID = os.Getenv("TEST_INSTANCE_ID") //3c653bce-8752-451b-96d9-a8a1a925b118
 		Expect(instanceID).ToNot(BeEmpty())
-		driverType = os.Getenv("LIBSTORAGE_DRIVER_TYPE")
-		Expect(driverType).ToNot(BeEmpty())
+		serviceName = os.Getenv("LIB_STOR_SERVICE")
+		Expect(serviceName).ToNot(BeEmpty())
 		libsServerHost := os.Getenv("LIBSTORAGE_URI")
 		Expect(libsServerHost).ToNot(BeEmpty())
 		brokerUser = os.Getenv("BROKER_USERNAME")
 		Expect(brokerUser).ToNot(BeEmpty())
 		brokerPassword = os.Getenv("BROKER_PASSWORD")
 		Expect(brokerPassword).ToNot(BeEmpty())
-		port := os.Getenv("BROKER_PORT")
+		port := os.Getenv("PORT")
 		Expect(port).ToNot(BeEmpty())
-		insecureEnv := os.Getenv("INSECURE")
-		Expect(insecureEnv).ToNot(BeEmpty())
-		insecure, err := strconv.ParseBool(insecureEnv)
-		Expect(err).ToNot(HaveOccurred())
+		diegoDriverSpec = os.Getenv("DIEGO_DRIVER_SPEC")
+		Expect(diegoDriverSpec).ToNot(BeEmpty())
 
 		serverURL = "http://localhost:" + port
 		serviceBindingPath = "/v2/service_instances/" + instanceID + "/service_bindings/" + bindingID
@@ -68,21 +65,19 @@ var _ = Describe("Unit", func() {
 		gin.DefaultWriter = devNull
 		gin.LoggerWithWriter(ioutil.Discard)
 
-		go s.Run(insecure, brokerUser, brokerPassword, port)
+		go s.Run()
 		time.Sleep(time.Millisecond * 500)
 
 		libsClient = NewLibsClient()
-		libsHostServiceName, err = libstoragewrapper.GetServiceNameByDriver(libsClient, driverType)
-		Expect(err).ToNot(HaveOccurred())
-		planIDString, err = utils.CreatePlanIDString(libsHostServiceName)
+		planIDString, err = utils.CreatePlanIDString(serviceName)
 		Expect(err).ToNot(HaveOccurred())
 
 	})
 
 	AfterEach(func() {
-		volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), libsHostServiceName, instanceID)
+		volumeID, err := libstoragewrapper.GetVolumeID(NewLibsClient(), serviceName, instanceID)
 		if err == nil {
-			libstoragewrapper.RemoveVolume(NewLibsClient(), libsHostServiceName, volumeID)
+			libstoragewrapper.RemoveVolume(NewLibsClient(), serviceName, volumeID)
 		}
 	})
 
@@ -103,8 +98,8 @@ var _ = Describe("Unit", func() {
 			Expect(err).ToNot(HaveOccurred())
 			var serviceFromCatalog = catalog.Services[0]
 			Expect(serviceFromCatalog).ToNot(BeNil())
-			Expect(serviceFromCatalog.ID).To(Equal("c8ddac0a-36d3-41f7-bf72-990fe65b8d16"))
-			Expect(serviceFromCatalog.Name).To(Equal("EMC-Persistence"))
+			Expect(serviceFromCatalog.ID).To(Equal(os.Getenv("EMC_SERVICE_UUID")))
+			Expect(serviceFromCatalog.Name).To(Equal(os.Getenv("EMC_SERVICE_NAME")))
 			Expect(serviceFromCatalog.Description).ToNot(BeEmpty())
 			Expect(serviceFromCatalog.Bindable).To(BeTrue())
 			Expect(serviceFromCatalog.Requires[0]).To(Equal("volume_mount"))
@@ -128,7 +123,7 @@ var _ = Describe("Unit", func() {
 				}
 				Expect(planMatchService).To(BeTrue())
 			}
-			Expect(len(plans)).To(Equal(len(services)))
+			Expect(len(plans)).To(Equal(1))
 
 		})
 	})
@@ -164,7 +159,7 @@ var _ = Describe("Unit", func() {
 		Expect(strings.TrimSpace(string(body))).To(Equal("{}"))
 
 		// Bind
-		volumeID, err := libstoragewrapper.GetVolumeID(libsClient, libsHostServiceName, instanceID)
+		volumeID, err := libstoragewrapper.GetVolumeID(libsClient, serviceName, instanceID)
 		Expect(err).ToNot(HaveOccurred())
 		volumeName, err := utils.CreateNameForVolume(instanceID)
 
@@ -179,10 +174,10 @@ var _ = Describe("Unit", func() {
 			},
 			VolumeMounts: []model.VolumeMount{
 				model.VolumeMount{
-					ContainerPath: fmt.Sprintf("/var/vcap/store/scaleio/%s", volumeID),
+					ContainerPath: fmt.Sprintf("/var/vcap/store/%s/%s", os.Getenv("EMC_SERVICE_NAME"), volumeID),
 					Mode:          "rw",
 					Private: model.VolumeMountPrivateDetails{
-						Driver:  "rexray",
+						Driver:  diegoDriverSpec,
 						GroupId: volumeName,
 						Config:  "{\"broker\":\"specific_values\"}",
 					},
@@ -191,7 +186,7 @@ var _ = Describe("Unit", func() {
 		}
 
 		provisionInstanceRequest := &model.ServiceBinding{
-			ServiceID: libsHostServiceName,
+			ServiceID: serviceName,
 			AppID:     appGUID,
 			PlanID:    planIDString,
 			BindResource: map[string]string{
@@ -241,7 +236,7 @@ var _ = Describe("Unit", func() {
 		// Removing instance
 		u, err = url.Parse(serverURL + "/v2/service_instances/" + instanceID)
 		q = u.Query()
-		q.Set("service_id", libsHostServiceName)
+		q.Set("service_id", serviceName)
 		q.Set("plan_id", planIDString)
 		u.RawQuery = q.Encode()
 		req, err = http.NewRequest("DELETE", u.String(), nil)

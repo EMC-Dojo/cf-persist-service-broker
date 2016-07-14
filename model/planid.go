@@ -4,4 +4,5 @@ package model
 type PlanID struct {
 	LibsHostName    string `json:"h"`
 	LibsServiceName string `json:"p"`
+	LibsDriverName  string `json:"d"`
 }

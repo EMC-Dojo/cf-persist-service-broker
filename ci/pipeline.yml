@@ -11,8 +11,7 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: cf-persist-service-broker
-      trigger: true
+    - {trigger: true,       get: cf-persist-service-broker}
   - task: integration
     config:
       platform: linux
@@ -28,10 +27,13 @@ jobs:
         STORAGE_POOL_NAME:                    {{storage_pool_name}}
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
-        BROKER_PORT:                          {{broker_port}}
+        PORT:                                 9000
         INSECURE:                             true
         LIBSTORAGE_URI:                       {{libstorage_uri}}
-        LIBSTORAGE_DRIVER_TYPE:               scaleio
+        LIB_STOR_SERVICE:                     {{lib_stor_service_scaleio}}
+        DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_scaleio}}
+        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
+        EMC_SERVICE_NAME:                     {{emc_service_name}}
       inputs:
       - name: cf-persist-service-broker
       run:
@@ -58,10 +60,13 @@ jobs:
         STORAGE_POOL_NAME:                    {{storage_pool_name}}
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
-        BROKER_PORT:                          {{broker_port}}
+        PORT:                                 9000
         INSECURE:                             true
         LIBSTORAGE_URI:                       {{libstorage_uri}}
-        LIBSTORAGE_DRIVER_TYPE:               isilon
+        LIB_STOR_SERVICE:                     {{lib_stor_service_isilon}}
+        DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_isilon}}
+        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
+        EMC_SERVICE_NAME:                     {{emc_service_name}}
       inputs:
       - name: cf-persist-service-broker
       run:
@@ -87,6 +92,8 @@ jobs:
         BROKER_NAME:              {{broker_name}}
         BROKER_PASSWORD:          {{broker_password}}
         BROKER_USERNAME:          {{broker_username}}
+        EMC_SERVICE_UUID:         {{emc_service_uuid}}
+        EMC_SERVICE_NAME:         {{emc_service_name}}
         CF_ENDPOINT:              {{cf_endpoint}}
         CF_USERNAME:              {{cf_username}}
         CF_PASSWORD:              {{cf_password}}
@@ -94,6 +101,7 @@ jobs:
         CF_SPACE:                 {{cf_space}}
         LIBSTORAGE_URI:           {{libstorage_uri}}
         INSECURE:                 true
+        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
       inputs:
       - name: cf-persist-service-broker
       run:
@@ -133,20 +141,30 @@ resources:
 - name: cf-persist-service-broker
   type: git
   source:
-    uri: https://{{github_user}}:{{github_password}}@github.com/EMC-Dojo/cf-persist-service-broker.git
+    uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
     branch: master
+    username: {{github_user}}
+    password: {{github_password}}
+    skip_ssl_verification: true
 
 - name: scaleio-acceptance-app
   type: git
   source:
-    uri: https://{{github_user}}:{{github_password}}@github.com/EMC-CMD/scaleio-io-test.git
+    uri: https://github.com/EMC-CMD/scaleio-io-test.git
     branch: master
+    username: {{github_user}}
+    password: {{github_password}}
+    skip_ssl_verification: true
+
 
 - name: cf-persist-service-broker-out
   type: git
   source:
-    uri: '--repo https://{{github_user}}:{{github_password}}@github.com/EMC-Dojo/cf-persist-service-broker.git'
+    uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
     branch: master
+    username: {{github_user}}
+    password: {{github_password}}
+    skip_ssl_verification: true
 
 - name: version-semver
   type: semver

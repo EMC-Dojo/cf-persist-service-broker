@@ -1,13 +1,16 @@
 package model
 
 type ServiceBinding struct {
-	ServiceID    string                 `json:"service_id"`
-	AppID        string                 `json:"app_guid"`
-	PlanID       string                 `json:"plan_id"`
-	BindResource map[string]string      `json:"bind_resource"`
-	Parameters   map[string]interface{} `json:"parameters"`
+	ServiceID    string               `json:"service_id"`
+	AppID        string               `json:"app_guid"`
+	PlanID       string               `json:"plan_id"`
+	BindResource map[string]string    `json:"bind_resource"`
+	Parameters   ServiceBindingParams `json:"parameters"`
 }
 
+type ServiceBindingParams struct {
+	Driver string `json:"volume_driver"`
+}
 type CreateServiceBindingResponse struct {
 	Credentials  CreateServiceBindingCredentials `json:"credentials"`
 	VolumeMounts []VolumeMount                   `json:"volume_mounts"`
