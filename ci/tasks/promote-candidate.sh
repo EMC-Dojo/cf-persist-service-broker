@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 set -e -x
-
 source cf-persist-service-broker/ci/tasks/util.sh
+
+check_param GITHUB_USER
+check_param GITHUB_EMAIL
 
 # Creates an integer version number from the semantic version format
 # May be changed when we decide to fully use semantic versions for releases
@@ -11,8 +13,9 @@ cp -r cf-persist-service-broker promote/cf-persist-service-broker
 echo ${integer_version} > promote/integer_version
 
 pushd promote/cf-persist-service-broker/
-  git config --global user.email emccmd-eng@emc.com
-  git config --global user.name EMCCMD-CI
+  git config --global user.email ${GITHUB_EMAIL}
+  git config --global user.name ${GITHUB_USER}
+  git config --global push.default simple
   export annotate_message=":airplane: New final release v${integer_version}"
   export log_message="`git log -1 --pretty=oneline`"
   echo "## v${integer_version}" >> CHANGELOG.md
