@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e -x
 
 check_param() {
   local name=$1
@@ -20,10 +21,15 @@ check_persistent() {
   fi
 }
 
-get_cf_services() {
-  local output=("yes")
+get_cf_service() {
+  output=$(cf marketplace -s $EMC_SERVICE_NAME)
+  if [ $? -eq 1 ]
+  then
+    exit 1
+  fi
+
   ct=0
-  cf marketplace -s EMC-Persistence |
+  echo "$output" |
   # augment marketplace output to get service names
   while read line;
     do ((ct+=1));

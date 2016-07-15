@@ -147,11 +147,13 @@ jobs:
         INSECURE:                 true
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
         TEST_APP_NAME:            {{test_app_name}}
+        NUM_DIEGO_CELLS:          {{num_diego_cells}}
+        APP_MEMORY:               {{app_memory}}
       inputs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle.sh
+        path: cf-persist-service-broker/ci/tasks/lifecycle_multiCell.sh
 
 - name: promote-candidate
   serial: true
