@@ -80,6 +80,7 @@ jobs:
     - get: cf-persist-service-broker
       trigger: true
       passed: [Isilon-Integration]
+    - get: lifecycle-app
   - task: lifecycle
     config:
       image_resource:
@@ -99,11 +100,15 @@ jobs:
         CF_PASSWORD:              {{cf_password}}
         CF_ORG:                   {{cf_org}}
         CF_SPACE:                 {{cf_space}}
+        CF_SERVICE:               {{emc_service_name}}
         LIBSTORAGE_URI:           {{libstorage_uri}}
+        LIB_STOR_SERVICE:         {{lib_stor_service_scaleio}}
         INSECURE:                 true
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
+        TEST_APP_NAME:            {{test_app_name}}
       inputs:
       - name: cf-persist-service-broker
+      - name: lifecycle-app
       run:
         path: cf-persist-service-broker/ci/tasks/lifecycle.sh
 
@@ -147,15 +152,14 @@ resources:
     password: {{github_password}}
     skip_ssl_verification: true
 
-- name: scaleio-acceptance-app
+- name: lifecycle-app
   type: git
   source:
-    uri: https://github.com/EMC-CMD/scaleio-io-test.git
+    uri: https://github.com/EMC-dojo/kitty.git
     branch: master
     username: {{github_user}}
     password: {{github_password}}
     skip_ssl_verification: true
-
 
 - name: cf-persist-service-broker-out
   type: git

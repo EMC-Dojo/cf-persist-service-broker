@@ -53,7 +53,7 @@ func (s Server) Run() {
 	driverName = os.Getenv("DIEGO_DRIVER_SPEC")
 	serviceUUID = os.Getenv("EMC_SERVICE_UUID")
 
-	fmt.Println("LibstorageServiceName: ", libStorageServiceName, "driverName", driverName, "serviceUUID", serviceUUID)
+	fmt.Println("LibstorageServiceName: ", libStorageServiceName, "driverName", driverName, "serviceUUID", serviceUUID, "emcServiceName", os.Getenv("EMC_SERVICE_NAME"))
 	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
 	if !r.MatchString(serviceUUID) {
 		log.Panic(fmt.Sprintf("The UUID given from ENV[EMC_SERVICE_UUID]= %s either was not set or is not a valid UUID", os.Getenv("EMC_SERVICE_UUID")))
