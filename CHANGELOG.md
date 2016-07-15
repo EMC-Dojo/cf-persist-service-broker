@@ -31,3 +31,5 @@ v49339eb278b1e73c2bf389896ac8764d3743683b Format configure persistence document
 v94e735020a0f7cdefed34de1eea487604ce266d3 Error handling for delete service instance when service is still attached to App [#121134559](https://www.pivotaltracker.com/story/show/121134559)
 ## v17
 v1fdbc21b77cc0064eba43f82bc970731f4472e05 Adding unbind service to lifecycle step of Pipeline
+## v18
+v7ff5dc1dd8cdb8544f6300be65f4cb4fa6ea295e Created new block in pipeline for releasing new candidate
