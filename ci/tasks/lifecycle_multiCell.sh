@@ -74,11 +74,9 @@ while read service
       set -x -e
       curl_output="$(curl http://$TEST_APP_NAME.$CF_ENDPOINT)"
       echo "$curl_output" | grep -w "Concourse BOT was here"
-      instance_number=$(echo '$curl_output' | grep -w "Instance ID is :" | sed -n -e 's/^.*Instance\ ID\ is\ : //p' | cut -f 1 -d ' ' )
-      echo instanceID=$instance_number
+      instance_number="$(echo $curl_output | grep -w "Instance ID is :" | sed -n -e 's/^.*Instance\ ID\ is\ : //p' | cut -f 1 -d ' ')"
       instances[$instance_number]=1
-
-      if ["${!instances[@]}" -eq $NUM_DIEGO_CELLS]
+      if [ "${#instances[@]}" == $NUM_DIEGO_CELLS]
       then
         echo "Verified Across All Diego Cells!"
         returnValue=0
