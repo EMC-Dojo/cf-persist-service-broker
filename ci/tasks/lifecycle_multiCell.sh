@@ -19,6 +19,8 @@ check_param EMC_SERVICE_NAME
 check_param EMC_SERVICE_UUID
 check_param DIEGO_DRIVER_SPEC
 check_param TEST_APP_NAME
+check_param NUM_DIEGO_CELLS
+check_param APP_MEMORY
 
 cd cf-persist-service-broker
 
@@ -56,6 +58,8 @@ cd ../lifecycle-app
 cf push $TEST_APP_NAME --no-start
 cf set-env $TEST_APP_NAME CF_SERVICE $CF_SERVICE
 
+returnValue=1
+
 get_cf_service |
 while read service
   do
@@ -63,7 +67,25 @@ while read service
   cf create-service $BROKER_NAME $service $service'_TEST_INSTANCE'
   cf bind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
   cf start $TEST_APP_NAME
-  curl -X POST -F 'text_box=Concourse BOT was here' http://$TEST_APP_NAME.$CF_ENDPOINT  | grep -w "Concourse BOT was here"
+  curl -X POST -F 'text_box=Concourse BOT was here' http://$TEST_APP_NAME.$CF_ENDPOINT | grep -w "Concourse BOT was here"
+  cf scale $TEST_APP_NAME -i $NUM_DIEGO_CELLS -m $APP_MEMORY
+    for i in {0..$(( $NUM_DIEGO_CELLS * 10 ))}
+    do
+      set -x -e
+      curl_output="$(curl http://$TEST_APP_NAME.$CF_ENDPOINT)"
+      echo "$curl_output" | grep -w "Concourse BOT was here"
+      instance_number=$(echo '$curl_output' | grep -w "Instance ID is :" | sed -n -e 's/^.*Instance\ ID\ is\ : //p' | cut -f 1 -d ' ' )
+      echo instanceID=$instance_number
+      instances[$instance_number]=1
+
+      if ["${!instances[@]}" -eq $NUM_DIEGO_CELLS]
+      then
+        echo "Verified Across All Diego Cells!"
+        returnValue=0
+        break
+      fi
+    done;
+
   cf stop $TEST_APP_NAME
   cf unbind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
   cf restage $TEST_APP_NAME
@@ -73,10 +95,16 @@ done;
 get_cf_service |
 while read service
   do
-  set -x -e
+  set -e -x
   cf delete-service $service'_TEST_INSTANCE' -f
 done;
 
 cf delete-service-broker $BROKER_NAME -f
 cf delete $BROKER_NAME -f
 cf delete $TEST_APP_NAME -f
+
+if [returnValue -eq 1]
+then
+  echo "Didnt Verify Across All Diego Cells After Multiple Tries!"
+  exit 1
+fi
