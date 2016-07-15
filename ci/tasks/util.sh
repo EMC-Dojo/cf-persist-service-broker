@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e -x
 
 check_param() {
   local name=$1
