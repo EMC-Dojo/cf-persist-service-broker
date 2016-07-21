@@ -149,6 +149,12 @@ jobs:
         TEST_APP_NAME:            {{test_app_name}}
         NUM_DIEGO_CELLS:          {{num_diego_cells}}
         APP_MEMORY:               {{app_memory}}
+        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
+        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
+        BOSH_DIR:                 {{bosh_dir}}
+        BOSH_USER:                {{bosh_user}}
+        BOSH_PASS:                {{bosh_pass}}
       inputs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
