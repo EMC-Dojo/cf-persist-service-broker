@@ -1,0 +1,278 @@
+groups:
+- name: EMC-Persistence-Broker
+  jobs:
+  - ScaleIO-Integration
+  - Isilon-Integration
+  - CloudFoundry-EMC-Persistence-Lifecycle-ScaleIO
+  - CloudFoundry-Scale-Diego-Cells-Up
+  - CloudFoundry-EMC-Persistence-Lifecycle-Isilon
+  - CloudFoundry-Scale-Diego-Cells-Down
+  - promote-candidate
+
+jobs:
+- name: ScaleIO-Integration
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true,       get: cf-persist-service-broker}
+  - task: integration
+    config:
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      params: &integration-params
+        TEST_INSTANCE_ID:                     {{test_instance_id}}
+        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+        TEST_SIZE:                            8
+        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        BROKER_PASSWORD:                      {{broker_password}}
+        BROKER_USERNAME:                      {{broker_username}}
+        PORT:                                 9000
+        INSECURE:                             true
+        LIBSTORAGE_URI:                       {{libstorage_uri}}
+        LIB_STOR_SERVICE:                     {{lib_stor_service_scaleio}}
+        DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_scaleio}}
+        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
+        EMC_SERVICE_NAME:                     {{emc_service_name}}
+      inputs:
+      - name: cf-persist-service-broker
+      run:
+        path: cf-persist-service-broker/ci/tasks/integration.sh
+
+- name: Isilon-Integration
+  serial: true
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+  - task: integration
+    config:
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      params: &integration-params
+        TEST_INSTANCE_ID:                     {{test_instance_id}}
+        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+        TEST_SIZE:                            0
+        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        BROKER_PASSWORD:                      {{broker_password}}
+        BROKER_USERNAME:                      {{broker_username}}
+        PORT:                                 9000
+        INSECURE:                             true
+        LIBSTORAGE_URI:                       {{libstorage_uri}}
+        LIB_STOR_SERVICE:                     {{lib_stor_service_isilon}}
+        DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_isilon}}
+        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
+        EMC_SERVICE_NAME:                     {{emc_service_name}}
+      inputs:
+      - name: cf-persist-service-broker
+      run:
+        path: cf-persist-service-broker/ci/tasks/integration.sh
+
+- name: CloudFoundry-EMC-Persistence-Lifecycle-ScaleIO
+  serial: true
+  serial_groups: [lifecycle]
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+      passed: [ScaleIO-Integration]
+    - get: lifecycle-app
+  - task: lifecycle
+    config:
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      platform: linux
+      params: &lifecycle-params
+        BROKER_NAME:              {{broker_name}}
+        BROKER_PASSWORD:          {{broker_password}}
+        BROKER_USERNAME:          {{broker_username}}
+        EMC_SERVICE_UUID:         {{emc_service_uuid}}
+        EMC_SERVICE_NAME:         {{emc_service_name}}
+        CF_ENDPOINT:              {{cf_endpoint}}
+        CF_USERNAME:              {{cf_username}}
+        CF_PASSWORD:              {{cf_password}}
+        CF_ORG:                   {{cf_org}}
+        CF_SPACE:                 {{cf_space}}
+        CF_SERVICE:               {{emc_service_name}}
+        LIBSTORAGE_URI:           {{libstorage_uri}}
+        LIB_STOR_SERVICE:         {{lib_stor_service_scaleio}}
+        INSECURE:                 true
+        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
+        TEST_APP_NAME:            {{test_app_name}}
+      inputs:
+      - name: cf-persist-service-broker
+      - name: lifecycle-app
+      run:
+        path: cf-persist-service-broker/ci/tasks/lifecycle.sh
+
+- name: CloudFoundry-Scale-Diego-Cells-Up
+  serial: true
+  serial_groups: [lifecycle]
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+      passed: [Isilon-Integration]
+  - task: scale-diego
+    config:
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      platform: linux
+      params: &lifecycle-params
+        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
+        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
+        BOSH_DIR:                 {{bosh_dir}}
+        BOSH_USER:                {{bosh_user}}
+        BOSH_PASS:                {{bosh_pass}}
+      inputs:
+      - name: cf-persist-service-broker
+      run:
+        path: cf-persist-service-broker/ci/tasks/lifecycle_scaleDiegoCellsUp.sh
+- name: CloudFoundry-EMC-Persistence-Lifecycle-Isilon
+  serial: true
+  serial_groups: [lifecycle]
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+      passed: [Isilon-Integration]
+    - get: lifecycle-app
+  - task: lifecycle
+    config:
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      platform: linux
+      params: &lifecycle-params
+        BROKER_NAME:              {{broker_name}}
+        BROKER_PASSWORD:          {{broker_password}}
+        BROKER_USERNAME:          {{broker_username}}
+        EMC_SERVICE_UUID:         {{emc_service_uuid}}
+        EMC_SERVICE_NAME:         {{emc_service_name}}
+        CF_ENDPOINT:              {{cf_endpoint}}
+        CF_USERNAME:              {{cf_username}}
+        CF_PASSWORD:              {{cf_password}}
+        CF_ORG:                   {{cf_org}}
+        CF_SPACE:                 {{cf_space}}
+        CF_SERVICE:               {{emc_service_name}}
+        LIBSTORAGE_URI:           {{libstorage_uri}}
+        LIB_STOR_SERVICE:         {{lib_stor_service_isilon}}
+        INSECURE:                 true
+        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
+        TEST_APP_NAME:            {{test_app_name}}
+        NUM_DIEGO_CELLS:          {{num_diego_cells}}
+        APP_MEMORY:               {{app_memory}}
+        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
+        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
+        BOSH_DIR:                 {{bosh_dir}}
+        BOSH_USER:                {{bosh_user}}
+        BOSH_PASS:                {{bosh_pass}}
+      inputs:
+      - name: cf-persist-service-broker
+      - name: lifecycle-app
+      run:
+        path: cf-persist-service-broker/ci/tasks/lifecycle_multiCell.sh
+
+- name: CloudFoundry-Scale-Diego-Cells-Down
+  serial: true
+  serial_groups: [lifecycle]
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+      passed: [Isilon-Integration]
+  - task: scale-diego
+    config:
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      platform: linux
+      params: &lifecycle-params
+        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
+        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
+        BOSH_DIR:                 {{bosh_dir}}
+        BOSH_USER:                {{bosh_user}}
+        BOSH_PASS:                {{bosh_pass}}
+      inputs:
+      - name: cf-persist-service-broker
+      run:
+        path: cf-persist-service-broker/ci/tasks/lifecycle_scaleDiegoCellsDown.sh
+- name: promote-candidate
+  serial: true
+  plan:
+  - aggregate:
+    - get: cf-persist-service-broker
+      trigger: true
+      passed: [CloudFoundry-EMC-Persistence-Lifecycle-Isilon, CloudFoundry-EMC-Persistence-Lifecycle-ScaleIO]
+    - get: version-semver
+      trigger: false
+      params: {bump: major}
+  - task: promote
+    config:
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+      inputs:
+      - name: cf-persist-service-broker
+      - name: version-semver
+      outputs:
+      - name: promote
+      run:
+        path: cf-persist-service-broker/ci/tasks/promote-candidate.sh
+      params: &promote-params
+        GITHUB_USER:              {{github_user}}
+        GITHUB_EMAIL:             {{github_email}}
+  - put: cf-persist-service-broker
+    params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
+  - put: version-semver
+    params: {file: version-semver/number}
+
+resources:
+- name: cf-persist-service-broker
+  type: git
+  source:
+    uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
+    branch: master
+    username: {{github_user}}
+    password: {{github_password}}
+    skip_ssl_verification: true
+
+- name: lifecycle-app
+  type: git
+  source:
+    uri: https://github.com/EMC-dojo/kitty.git
+    branch: master
+    username: {{github_user}}
+    password: {{github_password}}
+    skip_ssl_verification: true
+
+- name: version-semver
+  type: semver
+  source:
+    key:               number
+    bucket:            {{s3_bucket_name}}
+    access_key_id:     {{s3_access_key_id}}
+    secret_access_key: {{s3_secret_access_key}}
