@@ -17,9 +17,8 @@ gem install bosh_cli --no-ri --no-rdoc
 bosh -n target ${BOSH_DIR}
 bosh -n login ${BOSH_USER} ${BOSH_PASS}
 
-ci_manifest="$(bosh download manifest ${DIEGO_DEPLOYMENT_NAME})"
-origin_manifest="$(perl -0pe 's/(- instances: 2\n  name: CI_cell_z1)(.+?)(- instances:)/- instances:/sg')"
-echo "${origin_manifest}" > manifest.yml
+manifest="$(bosh download manifest ${DIEGO_DEPLOYMENT_NAME} | perl -0pe 's/(- instances: 2\n  name: CI_cell_z1)(.+?)(- instances:)/- instances:/sg')"
+echo "${manifest}" > manifest.yml
 
 bosh deployment manifest.yml
 bosh -n deploy

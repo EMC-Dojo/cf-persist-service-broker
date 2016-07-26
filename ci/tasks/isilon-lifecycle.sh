@@ -21,34 +21,18 @@ check_param DIEGO_DRIVER_SPEC
 check_param TEST_APP_NAME
 check_param NUM_DIEGO_CELLS
 check_param APP_MEMORY
-check_param DIEGO_DEPLOYMENT_NAME
-check_param CI_DIEGOCELL_IPS
-check_param SCALEIO_MDM_IPS
-check_param BOSH_DIR
-check_param BOSH_USER
-check_param BOSH_PASS
 
 cd cf-persist-service-broker
 
-#install bosh cli (should add to docker image eventually...)
-gem install bosh_cli --no-ri --no-rdoc
-
-#Setup BOSH CLI for us
-bosh -n target $BOSH_DIR
-bosh -n login $BOSH_USER $BOSH_PASS
-
 #Setup CF CLI for us
 cf api http://api.$CF_ENDPOINT --skip-ssl-validation
-
 cf auth $CF_USERNAME $CF_PASSWORD
-
 cf target -o $CF_ORG -s $CF_SPACE
 
 #Push EMC-Persistence broker with '--no-start' to allow setting ENVironment
 cf push $BROKER_NAME --no-start
 
 #Set ENVironment for EMC-Persistence broker
-
 cf set-env $BROKER_NAME EMC_SERVICE_UUID $EMC_SERVICE_UUID
 cf set-env $BROKER_NAME EMC_SERVICE_NAME $BROKER_NAME
 cf set-env $BROKER_NAME LIBSTORAGE_URI $LIBSTORAGE_URI
@@ -57,7 +41,6 @@ cf set-env $BROKER_NAME LIB_STOR_SERVICE $LIB_STOR_SERVICE
 cf set-env $BROKER_NAME INSECURE $INSECURE
 cf set-env $BROKER_NAME BROKER_USERNAME $BROKER_USERNAME
 cf set-env $BROKER_NAME BROKER_PASSWORD $BROKER_PASSWORD
-
 
 #Start EMC-Persistence broker with correct ENVironment
 cf start $BROKER_NAME

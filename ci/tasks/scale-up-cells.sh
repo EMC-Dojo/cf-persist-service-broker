@@ -3,12 +3,12 @@
 set -e -x
 source cf-persist-service-broker/ci/tasks/util.sh
 
-check_param DIEGO_DEPLOYMENT_NAME
-check_param CI_DIEGOCELL_IPS
-check_param SCALEIO_MDM_IPS
 check_param BOSH_DIR
-check_param BOSH_USER
 check_param BOSH_PASS
+check_param BOSH_USER
+check_param CI_DIEGOCELL_IPS
+check_param DIEGO_DEPLOYMENT_NAME
+check_param SCALEIO_MDM_IPS
 
 #install bosh cli (should add to docker image eventually...)
 gem install bosh_cli --no-ri --no-rdoc

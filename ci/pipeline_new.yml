@@ -23,19 +23,21 @@ jobs:
           source:
             repository: {{docker_repo}}
             insecure_registries: [{{docker_registry}}]
-      params: &integration-params
+      default-params: &integration-params
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
-        DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_scaleio}}
         EMC_SERVICE_NAME:                     {{emc_service_name}}
         EMC_SERVICE_UUID:                     {{emc_service_uuid}}
         INSECURE:                             true
-        LIB_STOR_SERVICE:                     {{lib_stor_service_scaleio}}
         LIBSTORAGE_URI:                       {{libstorage_uri}}
         PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-        PORT:                                 9000
         STORAGE_POOL_NAME:                    {{storage_pool_name}}
         TEST_INSTANCE_ID:                     {{test_instance_id}}
+        PORT:                                 9000
+      params:
+        <<: *integration-params
+        DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_scaleio}}
+        LIB_STOR_SERVICE:                     {{lib_stor_service_scaleio}}
         TEST_SIZE:                            8
       inputs:
       - name: cf-persist-service-broker
@@ -52,19 +54,10 @@ jobs:
     config:
       platform: linux
       image_resource: *docker
-      params: &integration-params
-        BROKER_PASSWORD:                      {{broker_password}}
-        BROKER_USERNAME:                      {{broker_username}}
+      params:
+        <<: *integration-params
         DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_isilon}}
-        EMC_SERVICE_NAME:                     {{emc_service_name}}
-        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
-        INSECURE:                             true
         LIB_STOR_SERVICE:                     {{lib_stor_service_isilon}}
-        LIBSTORAGE_URI:                       {{libstorage_uri}}
-        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-        PORT:                                 9000
-        STORAGE_POOL_NAME:                    {{storage_pool_name}}
-        TEST_INSTANCE_ID:                     {{test_instance_id}}
         TEST_SIZE:                            0
       inputs:
       - name: cf-persist-service-broker
@@ -85,23 +78,25 @@ jobs:
     config:
       image_resource: *docker
       platform: linux
-      params: &lifecycle-params
+      default-params: &lifecycle-params
         BROKER_NAME:              {{broker_name}}
         BROKER_PASSWORD:          {{broker_password}}
         BROKER_USERNAME:          {{broker_username}}
-        EMC_SERVICE_UUID:         {{emc_service_uuid}}
-        EMC_SERVICE_NAME:         {{emc_service_name}}
         CF_ENDPOINT:              {{cf_endpoint}}
-        CF_USERNAME:              {{cf_username}}
-        CF_PASSWORD:              {{cf_password}}
         CF_ORG:                   {{cf_org}}
-        CF_SPACE:                 {{cf_space}}
+        CF_PASSWORD:              {{cf_password}}
         CF_SERVICE:               {{emc_service_name}}
-        LIBSTORAGE_URI:           {{libstorage_uri}}
-        LIB_STOR_SERVICE:         {{lib_stor_service_scaleio}}
+        CF_SPACE:                 {{cf_space}}
+        CF_USERNAME:              {{cf_username}}
+        EMC_SERVICE_NAME:         {{emc_service_name}}
+        EMC_SERVICE_UUID:         {{emc_service_uuid}}
         INSECURE:                 true
-        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
+        LIBSTORAGE_URI:           {{libstorage_uri}}
         TEST_APP_NAME:            {{test_app_name}}
+      params:
+        <<: *lifecycle-params
+        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
+        LIB_STOR_SERVICE:         {{lib_stor_service_scaleio}}
       inputs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
@@ -120,13 +115,14 @@ jobs:
     config:
       image_resource: *docker
       platform: linux
-      params: &lifecycle-params
-        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+      default-params: &scale-params
+        BOSH_DIR:                 {{bosh_dir}}
+        BOSH_PASS:                {{bosh_pass}}
+        BOSH_USER:                {{bosh_user}}
         CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
         DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
-        BOSH_DIR:                 {{bosh_dir}}
-        BOSH_USER:                {{bosh_user}}
-        BOSH_PASS:                {{bosh_pass}}
+        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+      params: *scale-params
       inputs:
       - name: cf-persist-service-broker
       run:
@@ -145,31 +141,12 @@ jobs:
     config:
       image_resource: *docker
       platform: linux
-      params: &lifecycle-params
-        BROKER_NAME:              {{broker_name}}
-        BROKER_PASSWORD:          {{broker_password}}
-        BROKER_USERNAME:          {{broker_username}}
-        EMC_SERVICE_UUID:         {{emc_service_uuid}}
-        EMC_SERVICE_NAME:         {{emc_service_name}}
-        CF_ENDPOINT:              {{cf_endpoint}}
-        CF_USERNAME:              {{cf_username}}
-        CF_PASSWORD:              {{cf_password}}
-        CF_ORG:                   {{cf_org}}
-        CF_SPACE:                 {{cf_space}}
-        CF_SERVICE:               {{emc_service_name}}
-        LIBSTORAGE_URI:           {{libstorage_uri}}
-        LIB_STOR_SERVICE:         {{lib_stor_service_isilon}}
-        INSECURE:                 true
-        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
-        TEST_APP_NAME:            {{test_app_name}}
-        NUM_DIEGO_CELLS:          {{num_diego_cells}}
+      params:
+        <<: *lifecycle-params
         APP_MEMORY:               {{app_memory}}
-        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
-        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
-        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
-        BOSH_DIR:                 {{bosh_dir}}
-        BOSH_USER:                {{bosh_user}}
-        BOSH_PASS:                {{bosh_pass}}
+        DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
+        LIB_STOR_SERVICE:         {{lib_stor_service_isilon}}
+        NUM_DIEGO_CELLS:          {{num_diego_cells}}
       inputs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
@@ -188,13 +165,7 @@ jobs:
     config:
       image_resource: *docker
       platform: linux
-      params: &lifecycle-params
-        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
-        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
-        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
-        BOSH_DIR:                 {{bosh_dir}}
-        BOSH_USER:                {{bosh_user}}
-        BOSH_PASS:                {{bosh_pass}}
+      params: *scale-params
       inputs:
       - name: cf-persist-service-broker
       run:
