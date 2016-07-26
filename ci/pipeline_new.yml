@@ -81,9 +81,6 @@ jobs:
       trigger: true
       passed: [scaleio-integration]
     - get: lifecycle-app
-    - put: scaleio-lock
-      resource: promote-lock
-      params: {acquire: true}
   - task: lifecycle
     config:
       image_resource: *docker
@@ -110,8 +107,6 @@ jobs:
       - name: lifecycle-app
       run:
         path: cf-persist-service-broker/ci/tasks/scaleio-lifecycle.sh
-  - put: promote-lock
-    params: {release: scaleio-lock}
 
 - name: scale-up-cells
   serial: true
@@ -189,9 +184,6 @@ jobs:
     - get: cf-persist-service-broker
       trigger: true
       passed: [isilon-lifecycle]
-    - put: isilon-lock
-      resource: promote-lock
-      params: {acquire: true}
   - task: scale-diego
     config:
       image_resource: &docker
@@ -207,8 +199,6 @@ jobs:
       - name: cf-persist-service-broker
       run:
         path: cf-persist-service-broker/ci/tasks/scale-down-cells.sh
-  - put: promote-lock
-    params: {release: isilon-lock}
 
 - name: promote-candidate
   serial: true
@@ -220,12 +210,6 @@ jobs:
     - get: version-semver
       trigger: false
       params: {bump: major}
-    - put: scaleio-lock
-      resource: promote-lock
-      params: {acquire: true}
-    - put: isilon-lock
-      resource: promote-lock
-      params: {acquire: true}
   - task: promote
     config:
       platform: linux
@@ -244,10 +228,6 @@ jobs:
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: version-semver
     params: {file: version-semver/number}
-  - put: promote-lock
-    params: {release: isilon-lock}
-  - put: promote-lock
-    params: {release: scaleio-lock}
 
 resources:
 - name: cf-persist-service-broker
@@ -267,15 +247,6 @@ resources:
     username: {{github_user}}
     password: {{github_password}}
     skip_ssl_verification: true
-
-
-- name: promote-lock
-  type: pool
-  source:
-    uri: https://github.com/EMC-CMD/ci-promote-lock.git
-    branch: master
-    username: {{github_user}}
-    password: {{github_password}}
 
 - name: version-semver
   type: semver
