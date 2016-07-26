@@ -143,7 +143,7 @@ jobs:
     - get: lifecycle-app
   - task: lifecycle
     config:
-      image_resource: &docker
+      image_resource: *docker
       platform: linux
       params: &lifecycle-params
         BROKER_NAME:              {{broker_name}}
@@ -186,7 +186,7 @@ jobs:
       passed: [isilon-lifecycle]
   - task: scale-diego
     config:
-      image_resource: &docker
+      image_resource: *docker
       platform: linux
       params: &lifecycle-params
         SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
