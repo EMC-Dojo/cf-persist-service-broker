@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e -x
-
 source cf-persist-service-broker/ci/tasks/util.sh
 
 check_param TEST_INSTANCE_ID
