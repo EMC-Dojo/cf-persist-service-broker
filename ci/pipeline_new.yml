@@ -1,16 +1,16 @@
 groups:
 - name: EMC-Persistence-Broker
   jobs:
-  - ScaleIO-Integration
-  - Isilon-Integration
-  - CloudFoundry-EMC-Persistence-Lifecycle-ScaleIO
-  - CloudFoundry-Scale-Diego-Cells-Up
-  - CloudFoundry-EMC-Persistence-Lifecycle-Isilon
-  - CloudFoundry-Scale-Diego-Cells-Down
+  - scaleio-integration
+  - isilon-integration
+  - scaleio-lifecycle
+  - scale-up-cells
+  - isilon-lifecycle
+  - scale-down-cells
   - promote-candidate
 
 jobs:
-- name: ScaleIO-Integration
+- name: scaleio-integration
   serial: true
   plan:
   - aggregate:
@@ -18,7 +18,7 @@ jobs:
   - task: integration
     config:
       platform: linux
-      image_resource:
+      image_resource: &docker
           type: docker-image
           source:
             repository: {{docker_repo}}
@@ -42,7 +42,7 @@ jobs:
       run:
         path: cf-persist-service-broker/ci/tasks/integration.sh
 
-- name: Isilon-Integration
+- name: isilon-integration
   serial: true
   plan:
   - aggregate:
@@ -51,11 +51,7 @@ jobs:
   - task: integration
     config:
       platform: linux
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      image_resource: *docker
       params: &integration-params
         TEST_INSTANCE_ID:                     {{test_instance_id}}
         PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
@@ -75,22 +71,22 @@ jobs:
       run:
         path: cf-persist-service-broker/ci/tasks/integration.sh
 
-- name: CloudFoundry-EMC-Persistence-Lifecycle-ScaleIO
+
+- name: scaleio-lifecycle
   serial: true
   serial_groups: [lifecycle]
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [ScaleIO-Integration]
+      passed: [scaleio-integration]
     - get: lifecycle-app
+    - put: scaleio-lock
+      resource: promote-lock
+      params: {acquire: true}
   - task: lifecycle
     config:
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      image_resource: *docker
       platform: linux
       params: &lifecycle-params
         BROKER_NAME:              {{broker_name}}
@@ -113,23 +109,21 @@ jobs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle.sh
+        path: cf-persist-service-broker/ci/tasks/scaleio-lifecycle.sh
+  - put: promote-lock
+    params: {release: scaleio-lock}
 
-- name: CloudFoundry-Scale-Diego-Cells-Up
+- name: scale-up-cells
   serial: true
   serial_groups: [lifecycle]
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [Isilon-Integration]
+      passed: [isilon-integration]
   - task: scale-diego
     config:
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      image_resource: *docker
       platform: linux
       params: &lifecycle-params
         SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
@@ -141,23 +135,20 @@ jobs:
       inputs:
       - name: cf-persist-service-broker
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle_scaleDiegoCellsUp.sh
-- name: CloudFoundry-EMC-Persistence-Lifecycle-Isilon
+        path: cf-persist-service-broker/ci/tasks/scale-up-cells.sh
+
+- name: isilon-lifecycle
   serial: true
   serial_groups: [lifecycle]
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [Isilon-Integration]
+      passed: [scale-up-cells]
     - get: lifecycle-app
   - task: lifecycle
     config:
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      image_resource: &docker
       platform: linux
       params: &lifecycle-params
         BROKER_NAME:              {{broker_name}}
@@ -188,23 +179,22 @@ jobs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle_multiCell.sh
+        path: cf-persist-service-broker/ci/tasks/isilon-lifecycle.sh
 
-- name: CloudFoundry-Scale-Diego-Cells-Down
+- name: scale-down-cells
   serial: true
   serial_groups: [lifecycle]
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [Isilon-Integration]
+      passed: [isilon-lifecycle]
+    - put: isilon-lock
+      resource: promote-lock
+      params: {acquire: true}
   - task: scale-diego
     config:
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      image_resource: &docker
       platform: linux
       params: &lifecycle-params
         SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
@@ -216,25 +206,30 @@ jobs:
       inputs:
       - name: cf-persist-service-broker
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle_scaleDiegoCellsDown.sh
+        path: cf-persist-service-broker/ci/tasks/scale-down-cells.sh
+  - put: promote-lock
+    params: {release: isilon-lock}
+
 - name: promote-candidate
   serial: true
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [CloudFoundry-EMC-Persistence-Lifecycle-Isilon, CloudFoundry-EMC-Persistence-Lifecycle-ScaleIO]
+      passed: [scale-down-cells, scaleio-lifecycle]
     - get: version-semver
       trigger: false
       params: {bump: major}
+    - put: scaleio-lock
+      resource: promote-lock
+      params: {acquire: true}
+    - put: isilon-lock
+      resource: promote-lock
+      params: {acquire: true}
   - task: promote
     config:
       platform: linux
-      image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      image_resource: *docker
       inputs:
       - name: cf-persist-service-broker
       - name: version-semver
@@ -249,13 +244,17 @@ jobs:
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: version-semver
     params: {file: version-semver/number}
+  - put: promote-lock
+    params: {release: isilon-lock}
+  - put: promote-lock
+    params: {release: scaleio-lock}
 
 resources:
 - name: cf-persist-service-broker
   type: git
   source:
     uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
-    branch: master
+    branch: separate_concourse
     username: {{github_user}}
     password: {{github_password}}
     skip_ssl_verification: true
@@ -268,6 +267,15 @@ resources:
     username: {{github_user}}
     password: {{github_password}}
     skip_ssl_verification: true
+
+
+- name: promote-lock
+  type: pool
+  source:
+    uri: https://github.com/EMC-CMD/ci-promote-lock.git
+    branch: master
+    username: {{github_user}}
+    password: {{github_password}}
 
 - name: version-semver
   type: semver

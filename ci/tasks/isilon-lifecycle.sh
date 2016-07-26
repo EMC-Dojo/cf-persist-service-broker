@@ -72,12 +72,6 @@ cf push $TEST_APP_NAME --no-start
 cf set-env $TEST_APP_NAME CF_SERVICE $CF_SERVICE
 
 echo "1" > status.txt
-boshDiegoManifest="$(bosh download manifest $DIEGO_DEPLOYMENT_NAME)"
-CI_BoshDiegoManifest="$(echo -e "${boshDiegoManifest}" | sed -e $'s/jobs:/jobs:\\\n- instances: 2\\\n  name: CI_cell_z1\\\n  networks:\\\n  - name: private\\\n    static_ips: ['"$CI_DIEGOCELL_IPS"$']\\\n  properties:\\\n    scaleio:\\\n      mdm:\\\n        ips: ['"$SCALEIO_MDM_IPS"$']\\\n    diego:\\\n      rep:\\\n        zone: z1\\\n    metron_agent:\\\n      zone: z1\\\n  vm_type: x-large\\\n  stemcell: trusty-3215\\\n  azs:\\\n  - z1\\\n  templates:\\\n  - name: consul_agent\\\n    release: cf\\\n  - name: rep\\\n    release: diego-release\\\n  - name: garden\\\n    release: garden-linux\\\n  - name: cflinuxfs2-rootfs-setup\\\n    release: cflinuxfs2-rootfs\\\n  - name: metron_agent\\\n    release: cf\\\n  - name: rexray_service\\\n    release: rexray-bosh-release\\\n  - name: setup_sdc\\\n    release: scaleio-sdc-bosh-release\\\n  update:\\\n    max_in_flight: 1\\\n    serial: false/g')"
-echo "${boshDiegoManifest}" > baseBOSHDiegoManifest.yml
-echo "${CI_BoshDiegoManifest}" > CI_BOSHDiegoManigest.yml
-bosh deployment CI_BOSHDiegoManigest.yml
-bosh -n deploy
 
 get_cf_service |
 while read service
@@ -87,7 +81,6 @@ while read service
   cf bind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
   cf start $TEST_APP_NAME
   curl -X POST -F 'text_box=Concourse BOT was here' http://$TEST_APP_NAME.$CF_ENDPOINT | grep -w "Concourse BOT was here"
-
   cf scale $TEST_APP_NAME -i $NUM_DIEGO_CELLS -m $APP_MEMORY -f
     for i in `seq 0 $[$NUM_DIEGO_CELLS*10]`
     do
@@ -102,7 +95,6 @@ while read service
         break
       fi
     done;
-
   cf stop $TEST_APP_NAME
   cf unbind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
   cf restage $TEST_APP_NAME
@@ -119,9 +111,6 @@ done;
 cf delete-service-broker $BROKER_NAME -f
 cf delete $BROKER_NAME -f
 cf delete $TEST_APP_NAME -f
-
-bosh deployment baseBOSHDiegoManifest.yml
-bosh -n deploy
 
 if [ "$(cat status.txt)" == 1 ]
 then
