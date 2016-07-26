@@ -24,19 +24,19 @@ jobs:
             repository: {{docker_repo}}
             insecure_registries: [{{docker_registry}}]
       params: &integration-params
-        TEST_INSTANCE_ID:                     {{test_instance_id}}
-        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-        TEST_SIZE:                            8
-        STORAGE_POOL_NAME:                    {{storage_pool_name}}
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
-        PORT:                                 9000
-        INSECURE:                             true
-        LIBSTORAGE_URI:                       {{libstorage_uri}}
-        LIB_STOR_SERVICE:                     {{lib_stor_service_scaleio}}
         DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_scaleio}}
-        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
         EMC_SERVICE_NAME:                     {{emc_service_name}}
+        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
+        INSECURE:                             true
+        LIB_STOR_SERVICE:                     {{lib_stor_service_scaleio}}
+        LIBSTORAGE_URI:                       {{libstorage_uri}}
+        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+        PORT:                                 9000
+        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        TEST_INSTANCE_ID:                     {{test_instance_id}}
+        TEST_SIZE:                            8
       inputs:
       - name: cf-persist-service-broker
       run:
@@ -53,19 +53,19 @@ jobs:
       platform: linux
       image_resource: *docker
       params: &integration-params
-        TEST_INSTANCE_ID:                     {{test_instance_id}}
-        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-        TEST_SIZE:                            0
-        STORAGE_POOL_NAME:                    {{storage_pool_name}}
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
-        PORT:                                 9000
-        INSECURE:                             true
-        LIBSTORAGE_URI:                       {{libstorage_uri}}
-        LIB_STOR_SERVICE:                     {{lib_stor_service_isilon}}
         DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_isilon}}
-        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
         EMC_SERVICE_NAME:                     {{emc_service_name}}
+        EMC_SERVICE_UUID:                     {{emc_service_uuid}}
+        INSECURE:                             true
+        LIB_STOR_SERVICE:                     {{lib_stor_service_isilon}}
+        LIBSTORAGE_URI:                       {{libstorage_uri}}
+        PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
+        PORT:                                 9000
+        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        TEST_INSTANCE_ID:                     {{test_instance_id}}
+        TEST_SIZE:                            0
       inputs:
       - name: cf-persist-service-broker
       run:
