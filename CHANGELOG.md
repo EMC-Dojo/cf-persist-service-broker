@@ -33,3 +33,5 @@ v94e735020a0f7cdefed34de1eea487604ce266d3 Error handling for delete service inst
 v1fdbc21b77cc0064eba43f82bc970731f4472e05 Adding unbind service to lifecycle step of Pipeline
 ## v18
 v7ff5dc1dd8cdb8544f6300be65f4cb4fa6ea295e Created new block in pipeline for releasing new candidate
+## v23
+v228b368afb97184e5b0203fd915d41b2f7e202b4 Whatever
