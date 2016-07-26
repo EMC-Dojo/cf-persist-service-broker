@@ -111,7 +111,7 @@ jobs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle.sh
+        path: cf-persist-service-broker/ci/tasks/scaleio-lifecycle.sh
 
 - name: CloudFoundry-EMC-Persistence-Lifecycle-Isilon
   serial: true
@@ -159,7 +159,7 @@ jobs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
       run:
-        path: cf-persist-service-broker/ci/tasks/lifecycle_multiCell.sh
+        path: cf-persist-service-broker/ci/tasks/isilon-lifecycle.sh
 
 - name: promote-candidate
   serial: true
