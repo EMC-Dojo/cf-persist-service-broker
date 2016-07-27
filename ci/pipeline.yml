@@ -88,7 +88,6 @@ jobs:
         CF_SPACE:                 {{cf_space}}
         CF_USERNAME:              {{cf_username}}
         EMC_SERVICE_NAME:         {{emc_service_name}}
-        EMC_SERVICE_UUID:         {{emc_service_uuid}}
         INSECURE:                 true
         LIBSTORAGE_URI:           {{libstorage_uri}}
         TEST_APP_NAME:            {{test_app_name}}
@@ -96,6 +95,8 @@ jobs:
         <<: *lifecycle-params
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
         LIB_STOR_SERVICE:         {{lib_stor_service_scaleio}}
+        EMC_SERVICE_UUID:         {{scaleio_service_uuid}}
+        EMC_SERVICE_PLAN_UUID:    {{scaleio_service_plan_uuid}}
       inputs:
       - name: cf-persist-service-broker
       - name: lifecycle-app
@@ -147,6 +148,8 @@ jobs:
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
         LIB_STOR_SERVICE:         {{lib_stor_service_isilon}}
         NUM_DIEGO_CELLS:          {{num_diego_cells}}
+        EMC_SERVICE_UUID:         {{isilon_service_uuid}}
+        EMC_SERVICE_PLAN_UUID:    {{isilon_service_plan_uuid}}
       inputs:
       - name: cf-persist-service-broker
       - name: lifecycle-app

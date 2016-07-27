@@ -79,12 +79,16 @@ func CatalogHandler(c *gin.Context) {
 	var plans []model.Plan
 	for _, service := range services {
 		if service.Name == libStorageServiceName {
-			planID, err := utils.CreatePlanIDString(service.Name)
-			if err != nil {
-				log.Panic(fmt.Sprintf("Error creating PlanID from name %s : (%s)", service.Name, err))
+			planID := os.Getenv("EMC_SERVICE_PLAN_UUID")
+			if planID == "" {
+				planID, err = utils.CreatePlanIDString(service.Name) // UUID made from JSON Marshalled Libstorage Host IP/service name
+				if err != nil {
+					log.Panic(fmt.Sprintf("Error creating PlanID from name %s : (%s)", service.Name, err))
+				}
 			}
+
 			plans = append(plans, model.Plan{
-				ID:          planID, // UUID made from JSON Marshalled Libstorage Host IP/service name
+				ID:          planID,
 				Name:        service.Name,
 				Description: service.Driver.Name,
 			})
@@ -95,7 +99,6 @@ func CatalogHandler(c *gin.Context) {
 	}
 
 	serviceName := os.Getenv("EMC_SERVICE_NAME")
-
 	if serviceName == "" {
 		serviceName = "EMC-Persistence"
 	}
