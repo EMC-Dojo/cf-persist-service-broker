@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
 
 set -e -x
-
 source cf-persist-service-broker/ci/tasks/util.sh
 
-check_param TEST_INSTANCE_ID
-check_param PARSED_INSTANCE_ID
-check_param STORAGE_POOL_NAME
 check_param BROKER_PASSWORD
 check_param BROKER_USERNAME
-check_param LIBSTORAGE_URI
-check_param LIB_STOR_SERVICE
-check_param PORT
-check_param EMC_SERVICE_UUID
-check_param EMC_SERVICE_NAME
 check_param DIEGO_DRIVER_SPEC
+check_param EMC_SERVICE_NAME
+check_param EMC_SERVICE_UUID
 check_param INSECURE
+check_param LIB_STOR_SERVICE
+check_param LIBSTORAGE_URI
+check_param PARSED_INSTANCE_ID
+check_param PORT
+check_param STORAGE_POOL_NAME
+check_param TEST_INSTANCE_ID
 
 export GOPATH=$PWD/gocode
 export PATH=$PATH:$GOPATH/bin
