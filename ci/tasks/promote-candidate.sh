@@ -21,5 +21,5 @@ pushd promote/cf-persist-service-broker/
   echo "## v${integer_version}" >> CHANGELOG.md
   echo "v${log_message}" >> CHANGELOG.md
   git add CHANGELOG.md
-  git commit -m "${annotate_message}" -m "[ci skip]"
+  git commit -m "${annotate_message} [ci skip]"
 popd
