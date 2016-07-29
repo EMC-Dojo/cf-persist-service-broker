@@ -1,0 +1,93 @@
+---
+name: "<%= ENV['VATS_DEPLOYMENT_NAME'] %>"
+director_uuid: <%= bosh_director_uuid %>
+
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: '3215'
+
+releases:
+- name: "<%= ENV['REXRAY_RELEASE_NAME'] %>"
+  version: latest
+<% if ENV['STORAGE_SERVICE_TYPE'] == 'scaleio' %>
+- name: "<%= ENV['SCALEIO_SDC_RELEASE_NAME'] %>"
+  version: latest
+<% end %>
+
+jobs:
+- name: "<%= ENV['VATS_DEPLOYMENT_NAME'] %>"
+  instances: 1
+  templates:
+  - name: rexray_service
+    release: "<%= ENV['REXRAY_RELEASE_NAME'] %>"
+  <% if ENV['STORAGE_SERVICE_TYPE'] == 'scaleio' %>
+  - name: setup_sdc
+    release: "<%= ENV['SCALEIO_SDC_RELEASE_NAME'] %>"
+  <% end %>
+  vm_type: medium
+  stemcell: trusty
+  azs:
+  - z1
+  networks:
+  - name: private
+    static_ips:
+    - <%= ENV['VATS_DEPLOYMENT_IP'] %>
+  properties:
+    network_name: private
+
+properties:
+  <% if ENV['STORAGE_SERVICE_TYPE'] == 'scaleio' %>
+  scaleio:
+    mdm:
+      ips: <%= ENV['SCALEIO_MDM_IPS'] %>
+  <% end %>
+  rexray: |
+    ---
+    rexray:
+      modules:
+        <%= ENV['STORAGE_SERVICE_TYPE'] %>:
+          disabled: false
+          host: tcp://127.0.0.1:9000
+          spec: /var/vcap/data/voldrivers/rexray_<%= ENV['STORAGE_SERVICE_TYPE'] %>.spec
+          http:
+            writetimeout: 900
+            readtimeout: 900
+          type: docker
+          libstorage:
+            service: "<%= ENV['STORAGE_SERVICE_TYPE'] %>"
+      libstorage:
+        embedded: true
+        server:
+          services:
+            <%= ENV['STORAGE_SERVICE_TYPE'] %>:
+              driver: "<%= ENV['STORAGE_SERVICE_TYPE'] %>"
+    <% if ENV['STORAGE_SERVICE_TYPE'] == 'isilon' %>
+    isilon:
+      endpoint: https://"<%= ENV['ISILON_ENDPOINT'] %>":8080
+      insecure: "<%= ENV['ISILON_INSECURE'] %>"
+      username: "<%= ENV['ISILON_USERNAME'] %>"
+      password: "<%= ENV['ISILON_PASSWORD'] %>"
+      volumePath: "<%= ENV['ISILON_VOLUME_PATH'] %>"
+      nfsHost: "<%= ENV['ISILON_ENDPOINT'] %>"
+      dataSubnet: "<%= ENV['ISILON_DATA_SUBNET'] %>"
+      quotas: false
+      sharedMounts: true
+    <% elsif ENV['STORAGE_SERVICE_TYPE'] == 'scaleio' %>
+    scaleio:
+      endpoint: "<%= ENV['SCALEIO_ENDPOINT'] %>"
+      insecure: "<%= ENV['SCALEIO_INSECURE'] %>"
+      password: "<%= ENV['SCALEIO_PASSWORD'] %>"
+      protectionDomainName: default
+      storagePoolName: "<%= ENV['SCALEIO_STORAGE_POOL_NAME'] %>"
+      userName: "<%= ENV['SCALEIO_USERNAME'] %>"
+      version: "<%= ENV['SCALEIO_VERSION'] %>"
+    <% end %>
+    linux:
+      volume:
+        fileMode: 0777
+update:
+  canaries: 1
+  max_in_flight: 3
+  canary_watch_time: 30000-600000
+  update_watch_time: 5000-600000
