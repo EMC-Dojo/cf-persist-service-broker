@@ -91,7 +91,7 @@ jobs:
         EMC_SERVICE_UUID:         {{emc_service_uuid}}
         INSECURE:                 true
         LIBSTORAGE_URI:           {{libstorage_uri}}
-        TEST_APP_NAME:            {{test_app_name}}
+        LIFECYCLE_APP_NAME:       {{lifecycle_app_name}}
       params:
         <<: *lifecycle-params
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_scaleio}}
@@ -115,13 +115,13 @@ jobs:
       image_resource: *docker
       platform: linux
       default-params: &scale-params
-        BOSH_DIR:                 {{bosh_dir}}
-        BOSH_PASS:                {{bosh_pass}}
-        BOSH_USER:                {{bosh_user}}
-        DIEGO_DEPLOYMENT_NAME:    {{diego_deployment_name}}
+        BOSH_DIRECTOR_PUBLIC_IP:      {{bosh_director_public_ip}}
+        BOSH_PASSWORD:                {{bosh_password}}
+        BOSH_USER:                    {{bosh_user}}
+        DIEGO_DEPLOYMENT_NAME:        {{diego_deployment_name}}
       params:
         <<: *scale-params
-        CI_DIEGOCELL_IPS:         {{ci_diegocell_ips}}
+        DIEGO_CELL_IPS:           {{diego_cell_ips}}
         SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
       inputs:
       - name: cf-persist-service-broker
@@ -143,9 +143,9 @@ jobs:
       platform: linux
       params:
         <<: *lifecycle-params
-        APP_MEMORY:               {{app_memory}}
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
         LIB_STOR_SERVICE:         {{lib_stor_service_isilon}}
+        LIFECYCLE_APP_MEMORY:     {{lifecycle_app_memory}}
         NUM_DIEGO_CELLS:          {{num_diego_cells}}
       inputs:
       - name: cf-persist-service-broker
