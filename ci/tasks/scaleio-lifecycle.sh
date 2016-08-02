@@ -18,7 +18,7 @@ check_param EMC_SERVICE_UUID
 check_param INSECURE
 check_param LIB_STOR_SERVICE
 check_param LIBSTORAGE_URI
-check_param TEST_APP_NAME
+check_param LIFECYCLE_APP_NAME
 
 pushd cf-persist-service-broker
 #authentication stuff

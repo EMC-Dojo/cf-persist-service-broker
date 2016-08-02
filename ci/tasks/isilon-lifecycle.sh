@@ -3,7 +3,7 @@
 set -e -x
 source cf-persist-service-broker/ci/tasks/util.sh
 
-check_param APP_MEMORY
+check_param LIFECYCLE_APP_MEMORY
 check_param BROKER_NAME
 check_param BROKER_PASSWORD
 check_param BROKER_USERNAME
@@ -19,8 +19,8 @@ check_param EMC_SERVICE_UUID
 check_param INSECURE
 check_param LIB_STOR_SERVICE
 check_param LIBSTORAGE_URI
+check_param LIFECYCLE_APP_NAME
 check_param NUM_DIEGO_CELLS
-check_param TEST_APP_NAME
 
 #Setup CF CLI for us
 cf api http://api.$CF_ENDPOINT --skip-ssl-validation
@@ -50,8 +50,8 @@ cf enable-service-access $BROKER_NAME
 popd
 
 pushd lifecycle-app
-cf push $TEST_APP_NAME --no-start
-cf set-env $TEST_APP_NAME CF_SERVICE $CF_SERVICE
+cf push $LIFECYCLE_APP_NAME --no-start
+cf set-env $LIFECYCLE_APP_NAME CF_SERVICE $CF_SERVICE
 
 echo "1" > status.txt
 
@@ -60,14 +60,14 @@ while read service
   do
   set -x -e
   cf create-service $BROKER_NAME $service $service'_TEST_INSTANCE'
-  cf bind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
-  cf start $TEST_APP_NAME
-  curl -X POST -F 'text_box=Concourse BOT was here' http://$TEST_APP_NAME.$CF_ENDPOINT | grep -w "Concourse BOT was here"
-  cf scale $TEST_APP_NAME -i $NUM_DIEGO_CELLS -m $APP_MEMORY -f
+  cf bind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
+  cf start $LIFECYCLE_APP_NAME
+  curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "Concourse BOT was here"
+  cf scale $LIFECYCLE_APP_NAME -i $NUM_DIEGO_CELLS -m $LIFECYCLE_APP_MEMORY -f
     for i in `seq 0 $[$NUM_DIEGO_CELLS*10]`
     do
       set -x -e
-      curl_output="$(curl http://$TEST_APP_NAME.$CF_ENDPOINT)"
+      curl_output="$(curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT)"
       echo "$curl_output" | grep -w "Concourse BOT was here"
       instance_number="$(echo $curl_output | grep "Instance ID is: " | sed -n -e 's/^.*Instance\ ID\ is:\ //p' | cut -f 1 -d '<')"
       instances[$instance_number]=1
@@ -77,10 +77,10 @@ while read service
         break
       fi
     done;
-  cf stop $TEST_APP_NAME
-  cf unbind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
-  cf restage $TEST_APP_NAME
-  curl http://$TEST_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
+  cf stop $LIFECYCLE_APP_NAME
+  cf unbind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
+  cf restage $LIFECYCLE_APP_NAME
+  curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
 done;
 
 get_cf_service |
@@ -92,7 +92,7 @@ done;
 
 cf delete-service-broker $BROKER_NAME -f
 cf delete $BROKER_NAME -f
-cf delete $TEST_APP_NAME -f
+cf delete $LIFECYCLE_APP_NAME -f
 
 if [ "$(cat status.txt)" == 1 ]
 then
