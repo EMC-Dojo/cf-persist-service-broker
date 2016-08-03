@@ -173,13 +173,20 @@ jobs:
       params:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
-  - put: cf-persist-service-broker
+  - put: cf-persist-service-broker-out
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: version-semver
     params: {file: version-semver/number}
 
 resources:
 - name: cf-persist-service-broker
+  type: git
+  source:
+    uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
+    branch: master
+    skip_ssl_verification: true
+
+- name: cf-persist-service-broker-out
   type: git
   source:
     uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
