@@ -6,7 +6,6 @@ groups:
   - deploy-cells
   - scaleio-lifecycle
   - isilon-lifecycle
-  - destroy-cells
   - promote-candidate
 
 jobs:
@@ -75,19 +74,17 @@ jobs:
     config:
       image_resource: *docker
       platform: linux
-      default-params: &scale-params
+      params:
         BOSH_DIRECTOR_PUBLIC_IP:      {{bosh_director_public_ip}}
         BOSH_PASSWORD:                {{bosh_password}}
         BOSH_USER:                    {{bosh_user}}
+        DIEGO_CELL_IPS:               {{diego_cell_ips}}
         DIEGO_DEPLOYMENT_NAME:        {{diego_deployment_name}}
-      params:
-        <<: *scale-params
-        DIEGO_CELL_IPS:           {{diego_cell_ips}}
-        SCALEIO_MDM_IPS:          {{scaleio_mdm_ips}}
+        SCALEIO_MDM_IPS:              {{scaleio_mdm_ips}}
       inputs:
       - name: cf-persist-service-broker
       run:
-        path: cf-persist-service-broker/ci/tasks/scale-up-cells.sh
+        path: cf-persist-service-broker/ci/tasks/deploy-cells.sh
 
 - name: scaleio-lifecycle
   serial: true
@@ -152,30 +149,13 @@ jobs:
       run:
         path: cf-persist-service-broker/ci/tasks/isilon-lifecycle.sh
 
-- name: destroy-cells
-  serial: true
-  plan:
-  - aggregate:
-    - get: cf-persist-service-broker
-      trigger: true
-      passed: [isilon-lifecycle, scaleio-lifecycle]
-  - task: scale-diego
-    config:
-      image_resource: *docker
-      platform: linux
-      params: *scale-params
-      inputs:
-      - name: cf-persist-service-broker
-      run:
-        path: cf-persist-service-broker/ci/tasks/scale-down-cells.sh
-
 - name: promote-candidate
   serial: true
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       trigger: true
-      passed: [destroy-cells]
+      passed: [isilon-lifecycle, scaleio-lifecycle]
     - get: version-semver
       trigger: false
       params: {bump: major}

@@ -27,6 +27,17 @@ cf api http://api.$CF_ENDPOINT --skip-ssl-validation
 cf auth $CF_USERNAME $CF_PASSWORD
 cf target -o $CF_ORG -s $CF_SPACE
 
+get_cf_service |
+while read service
+  do
+  set -e -x
+  cf delete-service $service'_TEST_INSTANCE' -f
+done;
+cf delete-service-broker $BROKER_NAME -f
+cf delete $BROKER_NAME -f
+cf delete $LIFECYCLE_APP_NAME -f
+cf delete-orphaned-routes -f
+
 pushd cf-persist-service-broker
 #Push EMC-Persistence broker with '--no-start' to allow setting ENVironment
 cf push $BROKER_NAME --no-start
@@ -82,17 +93,6 @@ while read service
   cf restage $LIFECYCLE_APP_NAME
   curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
 done;
-
-get_cf_service |
-while read service
-  do
-  set -e -x
-  cf delete-service $service'_TEST_INSTANCE' -f
-done;
-
-cf delete-service-broker $BROKER_NAME -f
-cf delete $BROKER_NAME -f
-cf delete $LIFECYCLE_APP_NAME -f
 
 if [ "$(cat status.txt)" == 1 ]
 then
