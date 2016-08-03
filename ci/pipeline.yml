@@ -87,7 +87,7 @@ jobs:
       inputs:
       - name: cf-persist-service-broker
       run:
-        path: cf-persist-service-broker/ci/tasks/scale-up-cells.sh
+        path: cf-persist-service-broker/ci/tasks/deploy-cells.sh
 
 - name: scaleio-lifecycle
   serial: true
@@ -167,7 +167,7 @@ jobs:
       inputs:
       - name: cf-persist-service-broker
       run:
-        path: cf-persist-service-broker/ci/tasks/scale-down-cells.sh
+        path: cf-persist-service-broker/ci/tasks/destroy-cells.sh
 
 - name: promote-candidate
   serial: true
@@ -203,7 +203,7 @@ resources:
   type: git
   source:
     uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
-    branch: master
+    branch: combine
     username: {{github_user}}
     password: {{github_password}}
     skip_ssl_verification: true

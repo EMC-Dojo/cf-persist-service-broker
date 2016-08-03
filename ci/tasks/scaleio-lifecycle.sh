@@ -48,21 +48,21 @@ cf enable-service-access $BROKER_NAME
 popd
 
 pushd lifecycle-app
-cf push $TEST_APP_NAME --no-start
-cf set-env $TEST_APP_NAME CF_SERVICE $CF_SERVICE
+cf push $LIFECYCLE_APP_NAME --no-start
+cf set-env $LIFECYCLE_APP_NAME CF_SERVICE $CF_SERVICE
 
 get_cf_service |
 while read service
   do
   set -x -e
   cf create-service $BROKER_NAME $service $service'_TEST_INSTANCE'
-  cf bind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
-  cf start $TEST_APP_NAME
-  curl -X POST -F 'text_box=Concourse BOT was here' http://$TEST_APP_NAME.$CF_ENDPOINT  | grep -w "Concourse BOT was here"
-  cf stop $TEST_APP_NAME
-  cf unbind-service $TEST_APP_NAME $service'_TEST_INSTANCE'
-  cf restage $TEST_APP_NAME
-  curl http://$TEST_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
+  cf bind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
+  cf start $LIFECYCLE_APP_NAME
+  curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT  | grep -w "Concourse BOT was here"
+  cf stop $LIFECYCLE_APP_NAME
+  cf unbind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
+  cf restage $LIFECYCLE_APP_NAME
+  curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
 done;
 
 get_cf_service |
@@ -74,5 +74,5 @@ done;
 
 cf delete-service-broker $BROKER_NAME -f
 cf delete $BROKER_NAME -f
-cf delete $TEST_APP_NAME -f
+cf delete $LIFECYCLE_APP_NAME -f
 popd
