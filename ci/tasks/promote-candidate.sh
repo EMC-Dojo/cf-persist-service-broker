@@ -5,14 +5,15 @@ source cf-persist-service-broker/ci/tasks/util.sh
 
 check_param GITHUB_USER
 check_param GITHUB_EMAIL
+check_param REPO_NAME
 
 # Creates an integer version number from the semantic version format
 # May be changed when we decide to fully use semantic versions for releases
 export integer_version=`cut -d "." -f1 version-semver/number`
-cp -r cf-persist-service-broker promote/cf-persist-service-broker
+cp -r $REPO_NAME promote/${REPO_NAME}
 echo ${integer_version} > promote/integer_version
 
-pushd promote/cf-persist-service-broker/
+pushd promote/${REPO_NAME}
   git config --global user.email ${GITHUB_EMAIL}
   git config --global user.name ${GITHUB_USER}
   git config --global push.default simple
@@ -21,5 +22,5 @@ pushd promote/cf-persist-service-broker/
   echo "## v${integer_version}" >> CHANGELOG.md
   echo "v${log_message}" >> CHANGELOG.md
   git add CHANGELOG.md
-  git commit -m "${annotate_message} [ci skip]"
+  git commit -m "[ci skip] ${annotate_message}"
 popd
