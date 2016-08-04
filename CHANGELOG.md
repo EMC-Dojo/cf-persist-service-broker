@@ -37,3 +37,5 @@ v7ff5dc1dd8cdb8544f6300be65f4cb4fa6ea295e Created new block in pipeline for rele
 v9382e197f2ebb934f551330dcb00324bb96d5d5e Create New Diego Cells for multiple cell testing of persistence driver
 ## v25
 v761c1f9aeddb2c842d8ee08147b7bdb8ea5aa581 Extract scale diego cell out from isilon lifecycle
+## v
+vdb87a13feb1671a209481235fc9f670e967cd627 Make promote script reusable
