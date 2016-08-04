@@ -26,11 +26,11 @@ cf auth $CF_USERNAME $CF_PASSWORD
 cf target -o $CF_ORG -s $CF_SPACE
 
 get_cf_service |
-while read service
-  do
-  set -x -e
-  cf delete-service $service'_TEST_INSTANCE' -f
-done;
+while read service; do
+  set -e -x
+  cf unbind-service $LIFECYCLE_APP_NAME $service'_instance' || true
+  cf delete-service $service'_instance' -f
+done
 cf delete-service-broker $BROKER_NAME -f
 cf delete $BROKER_NAME -f
 cf delete $LIFECYCLE_APP_NAME -f
@@ -49,30 +49,24 @@ cf set-env $BROKER_NAME EMC_SERVICE_UUID $EMC_SERVICE_UUID
 cf set-env $BROKER_NAME INSECURE $INSECURE
 cf set-env $BROKER_NAME LIB_STOR_SERVICE $LIB_STOR_SERVICE
 cf set-env $BROKER_NAME LIBSTORAGE_URI $LIBSTORAGE_URI
-
-#Start EMC-Persistence broker with correct ENVironment
 cf start $BROKER_NAME
 
 #Create Service Broker for use with CF & Enable EMC-Persistence Service for use with CF
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD http://$BROKER_NAME.$CF_ENDPOINT
 cf enable-service-access $BROKER_NAME
+cf create-service $BROKER_NAME scaleioservice scaleioservice_instance
 popd
 
 pushd lifecycle-app
 cf push $LIFECYCLE_APP_NAME --no-start
 cf set-env $LIFECYCLE_APP_NAME CF_SERVICE $CF_SERVICE
+cf bind-service $LIFECYCLE_APP_NAME scaleioservice_instance
+cf start $LIFECYCLE_APP_NAME
 
-get_cf_service |
-while read service
-  do
-  set -x -e
-  cf create-service $BROKER_NAME $service $service'_TEST_INSTANCE'
-  cf bind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
-  cf start $LIFECYCLE_APP_NAME
-  curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT  | grep -w "Concourse BOT was here"
-  cf stop $LIFECYCLE_APP_NAME
-  cf unbind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
-  cf restage $LIFECYCLE_APP_NAME
-  curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
-done;
+curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT  | grep -w "Concourse BOT was here"
+
+cf stop $LIFECYCLE_APP_NAME
+cf unbind-service $LIFECYCLE_APP_NAME scaleioservice_instance
+cf restage $LIFECYCLE_APP_NAME
+curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
 popd

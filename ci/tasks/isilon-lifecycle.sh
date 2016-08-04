@@ -28,11 +28,11 @@ cf auth $CF_USERNAME $CF_PASSWORD
 cf target -o $CF_ORG -s $CF_SPACE
 
 get_cf_service |
-while read service
-  do
+while read service; do
   set -e -x
-  cf delete-service $service'_TEST_INSTANCE' -f
-done;
+  cf unbind-service $LIFECYCLE_APP_NAME $service'_instance' || true
+  cf delete-service $service'_instance' -f
+done
 cf delete-service-broker $BROKER_NAME -f
 cf delete $BROKER_NAME -f
 cf delete $LIFECYCLE_APP_NAME -f
@@ -51,51 +51,42 @@ cf set-env $BROKER_NAME EMC_SERVICE_UUID $EMC_SERVICE_UUID
 cf set-env $BROKER_NAME INSECURE $INSECURE
 cf set-env $BROKER_NAME LIB_STOR_SERVICE $LIB_STOR_SERVICE
 cf set-env $BROKER_NAME LIBSTORAGE_URI $LIBSTORAGE_URI
-
-#Start EMC-Persistence broker with correct ENVironment
 cf start $BROKER_NAME
 
 #Create Service Broker for use with CF & Enable EMC-Persistence Service for use with CF
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD http://$BROKER_NAME.$CF_ENDPOINT
 cf enable-service-access $BROKER_NAME
+cf create-service $BROKER_NAME isilonservice isilonservice_instance
 popd
 
 pushd lifecycle-app
 cf push $LIFECYCLE_APP_NAME --no-start
 cf set-env $LIFECYCLE_APP_NAME CF_SERVICE $CF_SERVICE
+cf bind-service $LIFECYCLE_APP_NAME isilonservice_instance
+cf start $LIFECYCLE_APP_NAME
 
+curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "Concourse BOT was here"
+
+cf scale $LIFECYCLE_APP_NAME -i $NUM_DIEGO_CELLS -m $LIFECYCLE_APP_MEMORY -f
 echo "1" > status.txt
-
-get_cf_service |
-while read service
-  do
+for i in `seq 0 $[$NUM_DIEGO_CELLS*10]`; do
   set -x -e
-  cf create-service $BROKER_NAME $service $service'_TEST_INSTANCE'
-  cf bind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
-  cf start $LIFECYCLE_APP_NAME
-  curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "Concourse BOT was here"
-  cf scale $LIFECYCLE_APP_NAME -i $NUM_DIEGO_CELLS -m $LIFECYCLE_APP_MEMORY -f
-    for i in `seq 0 $[$NUM_DIEGO_CELLS*10]`
-    do
-      set -x -e
-      curl_output="$(curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT)"
-      echo "$curl_output" | grep -w "Concourse BOT was here"
-      instance_number="$(echo $curl_output | grep "Instance ID is: " | sed -n -e 's/^.*Instance\ ID\ is:\ //p' | cut -f 1 -d '<')"
-      instances[$instance_number]=1
-      if [ "${#instances[@]}" == $NUM_DIEGO_CELLS ]
-      then
-        echo "0" > status.txt
-        break
-      fi
-    done;
-  cf stop $LIFECYCLE_APP_NAME
-  cf unbind-service $LIFECYCLE_APP_NAME $service'_TEST_INSTANCE'
-  cf restage $LIFECYCLE_APP_NAME
-  curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
-done;
+  curl_output="$(curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT)"
+  echo "$curl_output" | grep -w "Concourse BOT was here"
+  instance_number="$(echo $curl_output | grep "Instance ID is: " | sed -n -e 's/^.*Instance\ ID\ is:\ //p' | cut -f 1 -d '<')"
+  instances[$instance_number]=1
+  if [ "${#instances[@]}" == $NUM_DIEGO_CELLS ]; then
+    echo "0" > status.txt
+    break
+  fi
+done
 
-if [ "$(cat status.txt)" == 1 ]
-then
+cf stop $LIFECYCLE_APP_NAME
+cf unbind-service $LIFECYCLE_APP_NAME isilonservice_instance
+cf restage $LIFECYCLE_APP_NAME
+curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT | grep -w "can't open file"
+
+if [ "$(cat status.txt)" == 1 ]; then
   echo "Didnt Verify Across All Diego Cells After Multiple Tries!"
   exit 1
 else
