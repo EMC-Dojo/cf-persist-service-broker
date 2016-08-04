@@ -1,7 +1,9 @@
 groups:
 - name: EMC-Persistence-Broker
   jobs:
+  - scaleio-vats
   - scaleio-integration
+  - isilon-vats
   - isilon-integration
   - deploy-cells
   - scaleio-lifecycle
@@ -9,6 +11,77 @@ groups:
   - promote-candidate
 
 jobs:
+- name: scaleio-vats
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true, get: rexray-boshrelease}
+    - {trigger: true, get: scaleio-sdc-boshrelease}
+    - {trigger: true, get: volman}
+  - task: vats
+    docker-image: &docker
+      platform: linux
+      image_resource:
+          type: docker-image
+          source:
+            repository: {{docker_repo}}
+            insecure_registries: [{{docker_registry}}]
+    config:
+      <<: *docker
+      inputs:
+      - name: scaleio-sdc-boshrelease
+      - name: rexray-boshrelease
+      - name: volman
+      default-params: &vats-params
+        BOSH_DIRECTOR_PUBLIC_IP:          {{bosh_director_public_ip}}
+        BOSH_PASSWORD:                    {{bosh_password}}
+        BOSH_USER:                        {{bosh_user}}
+        VATS_DEPLOYMENT_PASSWORD:         {{vats_deployment_password}}
+        VATS_VOLDRIVER_ADDRESS:           {{vats_voldriver_address}}
+        VATS_VOLUME_NAME:                 fake-volume
+      params:
+        <<: *vats-params
+        REXRAY_RELEASE_NAME:              scaleio-rexray-boshrelease
+        SCALEIO_ENDPOINT:                 {{scaleio_endpoint}}
+        SCALEIO_INSECURE:                 {{scaleio_insecure}}
+        SCALEIO_MDM_IPS:                  {{scaleio_mdm_ips}}
+        SCALEIO_PASSWORD:                 {{scaleio_password}}
+        SCALEIO_STORAGE_POOL_NAME:        {{scaleio_storage_pool_name}}
+        SCALEIO_USERNAME:                 {{scaleio_username}}
+        SCALEIO_VERSION:                  {{scaleio_version}}
+        STORAGE_SERVICE_TYPE:             scaleio
+        VATS_DEPLOYMENT_IP:               {{scaleio_vats_deployment_ip}}
+        VATS_DEPLOYMENT_NAME:             scaleio-vats
+      run:
+        path: rexray-boshrelease/ci/tasks/vats.rb
+
+- name: isilon-vats
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true, get: rexray-boshrelease}
+    - {trigger: true, get: volman}
+  - task: vats
+    config:
+      <<: *docker
+      inputs:
+      - name: rexray-boshrelease
+      - name: volman
+      params:
+        <<: *vats-params
+        ISILON_DATA_SUBNET:                   {{isilon_data_subnet}}
+        ISILON_ENDPOINT:                      {{isilon_endpoint}}
+        ISILON_INSECURE:                      {{isilon_insecure}}
+        ISILON_PASSWORD:                      {{isilon_password}}
+        ISILON_USERNAME:                      {{isilon_username}}
+        ISILON_VOLUME_PATH:                   {{isilon_volume_path}}
+        REXRAY_RELEASE_NAME:                  isilon-rexray-boshrelease
+        STORAGE_SERVICE_TYPE:                 isilon
+        VATS_DEPLOYMENT_IP:                   {{isilon_vats_deployment_ip}}
+        VATS_DEPLOYMENT_NAME:                 isilon-vats
+      run:
+        path: rexray-boshrelease/ci/tasks/vats.rb
+
 - name: scaleio-integration
   serial: true
   plan:
@@ -16,12 +89,7 @@ jobs:
     - {trigger: true,       get: cf-persist-service-broker}
   - task: integration
     config:
-      platform: linux
-      image_resource: &docker
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+      <<: *docker
       default-params: &integration-params
         BROKER_PASSWORD:                      {{broker_password}}
         BROKER_USERNAME:                      {{broker_username}}
@@ -30,7 +98,7 @@ jobs:
         INSECURE:                             true
         LIBSTORAGE_URI:                       {{libstorage_uri}}
         PARSED_INSTANCE_ID:                   {{parsed_instance_id}}
-        STORAGE_POOL_NAME:                    {{storage_pool_name}}
+        STORAGE_POOL_NAME:                    {{scaleio_storage_pool_name}}
         TEST_INSTANCE_ID:                     {{test_instance_id}}
         PORT:                                 9000
       params:
@@ -51,8 +119,7 @@ jobs:
       trigger: true
   - task: integration
     config:
-      platform: linux
-      image_resource: *docker
+      <<: *docker
       params:
         <<: *integration-params
         DIEGO_DRIVER_SPEC:                    {{diego_driver_spec_isilon}}
@@ -67,13 +134,18 @@ jobs:
   serial: true
   plan:
   - aggregate:
+    - get: rexray-boshrelease
+      trigger: true
+      passed: [isilon-vats, scaleio-vats]
+    - get: scaleio-sdc-boshrelease
+      trigger: true
+      passed: [scaleio-vats]
     - get: cf-persist-service-broker
       trigger: true
       passed: [isilon-integration, scaleio-integration]
   - task: scale-diego
     config:
-      image_resource: *docker
-      platform: linux
+      <<: *docker
       params:
         BOSH_DIRECTOR_PUBLIC_IP:      {{bosh_director_public_ip}}
         BOSH_PASSWORD:                {{bosh_password}}
@@ -83,6 +155,8 @@ jobs:
         SCALEIO_MDM_IPS:              {{scaleio_mdm_ips}}
       inputs:
       - name: cf-persist-service-broker
+      - name: rexray-boshrelease
+      - name: scaleio-sdc-boshrelease
       run:
         path: cf-persist-service-broker/ci/tasks/deploy-cells.sh
 
@@ -97,8 +171,7 @@ jobs:
     - get: lifecycle-app
   - task: lifecycle
     config:
-      image_resource: *docker
-      platform: linux
+      <<: *docker
       default-params: &lifecycle-params
         BROKER_NAME:              {{broker_name}}
         BROKER_PASSWORD:          {{broker_password}}
@@ -135,8 +208,7 @@ jobs:
     - get: lifecycle-app
   - task: lifecycle
     config:
-      image_resource: *docker
-      platform: linux
+      <<: *docker
       params:
         <<: *lifecycle-params
         DIEGO_DRIVER_SPEC:        {{diego_driver_spec_isilon}}
@@ -156,16 +228,15 @@ jobs:
     - get: cf-persist-service-broker
       trigger: true
       passed: [isilon-lifecycle, scaleio-lifecycle]
-    - get: version-semver
+    - get: persist-version
       trigger: false
       params: {bump: major}
   - task: promote
     config:
-      platform: linux
-      image_resource: *docker
+      <<: *docker
       inputs:
       - name: cf-persist-service-broker
-      - name: version-semver
+      - name: persist-version
       outputs:
       - name: promote
       run:
@@ -173,10 +244,11 @@ jobs:
       params:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
+        REPO_NAME:                cf-persist-service-broker
   - put: cf-persist-service-broker-out
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-  - put: version-semver
-    params: {file: version-semver/number}
+  - put: persist-version
+    params: {file: persist-version/number}
 
 resources:
 - name: cf-persist-service-broker
@@ -188,26 +260,76 @@ resources:
 
 - name: cf-persist-service-broker-out
   type: git
-  source:
-    uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
-    branch: master
+  default-github: &github-secrets
     username: {{github_user}}
     password: {{github_password}}
     skip_ssl_verification: true
+  source:
+    uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
+    branch: master
+    <<: *github-secrets
 
 - name: lifecycle-app
   type: git
   source:
     uri: https://github.com/EMC-dojo/kitty.git
     branch: master
-    username: {{github_user}}
-    password: {{github_password}}
-    skip_ssl_verification: true
+    <<: *github-secrets
 
-- name: version-semver
+- name: persist-version
   type: semver
-  source:
-    key:               number
-    bucket:            {{s3_bucket_name}}
+  default-s3: &s3-secrets
     access_key_id:     {{s3_access_key_id}}
     secret_access_key: {{s3_secret_access_key}}
+  source:
+    key:               number
+    bucket:            {{s3_cf_persist_sb_bucket_name}}
+    <<: *s3-secrets
+
+- name: scaleio-sdc-boshrelease
+  type: git
+  source:
+    uri: https://github.com/EMC-Dojo/ScaleIO-SDC-Bosh-Release.git
+    branch: master
+    skip_ssl_verification: true
+
+- name: scaleio-sdc-boshrelease-out
+  type: git
+  source:
+    uri: https://github.com/EMC-Dojo/ScaleIO-SDC-Bosh-Release.git
+    branch: master
+    <<: *github-secrets
+
+- name: rexray-boshrelease
+  type: git
+  source:
+    uri: https://github.com/EMC-Dojo/rexray-boshrelease.git
+    branch: master
+    skip_ssl_verification: true
+
+- name: rexray-boshrelease-out
+  type: git
+  source:
+    uri: https://github.com/EMC-Dojo/rexray-boshrelease.git
+    branch: master
+    <<: *github-secrets
+
+- name: volman
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-incubator/volman
+    skip_ssl_verification: true
+
+- name: rexray-version
+  type: semver
+  source:
+    key:               release-current-version
+    bucket:            {{s3_rexray_bucket_name}}
+    <<: *s3-secrets
+
+- name: sdc-version
+  type: semver
+  source:
+    key:               release-current-version
+    bucket:            {{s3_scaleio_sdc_bucket_name}}
+    <<: *s3-secrets
