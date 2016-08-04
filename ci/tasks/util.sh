@@ -10,6 +10,17 @@ check_param() {
   fi
 }
 
+
+get_release_version() {
+  version=$(bosh releases | grep $1 | awk '{print $4}' | awk -F "*" '{print $1}')
+  if [[ $version =~ ^[0-9]+$ ]]; then
+    version=$((version+1))
+  else
+    version=1
+  fi
+  echo $version
+}
+
 check_persistent() {
   local uploaded_data=$1
   echo $2
