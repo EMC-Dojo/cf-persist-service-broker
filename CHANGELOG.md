@@ -39,3 +39,5 @@ v9382e197f2ebb934f551330dcb00324bb96d5d5e Create New Diego Cells for multiple ce
 v761c1f9aeddb2c842d8ee08147b7bdb8ea5aa581 Extract scale diego cell out from isilon lifecycle
 ## v
 vdb87a13feb1671a209481235fc9f670e967cd627 Make promote script reusable
+## v
+vc811e7c7506888cf5bad43d1650ae16b393f2234 Add promote rexray and scaleio sdc release
