@@ -16,24 +16,20 @@ gem install bosh_cli --no-ri --no-rdoc
 bosh -n target ${BOSH_DIRECTOR_PUBLIC_IP}
 bosh -n login ${BOSH_USER} ${BOSH_PASSWORD}
 
-
-
 manifest="$(bosh download manifest ${DIEGO_DEPLOYMENT_NAME} | perl -0pe 's/(- instances: 2\n  name: CI_cell_z1)(.+?)(- instances:)/- instances:/sg')"
 echo "${manifest}" > manifest.yml
 
 bosh deployment manifest.yml
 bosh -n deploy
 
+bosh cleanup --all
 pushd rexray-boshrelease
   rexray_release_version=$(get_release_version ci-rexray-boshrelease)
-  bosh -n delete release ci-rexray-boshrelease || true
   bosh -n create release --force --name ci-rexray-boshrelease --version ${rexray_release_version}
   bosh -n upload release
 popd
-
 pushd scaleio-sdc-boshrelease
   sdc_release_version=$(get_release_version ci-scaleio-sdc-boshrelease)
-  bosh -n delete release ci-scaleio-sdc-boshrelease || true
   bosh -n create release --force --name ci-scaleio-sdc-boshrelease --version ${sdc_release_version}
   bosh -n upload release
 popd
