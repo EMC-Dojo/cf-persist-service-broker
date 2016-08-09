@@ -19,12 +19,9 @@ pushd promote/${REPO_NAME}
   git config --global user.name ${GITHUB_USER}
   git config --global push.default simple
 
-  export annotate_message=":airplane: New final release v${integer_version}"
-  export log_message="`git log -1 --pretty=oneline`"
-
   echo "## v${integer_version}" >> CHANGELOG.md
-  echo "v${log_message}" >> CHANGELOG.md
-
+  echo `git log -1 --pretty=oneline` >> CHANGELOG.md
   git add CHANGELOG.md
-  git commit -m "[ci skip] ${annotate_message}"
+
+  git commit -m ":airplane: New final release v${integer_version}"
 popd
