@@ -43,3 +43,5 @@ vdb87a13feb1671a209481235fc9f670e967cd627 Make promote script reusable
 vc811e7c7506888cf5bad43d1650ae16b393f2234 Add promote rexray and scaleio sdc release
 ## v
 v251e8759eb2fc511f4e313b98a9e7d9fb8cc02bb Merge pull request #1 from linlynn/master
+## v38
+543cc67 Rename scaleio-sdc release to scaleio
