@@ -10,7 +10,7 @@ groups:
   - isilon-lifecycle
   - promote-broker
   - promote-rexray
-  - promote-scaleio-sdc
+  - promote-scaleio
 
 jobs:
 - name: scaleio-vats
@@ -18,7 +18,7 @@ jobs:
   plan:
   - aggregate:
     - {trigger: true, get: rexray-boshrelease}
-    - {trigger: true, get: scaleio-sdc-boshrelease}
+    - {trigger: true, get: scaleio-boshrelease}
     - {trigger: true, get: volman}
   - task: vats
     docker-image: &docker
@@ -31,7 +31,7 @@ jobs:
     config:
       <<: *docker
       inputs:
-      - name: scaleio-sdc-boshrelease
+      - name: scaleio-boshrelease
       - name: rexray-boshrelease
       - name: volman
       default-params: &vats-params
@@ -139,7 +139,7 @@ jobs:
     - get: rexray-boshrelease
       trigger: true
       passed: [isilon-vats, scaleio-vats]
-    - get: scaleio-sdc-boshrelease
+    - get: scaleio-boshrelease
       trigger: true
       passed: [scaleio-vats]
     - get: cf-persist-service-broker
@@ -158,7 +158,7 @@ jobs:
       inputs:
       - name: cf-persist-service-broker
       - name: rexray-boshrelease
-      - name: scaleio-sdc-boshrelease
+      - name: scaleio-boshrelease
       run:
         path: cf-persist-service-broker/ci/tasks/deploy-cells.sh
 
@@ -285,24 +285,24 @@ jobs:
   - put: rexray-version
     params: {file: rexray-version/release-current-version}
 
-- name: promote-scaleio-sdc
+- name: promote-scaleio
   serial: true
   plan:
   - aggregate:
     - get: cf-persist-service-broker
       passed: [isilon-lifecycle, scaleio-lifecycle]
-    - get: scaleio-sdc-boshrelease
+    - get: scaleio-boshrelease
       trigger: true
       passed: [deploy-cells]
-    - get: scaleio-sdc-version
+    - get: scaleio-version
       params: {bump: major}
   - task: promote
     config:
       <<: *docker
       inputs:
       - name: cf-persist-service-broker
-      - name: scaleio-sdc-boshrelease
-      - name: scaleio-sdc-version
+      - name: scaleio-boshrelease
+      - name: scaleio-version
       outputs:
       - name: promote
       run:
@@ -310,12 +310,12 @@ jobs:
       params:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
-        REPO_NAME:                scaleio-sdc-boshrelease
-        VERSION_FILE:             scaleio-sdc-version/release-current-version
-  - put: scaleio-sdc-boshrelease-out
-    params: {repository: promote/scaleio-sdc-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-  - put: scaleio-sdc-version
-    params: {file: scaleio-sdc-version/release-current-version}
+        REPO_NAME:                scaleio-boshrelease
+        VERSION_FILE:             scaleio-version/release-current-version
+  - put: scaleio-boshrelease-out
+    params: {repository: promote/scaleio-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
+  - put: scaleio-version
+    params: {file: scaleio-version/release-current-version}
 
 resources:
 - name: cf-persist-service-broker
@@ -353,21 +353,21 @@ resources:
     branch: master
     <<: *github-secrets
 
-- name: scaleio-sdc-boshrelease
+- name: scaleio-boshrelease
   type: git
   source:
     uri: https://github.com/EMC-Dojo/ScaleIO-SDC-Bosh-Release.git
     branch: master
     skip_ssl_verification: true
 
-- name: scaleio-sdc-boshrelease-out
+- name: scaleio-boshrelease-out
   type: git
   source:
     uri: https://github.com/EMC-Dojo/ScaleIO-SDC-Bosh-Release.git
     branch: master
     <<: *github-secrets
 
-- name: scaleio-sdc-version
+- name: scaleio-version
   type: semver
   source:
     key:               release-current-version
