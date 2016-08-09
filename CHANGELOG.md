@@ -41,3 +41,5 @@ v761c1f9aeddb2c842d8ee08147b7bdb8ea5aa581 Extract scale diego cell out from isil
 vdb87a13feb1671a209481235fc9f670e967cd627 Make promote script reusable
 ## v35
 vd8e054773df8af0b2ff0d514cc40e03dfcd62e36 TEST1
+## v36
+6be5e024376a15cafddf3f0c8267c5d3fdb854c5 Fix version is not showing in promote
