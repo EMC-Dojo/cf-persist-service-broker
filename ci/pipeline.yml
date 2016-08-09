@@ -10,7 +10,7 @@ groups:
   - isilon-lifecycle
   - promote-broker
   - promote-rexray
-  - promote-sdc
+  - promote-scaleio-sdc
 
 jobs:
 - name: scaleio-vats
@@ -247,6 +247,7 @@ jobs:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
         REPO_NAME:                cf-persist-service-broker
+        VERSION_FILE:             persist-version/number
   - put: cf-persist-service-broker-out
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: persist-version
@@ -278,11 +279,11 @@ jobs:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
         REPO_NAME:                rexray-boshrelease
+        VERSION_FILE:             rexray-version/release-current-version
   - put: rexray-boshrelease-out
     params: {repository: promote/rexray-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: rexray-version
-    params: {file: rexray-version/number}
-
+    params: {file: rexray-version/release-current-version}
 
 - name: promote-scaleio-sdc
   serial: true
@@ -310,10 +311,11 @@ jobs:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
         REPO_NAME:                scaleio-sdc-boshrelease
+        VERSION_FILE:             scaleio-sdc-version/release-current-version
   - put: scaleio-sdc-boshrelease-out
     params: {repository: promote/scaleio-sdc-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: scaleio-sdc-version
-    params: {file: scaleio-sdc-version/number}
+    params: {file: scaleio-sdc-version/release-current-version}
 
 resources:
 - name: cf-persist-service-broker
