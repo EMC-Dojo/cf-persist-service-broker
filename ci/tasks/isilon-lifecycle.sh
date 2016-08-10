@@ -69,13 +69,14 @@ curl -X POST -F 'text_box=Concourse BOT was here' http://$LIFECYCLE_APP_NAME.$CF
 
 cf scale $LIFECYCLE_APP_NAME -i $NUM_DIEGO_CELLS -m $LIFECYCLE_APP_MEMORY -f
 echo "1" > status.txt
+declare -A ips
 for i in `seq 0 $[$NUM_DIEGO_CELLS*10]`; do
   set -x -e
-  curl_output="$(curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT)"
+  curl_output=`curl http://$LIFECYCLE_APP_NAME.$CF_ENDPOINT)`
   echo "$curl_output" | grep -w "Concourse BOT was here"
-  instance_number="$(echo $curl_output | grep "Instance ID is: " | sed -n -e 's/^.*Instance\ ID\ is:\ //p' | cut -f 1 -d '<')"
-  instances[$instance_number]=1
-  if [ "${#instances[@]}" == $NUM_DIEGO_CELLS ]; then
+  ip=`echo $curl_output | grep "My IP is" | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"`
+  ips[$ip]=true
+  if [ "${#ips[@]}" == $NUM_DIEGO_CELLS ]; then
     echo "0" > status.txt
     break
   fi
