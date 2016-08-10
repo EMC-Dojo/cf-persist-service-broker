@@ -45,3 +45,5 @@ vc811e7c7506888cf5bad43d1650ae16b393f2234 Add promote rexray and scaleio sdc rel
 v251e8759eb2fc511f4e313b98a9e7d9fb8cc02bb Merge pull request #1 from linlynn/master
 ## v38
 543cc67 Rename scaleio-sdc release to scaleio
+## v40
+0ab740c Fix isilon lifecycle bug
