@@ -22,28 +22,28 @@ jobs:
   plan:
   - aggregate:
     - {trigger: true,                 get: rexray-boshrelease}
-    - {params: {acquire: true},       get: commit-lock}
+    - get: commit-lock
 
 - name: scaleio-lock
   serial: true
   plan:
   - aggregate:
     - {trigger: true,                 get: scaleio-boshrelease}
-    - {params: {acquire: true},       get: commit-lock}
+    - get: commit-lock
 
 - name: persist-lock
   serial: true
   plan:
   - aggregate:
     - {trigger: true,                 get: cf-persist-service-broker}
-    - {params: {acquire: true},       get: commit-lock}
+    - get: commit-lock
 
 - name: volman-lock
   serial: true
   plan:
   - aggregate:
     - {trigger: true,                 get: volman}
-    - {params: {acquire: true},       get: commit-lock}
+    - get: commit-lock
 
 - name: scaleio-vats
   serial: true
