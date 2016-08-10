@@ -22,28 +22,42 @@ jobs:
   plan:
   - aggregate:
     - {trigger: true,                 get: rexray-boshrelease}
-    - get: commit-lock
+    - {params: {acquire: true},       get: commit-lock}
+  - task: require-locl
+    docker-image: &docker
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: {{docker_repo}}
+          insecure_registries: [{{docker_registry}}]
+    config:
+      <<: *docker
+    run: {path: echo, args: [lock acquired]}
 
 - name: scaleio-lock
   serial: true
   plan:
   - aggregate:
     - {trigger: true,                 get: scaleio-boshrelease}
-    - get: commit-lock
+    - {params: {acquire: true},       get: commit-lock}
 
 - name: persist-lock
   serial: true
   plan:
   - aggregate:
     - {trigger: true,                 get: cf-persist-service-broker}
-    - get: commit-lock
-
+    - {params: {acquire: true},       get: commit-lock}
+  - task: require-locl
+    config:
+      <<: *docker
+    run: {path: echo, args: [lock acquired]}
 - name: volman-lock
   serial: true
   plan:
   - aggregate:
     - {trigger: true,                 get: volman}
-    - get: commit-lock
+    - {params: {acquire: true},       get: commit-lock}
 
 - name: scaleio-vats
   serial: true
@@ -53,13 +67,6 @@ jobs:
     - {trigger: true,   passed: [scaleio-lock],       get: scaleio-boshrelease}
     - {trigger: true,   passed: [volman-lock],        get: volman}
   - task: vats
-    docker-image: &docker
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: {{docker_repo}}
-          insecure_registries: [{{docker_registry}}]
     config:
       <<: *docker
       inputs:
