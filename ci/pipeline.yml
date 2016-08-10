@@ -171,6 +171,12 @@ jobs:
       trigger: true
       passed: [deploy-cells]
     - get: lifecycle-app
+    - get: rexray-boshrelease
+      trigger: true
+      passed: [deploy-cells]
+    - get: scaleio-boshrelease
+      trigger: true
+      passed: [deploy-cells]
   - task: lifecycle
     config:
       <<: *docker
@@ -208,6 +214,9 @@ jobs:
       trigger: true
       passed: [deploy-cells]
     - get: lifecycle-app
+    - get: rexray-boshrelease
+      trigger: true
+      passed: [deploy-cells]
   - task: lifecycle
     config:
       <<: *docker
@@ -261,7 +270,7 @@ jobs:
       passed: [isilon-lifecycle, scaleio-lifecycle]
     - get: rexray-boshrelease
       trigger: true
-      passed: [deploy-cells]
+      passed: [isilon-lifecycle, scaleio-lifecycle]
     - get: rexray-version
       params: {bump: major}
   - task: promote
@@ -279,21 +288,21 @@ jobs:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
         REPO_NAME:                rexray-boshrelease
-        VERSION_FILE:             rexray-version/release-current-version
+        VERSION_FILE:             rexray-version/version
   - put: rexray-boshrelease-out
     params: {repository: promote/rexray-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: rexray-version
-    params: {file: rexray-version/release-current-version}
+    params: {file: rexray-version/version}
 
 - name: promote-scaleio
   serial: true
   plan:
   - aggregate:
     - get: cf-persist-service-broker
-      passed: [isilon-lifecycle, scaleio-lifecycle]
+      passed: [scaleio-lifecycle]
     - get: scaleio-boshrelease
       trigger: true
-      passed: [deploy-cells]
+      passed: [scaleio-lifecycle]
     - get: scaleio-version
       params: {bump: major}
   - task: promote
@@ -311,11 +320,11 @@ jobs:
         GITHUB_USER:              {{github_user}}
         GITHUB_EMAIL:             {{github_email}}
         REPO_NAME:                scaleio-boshrelease
-        VERSION_FILE:             scaleio-version/release-current-version
+        VERSION_FILE:             scaleio-version/version
   - put: scaleio-boshrelease-out
     params: {repository: promote/scaleio-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: scaleio-version
-    params: {file: scaleio-version/release-current-version}
+    params: {file: scaleio-version/version}
 
 resources:
 - name: cf-persist-service-broker
