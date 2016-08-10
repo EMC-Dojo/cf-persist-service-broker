@@ -1,6 +1,10 @@
 groups:
 - name: EMC-Persistence-Broker
   jobs:
+  - persist-lock
+  - rexray-lock
+  - scaleio-lock
+  - volman-lock
   - scaleio-vats
   - scaleio-integration
   - isilon-vats
@@ -13,21 +17,49 @@ groups:
   - promote-scaleio
 
 jobs:
+- name: rexray-lock
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true,                 get: rexray-boshrelease}
+    - {params: {acquire: true},       get: commit-lock}
+
+- name: scaleio-lock
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true,                 get: scaleio-boshrelease}
+    - {params: {acquire: true},       get: commit-lock}
+
+- name: persist-lock
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true,                 get: cf-persist-service-broker}
+    - {params: {acquire: true},       get: commit-lock}
+
+- name: volman-lock
+  serial: true
+  plan:
+  - aggregate:
+    - {trigger: true,                 get: volman}
+    - {params: {acquire: true},       get: commit-lock}
+
 - name: scaleio-vats
   serial: true
   plan:
   - aggregate:
-    - {trigger: true, get: rexray-boshrelease}
-    - {trigger: true, get: scaleio-boshrelease}
-    - {trigger: true, get: volman}
+    - {trigger: true,   passed: [rexray-lock],        get: rexray-boshrelease}
+    - {trigger: true,   passed: [scaleio-lock],       get: scaleio-boshrelease}
+    - {trigger: true,   passed: [volman-lock],        get: volman}
   - task: vats
     docker-image: &docker
       platform: linux
       image_resource:
-          type: docker-image
-          source:
-            repository: {{docker_repo}}
-            insecure_registries: [{{docker_registry}}]
+        type: docker-image
+        source:
+          repository: {{docker_repo}}
+          insecure_registries: [{{docker_registry}}]
     config:
       <<: *docker
       inputs:
@@ -61,8 +93,8 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - {trigger: true, get: rexray-boshrelease}
-    - {trigger: true, get: volman}
+    - {trigger: true,     passed: [rexray-lock],          get: rexray-boshrelease}
+    - {trigger: true,     passed: [volman-lock],          get: volman}
   - task: vats
     config:
       <<: *docker
@@ -88,7 +120,7 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - {trigger: true,       get: cf-persist-service-broker}
+    - {trigger: true,     passed: [persist-lock],   get: cf-persist-service-broker}
   - task: integration
     config:
       <<: *docker
@@ -117,8 +149,7 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: cf-persist-service-broker
-      trigger: true
+    - {trigger: true,   passed: [persist-lock],   get: cf-persist-service-broker}
   - task: integration
     config:
       <<: *docker
@@ -264,6 +295,8 @@ jobs:
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: persist-version
     params: {file: persist-version/number}
+  - put: commit-lock
+    params: {release: commit-lock}
 
 - name: promote-rexray
   serial: true
@@ -296,6 +329,8 @@ jobs:
     params: {repository: promote/rexray-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: rexray-version
     params: {file: rexray-version/version}
+  - put: commit-lock
+    params: {release: commit-lock}
 
 - name: promote-scaleio
   serial: true
@@ -328,13 +363,15 @@ jobs:
     params: {repository: promote/scaleio-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
   - put: scaleio-version
     params: {file: scaleio-version/version}
+  - put: commit-lock
+    params: {release: commit-lock}
 
 resources:
 - name: cf-persist-service-broker
   type: git
   source:
     uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
-    branch: master
+    branch: combine
     skip_ssl_verification: true
 
 - name: cf-persist-service-broker-out
@@ -345,7 +382,7 @@ resources:
     skip_ssl_verification: true
   source:
     uri: https://github.com/EMC-Dojo/cf-persist-service-broker.git
-    branch: master
+    branch: combine
     <<: *github-secrets
 
 - name: persist-version
@@ -369,14 +406,14 @@ resources:
   type: git
   source:
     uri: https://github.com/EMC-Dojo/ScaleIO-SDC-Bosh-Release.git
-    branch: master
+    branch: combine
     skip_ssl_verification: true
 
 - name: scaleio-boshrelease-out
   type: git
   source:
     uri: https://github.com/EMC-Dojo/ScaleIO-SDC-Bosh-Release.git
-    branch: master
+    branch: combine
     <<: *github-secrets
 
 - name: scaleio-version
@@ -390,14 +427,14 @@ resources:
   type: git
   source:
     uri: https://github.com/EMC-Dojo/rexray-boshrelease.git
-    branch: master
+    branch: combine
     skip_ssl_verification: true
 
 - name: rexray-boshrelease-out
   type: git
   source:
     uri: https://github.com/EMC-Dojo/rexray-boshrelease.git
-    branch: master
+    branch: combine
     <<: *github-secrets
 
 - name: rexray-version
@@ -412,3 +449,11 @@ resources:
   source:
     uri: https://github.com/cloudfoundry-incubator/volman
     skip_ssl_verification: true
+
+- name: commit-lock
+  type: pool
+  source:
+    uri: https://github.com/EMC-CMD/ci-lock.git
+    branch: master
+    <<: *github-secrets
+    pool: persist
