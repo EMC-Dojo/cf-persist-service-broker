@@ -23,7 +23,7 @@ jobs:
   - aggregate:
     - {trigger: true,                 get: rexray-boshrelease}
     - {params: {acquire: true},       get: commit-lock}
-  - task: require-locl
+  - task: acquire-lock
     docker-image: &docker
       platform: linux
       image_resource:
@@ -33,7 +33,8 @@ jobs:
           insecure_registries: [{{docker_registry}}]
     config:
       <<: *docker
-    run: {path: echo, args: [lock acquired]}
+      run:
+        path: cf-persist-service-broker/ci/tasks/lock.sh
 
 - name: scaleio-lock
   serial: true
@@ -48,10 +49,7 @@ jobs:
   - aggregate:
     - {trigger: true,                 get: cf-persist-service-broker}
     - {params: {acquire: true},       get: commit-lock}
-  - task: require-locl
-    config:
-      <<: *docker
-    run: {path: echo, args: [lock acquired]}
+
 - name: volman-lock
   serial: true
   plan:
