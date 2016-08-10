@@ -16,7 +16,6 @@ groups:
   - promote-rexray
   - promote-scaleio
 
-
 jobs:
 - name: rexray-lock
   serial: true
