@@ -49,6 +49,11 @@ jobs:
   - aggregate:
     - {trigger: true,                 get: cf-persist-service-broker}
     - {params: {acquire: true},       get: commit-lock}
+  - task: acquire-lock
+    config:
+      <<: *docker
+      run:
+        path: cf-persist-service-broker/ci/tasks/lock.sh
 
 - name: volman-lock
   serial: true
