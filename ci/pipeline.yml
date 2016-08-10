@@ -56,6 +56,11 @@ jobs:
   - aggregate:
     - {trigger: true,                 get: volman}
     - {params: {acquire: true},       get: commit-lock}
+  - task: acquire-lock
+    config:
+      <<: *docker
+      run:
+        path: cf-persist-service-broker/ci/tasks/lock.sh
 
 - name: scaleio-vats
   serial: true
