@@ -291,10 +291,10 @@ jobs:
         VERSION_FILE:             persist-version/number
   - put: cf-persist-service-broker-out
     params: {repository: promote/cf-persist-service-broker, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-  - put: persist-version
-    params: {file: persist-version/number}
   - put: commit-lock
     params: {release: commit-lock}
+  - put: persist-version
+    params: {file: persist-version/number}
 
 - name: promote-rexray
   serial: true
@@ -326,10 +326,10 @@ jobs:
         VERSION_FILE:             rexray-version/version
   - put: rexray-boshrelease-out
     params: {repository: promote/rexray-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-  - put: rexray-version
-    params: {file: rexray-version/version}
   - put: commit-lock
     params: {release: commit-lock}
+  - put: rexray-version
+    params: {file: rexray-version/version}
 
 - name: promote-scaleio
   serial: true
@@ -361,10 +361,10 @@ jobs:
         VERSION_FILE:             scaleio-version/version
   - put: scaleio-boshrelease-out
     params: {repository: promote/scaleio-boshrelease, rebase: true, tag_prefix: "v", tag: promote/integer_version}
-  - put: scaleio-version
-    params: {file: scaleio-version/version}
   - put: commit-lock
     params: {release: commit-lock}
+  - put: scaleio-version
+    params: {file: scaleio-version/version}
 
 resources:
 - name: cf-persist-service-broker
