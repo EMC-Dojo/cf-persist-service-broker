@@ -51,3 +51,5 @@ v251e8759eb2fc511f4e313b98a9e7d9fb8cc02bb Merge pull request #1 from linlynn/mas
 98d6f12 Fix cell deployment doesn't get right version of releases
 ## v42
 9bc1173 Added sequence change for versioning
+## v43
+1ec10eb Diego release is now called diego
