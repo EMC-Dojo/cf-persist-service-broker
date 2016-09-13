@@ -61,6 +61,6 @@ More documentation coming soon.
 ### Contact
 - Slack Channel:
   - Organization: <http://cloudfoundry.slack.com>
-  - Channel: `#persi`
+  - Channel: `#persi` 
 - Contact: [EMC Dojo](mailto:emcdojo@emc.com) [@EMCDojo](https://twitter.com/hashtag/emcdojo)
 - Blog: [EMC Dojo Blog](http://dojoblog.emc.com)
