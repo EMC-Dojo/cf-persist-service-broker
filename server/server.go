@@ -217,13 +217,13 @@ func BindingHandler(c *gin.Context) {
 		},
 		VolumeMounts: []model.VolumeMount{
 			model.VolumeMount{
-				//should we be using volumeID?
-				ContainerPath: fmt.Sprintf("/var/vcap/store/%s/%s", brokerName, volumeID),
-				Mode:          "rw",
-				Private: model.VolumeMountPrivateDetails{
-					Driver:  driverName,
-					GroupId: volumeName,
-					Config:  "{\"broker\":\"specific_values\"}",
+				Driver:       driverName,
+				ContainerDir: fmt.Sprintf("/var/vcap/store/%s/%s", brokerName, volumeID),
+				Mode:         "rw",
+				DeviceType:   "shared",
+				Device: model.Device{
+					VolumeID:    volumeName,
+					MountConfig: map[string]string{"broker": "specific_values"},
 				},
 			},
 		},

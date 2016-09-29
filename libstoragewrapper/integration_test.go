@@ -14,7 +14,6 @@ import (
 )
 
 var _ = Describe("Integration", func() {
-
 	Describe("Libstorage Client Integration", func() {
 		var libsClient types.APIClient
 		var instanceID, storagePool, volumeID, libStorageURI, serviceName string
@@ -31,19 +30,16 @@ var _ = Describe("Integration", func() {
 			Expect(serviceName).ToNot(BeEmpty())
 			libStorageURI = os.Getenv("LIBSTORAGE_URI")
 			Expect(libStorageURI).ToNot(BeEmpty())
+
 			libsClient = server.NewLibsClient()
 			Expect(err).ToNot(HaveOccurred())
-
 		})
 
 		BeforeEach(func() {
-
 			volumeRequest, err := utils.CreateVolumeRequest(instanceID, storagePool, int64(8))
 			Expect(err).ToNot(HaveOccurred())
-
 			volume, err := libstoragewrapper.CreateVolume(libsClient, serviceName, volumeRequest)
 			Expect(err).ToNot(HaveOccurred())
-
 			volumeID = volume.ID
 		})
 

@@ -71,7 +71,6 @@ var _ = Describe("Unit", func() {
 		libsClient = NewLibsClient()
 		planIDString, err = utils.CreatePlanIDString(serviceName)
 		Expect(err).ToNot(HaveOccurred())
-
 	})
 
 	AfterEach(func() {
@@ -174,12 +173,13 @@ var _ = Describe("Unit", func() {
 			},
 			VolumeMounts: []model.VolumeMount{
 				model.VolumeMount{
-					ContainerPath: fmt.Sprintf("/var/vcap/store/%s/%s", os.Getenv("EMC_SERVICE_NAME"), volumeID),
-					Mode:          "rw",
-					Private: model.VolumeMountPrivateDetails{
-						Driver:  diegoDriverSpec,
-						GroupId: volumeName,
-						Config:  "{\"broker\":\"specific_values\"}",
+					Driver:       diegoDriverSpec,
+					ContainerDir: fmt.Sprintf("/var/vcap/store/%s/%s", os.Getenv("EMC_SERVICE_NAME"), volumeID),
+					Mode:         "rw",
+					DeviceType:   "shared",
+					Device: model.Device{
+						VolumeID:    volumeName,
+						MountConfig: map[string]string{"broker": "specific_values"},
 					},
 				},
 			},

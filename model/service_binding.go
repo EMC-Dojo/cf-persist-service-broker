@@ -11,6 +11,7 @@ type ServiceBinding struct {
 type ServiceBindingParams struct {
 	Driver string `json:"volume_driver"`
 }
+
 type CreateServiceBindingResponse struct {
 	Credentials  CreateServiceBindingCredentials `json:"credentials"`
 	VolumeMounts []VolumeMount                   `json:"volume_mounts"`
@@ -26,13 +27,14 @@ type CreateServiceBindingCredentials struct {
 }
 
 type VolumeMount struct {
-	ContainerPath string                    `json:"container_path"`
-	Mode          string                    `json:"mode"`
-	Private       VolumeMountPrivateDetails `json:"private"`
+	Driver       string `json:"driver"`
+	ContainerDir string `json:"container_dir"`
+	Mode         string `json:"mode"`
+	DeviceType   string `json:"device_type"`
+	Device       Device `json:"device"`
 }
 
-type VolumeMountPrivateDetails struct {
-	Driver  string `json:"driver"`
-	GroupId string `json:"group_id"`
-	Config  string `json:"config"`
+type Device struct {
+	VolumeID    string            `json:"volume_id"`
+	MountConfig map[string]string `json:"mount_config"`
 }
