@@ -16,6 +16,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/EMC-Dojo/cf-persist-service-broker/config"
 	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
 	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
@@ -25,6 +26,7 @@ import (
 var _ = Describe("Unit", func() {
 	var serverURL, brokerUser, brokerPassword, instanceID, planIDString, appGUID, bindingID, serviceBindingPath, serviceName, storagePool, diegoDriverSpec string
 	var libsClient types.APIClient
+	var configFile []model.Service
 
 	type PlanID model.PlanID
 	type ProvisionInstanceRequest model.ServiceInstance
@@ -49,6 +51,8 @@ var _ = Describe("Unit", func() {
 		Expect(port).ToNot(BeEmpty())
 		diegoDriverSpec = os.Getenv("DIEGO_DRIVER_SPEC")
 		Expect(diegoDriverSpec).ToNot(BeEmpty())
+		brokerConfigPath := os.Getenv("BROKER_CONFIG_PATH")
+		Expect(brokerConfigPath).ToNot(BeEmpty())
 
 		serverURL = "http://localhost:" + port
 		serviceBindingPath = "/v2/service_instances/" + instanceID + "/service_bindings/" + bindingID
@@ -72,6 +76,8 @@ var _ = Describe("Unit", func() {
 		planIDString, err = utils.CreatePlanIDString(serviceName, libsServerHost)
 		Expect(err).ToNot(HaveOccurred())
 
+		configFile, err = config.ReadConfig(brokerConfigPath)
+		Expect(err).ToNot(HaveOccurred())
 	})
 
 	AfterEach(func() {
@@ -98,8 +104,8 @@ var _ = Describe("Unit", func() {
 			Expect(err).ToNot(HaveOccurred())
 			var serviceFromCatalog = catalog.Services[0]
 			Expect(serviceFromCatalog).ToNot(BeNil())
-			Expect(serviceFromCatalog.ID).To(Equal("92e98925-d046-4c72-9598-ba352449a5c7"))
-			Expect(serviceFromCatalog.Name).To(Equal("Persistent Storage"))
+			Expect(serviceFromCatalog.ID).To(Equal(configFile[0].ID))
+			Expect(serviceFromCatalog.Name).To(Equal(configFile[0].Name))
 			Expect(serviceFromCatalog.Description).ToNot(BeEmpty())
 			Expect(serviceFromCatalog.Bindable).To(BeTrue())
 			Expect(serviceFromCatalog.Requires[0]).To(Equal("volume_mount"))
