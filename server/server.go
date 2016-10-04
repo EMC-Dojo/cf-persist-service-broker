@@ -37,7 +37,7 @@ func NewLibsClient() types.APIClient {
 
 // Run the Service Broker
 func (s Server) Run() {
-	expectingENVs := []string{"BROKER_USERNAME", "BROKER_PASSWORD", "BROKER_CONFIG_PATH", "PORT", "DIEGO_DRIVER_SPEC", "LIBSTORAGE_URI", "INSECURE"}
+	expectingENVs := []string{"BROKER_USERNAME", "BROKER_PASSWORD", "PORT", "DIEGO_DRIVER_SPEC", "LIBSTORAGE_URI", "INSECURE"}
 	err := VerifyEnvironmentVariable(expectingENVs)
 	if err != nil {
 		log.Panicf("error: %s. expecting envs: %s", err, expectingENVs)

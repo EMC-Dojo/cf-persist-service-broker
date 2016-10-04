@@ -1,7 +1,7 @@
 [
   {
     "id": "not-valid-uuid",
-    "name": "Persistent Storage",
+    "name": "Persistent-Storage",
     "description": "Supports EMC ScaleIO & Isilon Storage Arrays for use with CloudFoundry",
     "bindable": true,
     "requires": [

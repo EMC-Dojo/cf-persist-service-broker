@@ -52,7 +52,6 @@ var _ = Describe("Unit", func() {
 		diegoDriverSpec = os.Getenv("DIEGO_DRIVER_SPEC")
 		Expect(diegoDriverSpec).ToNot(BeEmpty())
 		brokerConfigPath := os.Getenv("BROKER_CONFIG_PATH")
-		Expect(brokerConfigPath).ToNot(BeEmpty())
 
 		serverURL = "http://localhost:" + port
 		serviceBindingPath = "/v2/service_instances/" + instanceID + "/service_bindings/" + bindingID

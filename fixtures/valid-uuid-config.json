@@ -1,7 +1,7 @@
 [
   {
     "id": "92e98925-d046-4c72-9598-ba352449a5c7",
-    "name": "Persistent Storage",
+    "name": "Persistent-Storage",
     "description": "Supports EMC ScaleIO & Isilon Storage Arrays for use with CloudFoundry",
     "bindable": true,
     "requires": [

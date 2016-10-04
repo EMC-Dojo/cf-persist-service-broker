@@ -17,6 +17,7 @@ check_param INSECURE
 check_param LIB_STOR_SERVICE
 check_param LIBSTORAGE_URI
 check_param LIFECYCLE_APP_NAME
+check_param EMC_SERVICE_NAME
 
 #authentication stuff
 cf api http://api.$CF_ENDPOINT --skip-ssl-validation

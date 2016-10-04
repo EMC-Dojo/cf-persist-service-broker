@@ -19,6 +19,7 @@ check_param LIB_STOR_SERVICE
 check_param LIBSTORAGE_URI
 check_param LIFECYCLE_APP_NAME
 check_param NUM_DIEGO_CELLS
+check_param EMC_SERVICE_NAME
 
 #Setup CF CLI for us
 cf api http://api.$CF_ENDPOINT --skip-ssl-validation

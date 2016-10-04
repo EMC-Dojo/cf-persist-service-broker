@@ -63,9 +63,17 @@ var _ = Describe("Config", func() {
 	Context("Parse Settings file", func() {
 		It("return the correct structure", func() {
 			services[0].ID = "92e98925-d046-4c72-9598-ba352449a5c7"
-			config, err := config.ReadConfig("../fixtures/config.json")
+			configData, err := config.ReadConfig("../fixtures/valid-uuid-config.json")
 			Expect(err).ToNot(HaveOccurred())
-			Expect(config).To(Equal(services))
+			Expect(configData).To(Equal(services))
+		})
+	})
+
+	Context("When config path is empty", func() {
+		It("use default config defined in config.go", func() {
+			configData, err := config.ReadConfig("")
+			Expect(err).ToNot(HaveOccurred())
+			Expect(configData).To(Equal(config.DefaultConfig))
 		})
 	})
 

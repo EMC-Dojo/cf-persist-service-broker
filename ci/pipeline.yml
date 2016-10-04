@@ -219,6 +219,7 @@ jobs:
         CF_SERVICE:               {{emc_service_name}}
         CF_SPACE:                 {{cf_space}}
         CF_USERNAME:              {{cf_username}}
+        EMC_SERVICE_NAME:         {{emc_service_name}}
         INSECURE:                 true
         LIBSTORAGE_URI:           {{libstorage_uri}}
         LIFECYCLE_APP_NAME:       {{lifecycle_app_name}}
