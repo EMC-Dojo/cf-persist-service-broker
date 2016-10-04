@@ -37,7 +37,7 @@ var _ = Describe("Config", func() {
 		services = []model.Service{
 			model.Service{
 				ID:          "fake-uuid",
-				Name:        "Persistent Storage",
+				Name:        "Persistent-Storage",
 				Description: "Supports EMC ScaleIO & Isilon Storage Arrays for use with CloudFoundry",
 				Bindable:    true,
 				Requires:    []string{"volume_mount"},
