@@ -57,3 +57,5 @@ v251e8759eb2fc511f4e313b98a9e7d9fb8cc02bb Merge pull request #1 from linlynn/mas
 c77cc79 changed readme
 ## v45
 c451fc7 Remove unused ruby code
+## v46
+219d213 Fix typo
