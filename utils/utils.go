@@ -17,15 +17,24 @@ func ProjectDirectory() string {
 }
 
 // CreatePlanIDString : Cloud Foundry, Open Source, The Way (To marshall Plan ID's). JUST LIKE MOM USED TO MAKE
-func CreatePlanIDString(LibstorageService string) (string, error) {
+func CreatePlanIDString(LibstorageService string, ListorageHost string) (string, error) {
 	planID, err := json.Marshal(&model.PlanID{
-		LibsHostName:    os.Getenv("LIBSTORAGE_URI"),
+		LibsHostName:    ListorageHost,
 		LibsServiceName: LibstorageService,
 	})
 	if err != nil {
 		return "", fmt.Errorf("Error creating PlanIDString : (%s)", err)
 	}
 	return string(planID[:len(planID)]), nil
+}
+
+func UnmarshalPlanID(planIDJson string) (model.PlanID, error) {
+	planID := model.PlanID{}
+	err := json.Unmarshal([]byte(planIDJson), &planID)
+	if err != nil {
+		return model.PlanID{}, err
+	}
+	return planID, nil
 }
 
 // CreateVolumeRequest : generate a Libstorage volume request based on a provided name and storagepool as strings and size in GB
@@ -61,4 +70,11 @@ func CreateNameForVolume(instanceID string) (string, error) {
 	}
 
 	return cookedString, nil
+}
+
+func FileExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

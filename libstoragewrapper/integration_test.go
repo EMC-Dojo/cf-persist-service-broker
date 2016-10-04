@@ -37,7 +37,6 @@ var _ = Describe("Integration", func() {
 		})
 
 		BeforeEach(func() {
-
 			volumeRequest, err := utils.CreateVolumeRequest(instanceID, storagePool, int64(8))
 			Expect(err).ToNot(HaveOccurred())
 

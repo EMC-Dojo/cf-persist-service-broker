@@ -6,13 +6,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 
 	"encoding/json"
 
+	"github.com/EMC-Dojo/cf-persist-service-broker/config"
 	"github.com/EMC-Dojo/cf-persist-service-broker/libstoragewrapper"
 	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
@@ -20,7 +20,7 @@ import (
 	"github.com/emccode/libstorage/api/types"
 )
 
-var serviceUUID, libStorageServiceName, libstorageHost, driverName string
+var serviceUUID, libstorageHost, driverName string
 
 // Server : Service Broker Server
 type Server struct {
@@ -30,9 +30,6 @@ type Server struct {
 func NewLibsClient() types.APIClient {
 	insecure := (os.Getenv("INSECURE") == "true")
 	libstorageHost = os.Getenv("LIBSTORAGE_URI")
-	if libstorageHost == "" {
-		log.Panic("A libstorage storage host must be specified with ENV[LIBSTORAGE_URI]")
-	}
 	return client.New(libstorageHost, &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 	})
@@ -40,24 +37,22 @@ func NewLibsClient() types.APIClient {
 
 // Run the Service Broker
 func (s Server) Run() {
+	expectingENVs := []string{"BROKER_USERNAME", "BROKER_PASSWORD", "BROKER_CONFIG_PATH", "PORT", "DIEGO_DRIVER_SPEC", "LIBSTORAGE_URI", "INSECURE"}
+	err := VerifyEnvironmentVariable(expectingENVs)
+	if err != nil {
+		log.Panicf("error: %s. expecting envs: %s", err, expectingENVs)
+	}
+
 	username := os.Getenv("BROKER_USERNAME")
 	password := os.Getenv("BROKER_PASSWORD")
 	port := os.Getenv("PORT")
+	driverName = os.Getenv("DIEGO_DRIVER_SPEC")
+
 	server := gin.Default()
 	gin.SetMode("release")
 	authorized := server.Group("/", gin.BasicAuth(gin.Accounts{
 		username: password,
 	}))
-
-	libStorageServiceName = os.Getenv("LIB_STOR_SERVICE")
-	driverName = os.Getenv("DIEGO_DRIVER_SPEC")
-	serviceUUID = os.Getenv("EMC_SERVICE_UUID")
-
-	fmt.Println("LibstorageServiceName: ", libStorageServiceName, "driverName", driverName, "serviceUUID", serviceUUID, "emcServiceName", os.Getenv("EMC_SERVICE_NAME"))
-	r := regexp.MustCompile("^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[8|9|aA|bB][a-f0-9]{3}-[a-f0-9]{12}$")
-	if !r.MatchString(serviceUUID) {
-		log.Panic(fmt.Sprintf("The UUID given from ENV[EMC_SERVICE_UUID]= %s either was not set or is not a valid UUID", os.Getenv("EMC_SERVICE_UUID")))
-	}
 
 	authorized.GET("/v2/catalog", CatalogHandler)
 	authorized.PUT("/v2/service_instances/:instanceID", ProvisioningHandler)
@@ -71,48 +66,29 @@ func (s Server) Run() {
 
 // CatalogHandler : Shows a catalog of available service plans
 func CatalogHandler(c *gin.Context) {
+	configPath := os.Getenv("BROKER_CONFIG_PATH")
+	catalogServices, err := config.ReadConfig(configPath)
+	if err != nil {
+		log.Panicf("error reading config file %s", err)
+	}
+
 	// filter with supported drivers?
-	services, err := libstoragewrapper.GetServices(NewLibsClient())
+	libstorageServices, err := libstoragewrapper.GetServices(NewLibsClient())
 	if err != nil {
 		log.Panicf("error retrieving services from libstorage host %s : (%s) ", os.Getenv("LIBSTORAGE_URI"), err)
 	}
-	var plans []model.Plan
-	for _, service := range services {
-		if service.Name == libStorageServiceName {
-			planID, err := utils.CreatePlanIDString(service.Name)
-			if err != nil {
-				log.Panic(fmt.Sprintf("Error creating PlanID from name %s : (%s)", service.Name, err))
-			}
-			plans = append(plans, model.Plan{
-				ID:          planID, // UUID made from JSON Marshalled Libstorage Host IP/service name
-				Name:        service.Name,
-				Description: service.Driver.Name,
-			})
-		}
-	}
-	if len(plans) < 1 {
-		log.Panic(fmt.Sprintf("Service %s was not found on the LibStorage Server %s", libStorageServiceName, libstorageHost))
+
+	plansExists := DoPlansExistInLibstorage(catalogServices[0].Plans, libstorageServices)
+	if !plansExists {
+		log.Panic("plan(s) do not exist in libstorage services.")
 	}
 
-	serviceName := os.Getenv("EMC_SERVICE_NAME")
-
-	if serviceName == "" {
-		serviceName = "EMC-Persistence"
+	catalogServices[0].Plans, err = AddCatalogPlanIDs(catalogServices[0].Plans, libstorageHost)
+	if err != nil {
+		log.Panic("could not modify plans' ids")
 	}
 
-	catalogResponse := model.Catalog{
-		Services: []model.Service{
-			model.Service{
-				ID:          serviceUUID,
-				Name:        serviceName,
-				Description: "Supports EMC ScaleIO & Isilon Storage Arrays for use with CloudFoundry",
-				Bindable:    true,
-				Requires:    []string{"volume_mount"},
-				Plans:       plans,
-			},
-		},
-	}
-	c.JSON(http.StatusOK, catalogResponse)
+	c.JSON(http.StatusOK, model.Catalog{Services: catalogServices})
 }
 
 // ProvisioningHandler : Provisions service instances (e.g. creates volumes; used by cloud controller)
@@ -204,8 +180,6 @@ func BindingHandler(c *gin.Context) {
 		log.Panic(fmt.Sprintf("Unable to encode instanceID to volume Name %s", err))
 	}
 
-	brokerName := os.Getenv("EMC_SERVICE_NAME")
-
 	serviceBindingResp := model.CreateServiceBindingResponse{
 		Credentials: model.CreateServiceBindingCredentials{
 			Database: "dummy",
@@ -218,7 +192,7 @@ func BindingHandler(c *gin.Context) {
 		VolumeMounts: []model.VolumeMount{
 			model.VolumeMount{
 				//should we be using volumeID?
-				ContainerPath: fmt.Sprintf("/var/vcap/store/%s/%s", brokerName, volumeID),
+				ContainerPath: fmt.Sprintf("/var/vcap/store/%s", volumeID),
 				Mode:          "rw",
 				Private: model.VolumeMountPrivateDetails{
 					Driver:  driverName,

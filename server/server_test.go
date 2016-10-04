@@ -69,7 +69,7 @@ var _ = Describe("Unit", func() {
 		time.Sleep(time.Millisecond * 500)
 
 		libsClient = NewLibsClient()
-		planIDString, err = utils.CreatePlanIDString(serviceName)
+		planIDString, err = utils.CreatePlanIDString(serviceName, libsServerHost)
 		Expect(err).ToNot(HaveOccurred())
 
 	})
@@ -98,8 +98,8 @@ var _ = Describe("Unit", func() {
 			Expect(err).ToNot(HaveOccurred())
 			var serviceFromCatalog = catalog.Services[0]
 			Expect(serviceFromCatalog).ToNot(BeNil())
-			Expect(serviceFromCatalog.ID).To(Equal(os.Getenv("EMC_SERVICE_UUID")))
-			Expect(serviceFromCatalog.Name).To(Equal(os.Getenv("EMC_SERVICE_NAME")))
+			Expect(serviceFromCatalog.ID).To(Equal("92e98925-d046-4c72-9598-ba352449a5c7"))
+			Expect(serviceFromCatalog.Name).To(Equal("Persistent Storage"))
 			Expect(serviceFromCatalog.Description).ToNot(BeEmpty())
 			Expect(serviceFromCatalog.Bindable).To(BeTrue())
 			Expect(serviceFromCatalog.Requires[0]).To(Equal("volume_mount"))
@@ -123,7 +123,7 @@ var _ = Describe("Unit", func() {
 				}
 				Expect(planMatchService).To(BeTrue())
 			}
-			Expect(len(plans)).To(Equal(1))
+			Expect(len(plans)).To(Equal(2))
 
 		})
 	})
@@ -174,7 +174,7 @@ var _ = Describe("Unit", func() {
 			},
 			VolumeMounts: []model.VolumeMount{
 				model.VolumeMount{
-					ContainerPath: fmt.Sprintf("/var/vcap/store/%s/%s", os.Getenv("EMC_SERVICE_NAME"), volumeID),
+					ContainerPath: fmt.Sprintf("/var/vcap/store/%s", volumeID),
 					Mode:          "rw",
 					Private: model.VolumeMountPrivateDetails{
 						Driver:  diegoDriverSpec,

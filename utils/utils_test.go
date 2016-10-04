@@ -1,9 +1,11 @@
 package utils_test
 
 import (
+	"io/ioutil"
 	"os"
 	"strconv"
 
+	"github.com/EMC-Dojo/cf-persist-service-broker/model"
 	"github.com/EMC-Dojo/cf-persist-service-broker/utils"
 
 	. "github.com/onsi/ginkgo"
@@ -11,7 +13,7 @@ import (
 )
 
 var _ = Describe("Utils/Utils", func() {
-	var instanceID, parsedInstanceID, storagePool string
+	var instanceID, parsedInstanceID, storagePool, libstorage_uri string
 	var size int64
 	var err error
 
@@ -22,6 +24,8 @@ var _ = Describe("Utils/Utils", func() {
 		Expect(parsedInstanceID).ToNot(BeEmpty())
 		storagePool = os.Getenv("STORAGE_POOL_NAME")
 		Expect(storagePool).ToNot(BeEmpty())
+		libstorage_uri = os.Getenv("LIBSTORAGE_URI")
+		Expect(libstorage_uri).ToNot(BeEmpty())
 		size, err = strconv.ParseInt(os.Getenv("TEST_SIZE"), 10, 64)
 		Expect(err).ToNot(HaveOccurred())
 	})
@@ -56,6 +60,39 @@ var _ = Describe("Utils/Utils", func() {
 				Expect(*volumeCreateRequest.IOPS).To(Equal(int64(0)))
 				Expect(*volumeCreateRequest.Size).To(Equal(size))
 				Expect(*volumeCreateRequest.Type).To(Equal(storagePool))
+			})
+		})
+	})
+
+	Describe("CreatePlanIDString and UnmarshalPlanID", func() {
+		Context("When given libstorage uri and service name", func() {
+			It("contructs plan id as a json base on those fields", func() {
+				planIDJson, err := utils.CreatePlanIDString("isilonservice", libstorage_uri)
+				Expect(err).ToNot(HaveOccurred())
+
+				planID, err := utils.UnmarshalPlanID(planIDJson)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(planID).To(Equal(model.PlanID{
+					LibsHostName:    libstorage_uri,
+					LibsServiceName: "isilonservice",
+				}))
+			})
+		})
+	})
+
+	Describe("FileExists", func() {
+		Context("File exists after creation and does not exist after deletion", func() {
+			It("return true or false", func() {
+				path := "test.test"
+				Expect(utils.FileExists(path)).To(BeFalse())
+
+				err := ioutil.WriteFile(path, []byte("abc"), 0644)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(utils.FileExists(path)).To(BeTrue())
+
+				err = os.Remove(path)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(utils.FileExists(path)).To(BeFalse())
 			})
 		})
 	})
