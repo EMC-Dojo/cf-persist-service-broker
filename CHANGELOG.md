@@ -61,3 +61,5 @@ c451fc7 Remove unused ruby code
 219d213 Fix typo
 ## v47
 c3ac9d7 Added documentation for PCF Tile/Open Source
+## v48
+124add6 Few Doc Updates/Clarifications
