@@ -59,3 +59,5 @@ c77cc79 changed readme
 c451fc7 Remove unused ruby code
 ## v46
 219d213 Fix typo
+## v47
+c3ac9d7 Added documentation for PCF Tile/Open Source
