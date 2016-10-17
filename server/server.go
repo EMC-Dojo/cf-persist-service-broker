@@ -113,7 +113,7 @@ func ProvisioningHandler(c *gin.Context) {
 	}
 	serviceName := planInfo.LibsServiceName
 
-	var volumeSize = int64(8)
+	volumeSize := int64(8)
 	if serviceInstance.Parameters.SizeInGB != "" {
 		volumeSize, err = strconv.ParseInt(serviceInstance.Parameters.SizeInGB, 10, 64)
 		if err != nil {
