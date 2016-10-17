@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -112,7 +113,15 @@ func ProvisioningHandler(c *gin.Context) {
 	}
 	serviceName := planInfo.LibsServiceName
 
-	volumeCreateRequest, err := utils.CreateVolumeRequest(instanceID, serviceInstance.Parameters["storage_pool_name"], int64(8))
+	var volumeSize = int64(8)
+	if serviceInstance.Parameters.SizeInGB != "" {
+		volumeSize, err = strconv.ParseInt(serviceInstance.Parameters.SizeInGB, 10, 64)
+		if err != nil {
+			log.Panicf("Invalid SizeInGB %s", serviceInstance.Parameters.SizeInGB)
+		}
+	}
+
+	volumeCreateRequest, err := utils.CreateVolumeRequest(instanceID, serviceInstance.Parameters.StoragePoolName, int64(volumeSize))
 	if err != nil {
 		log.Panic(fmt.Sprintf("Unable to create volume request: %s.", err))
 	}

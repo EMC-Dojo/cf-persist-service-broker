@@ -135,14 +135,17 @@ var _ = Describe("Unit", func() {
 
 	It("provisions, binds, unbinds, and deprovisions", func() {
 		// Provision
+		Params := model.Parameters{
+			StoragePoolName: storagePool,
+			SizeInGB:        "8",
+		}
+
 		testProvisionRequest := &ProvisionInstanceRequest{
-			OrganizationGUID: "88011F5E-9FA0-484F-BFE5-9F1EED50B7D6",
-			PlanID:           planIDString,
-			ServiceID:        instanceID,
-			SpaceGUID:        "A2331788-A736-479D-A9FB-114336F144C3",
-			Parameters: map[string]string{
-				"storage_pool_name": storagePool,
-			},
+			OrganizationGUID:  "88011F5E-9FA0-484F-BFE5-9F1EED50B7D6",
+			PlanID:            planIDString,
+			ServiceID:         instanceID,
+			SpaceGUID:         "A2331788-A736-479D-A9FB-114336F144C3",
+			Parameters:        Params,
 			AcceptsIncomplete: true,
 		}
 
