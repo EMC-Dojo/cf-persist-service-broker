@@ -63,3 +63,5 @@ c451fc7 Remove unused ruby code
 c3ac9d7 Added documentation for PCF Tile/Open Source
 ## v48
 124add6 Few Doc Updates/Clarifications
+## v49
+6364e07 Allow broker to accept volume size in GB
