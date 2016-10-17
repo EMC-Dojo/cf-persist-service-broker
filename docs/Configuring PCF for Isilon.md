@@ -2,15 +2,15 @@
 
 ####Context: Why is this Hacky?
 
-Persistence in PCF is only newly available as of 1.8. in 1.9, there will be cleaner avenues to interact with bosh manifests. For now, we must document the horrible, no good, very bad way.
+Persistence in PCF is only newly available as of version 1.8. When version 1.9 is released (Q4 2016), there will be cleaner avenues to interact with bosh manifests. For now, we must document the horrible, no good, very bad way.
 
 ####Step 1: Install Pivotal Elastic Runtime
 
 This is a gigantic step, and is better left to [better docs](https://network.pivotal.io/products/elastic-runtime)
 
-####Step 2: Install Persistence Tile
+####Step 2: Install Isilon Tile
 
-Install the Persistence Tile as available from the DellEMC Dojo. Contact victor.fong@dell.com for more information on this. (Link coming soon!)
+Install the Isilon Tile, available from the DellEMC Dojo. Contact victor.fong@dell.com for more information on this. (Link coming soon as we opensource it!)
 
 ####Step 3: SSH into OpsManager
 
@@ -121,7 +121,7 @@ jobs:
           insecure: true  
           username: #EDIT ME
           password: #EDIT ME
-          volumePath: /rexray  
+          volumePath: /rexray #READ NOTE2 BELOW
           nfsHost: #EDIT ME
           dataSubnet: #EDIT ME
           quotas: #EDIT ME
@@ -130,9 +130,13 @@ jobs:
           volume:  
             fileMode: 0777  
 ```
-__NOTE: VALUES ABOVE MARKED "EDIT ME" WILL NOT WORK, UPDATE THEM__
+_NOTE: VALUES ABOVE MARKED "EDIT ME" WILL NOT WORK, UPDATE THEM AND REMOVE THE COMMENT INCLUDING #_
 
-This should mount Rexray into all Diego Cells on the next deploy. It's probably a good idea to make a copy of this manifest for reference. A re-deployment of Pivotal Elastic Runtime may cause a wipe of these changes, and the valuable fields will have to be recreated.
+_NOTE2: volumePath refers to the path relative to /ifs/volumes/ on your Isilon. This is the folder where we will create subfolders for your CloudFoundry. ENSURE THIS IS PRE-CREATED AND IS THE CORRECT PATH #_
+
+__
+
+This should deploy the volume driver, Rexray, into all Diego Cells on the next deploy. It's probably a good idea to make a copy of this manifest for reference. A re-deployment of Pivotal Elastic Runtime may cause a wipe of these changes, and the valuable fields will have to be recreated.
 
 ####Step 7: Re-Deploy Elastic Runtime (Diego Cells)
 
@@ -143,4 +147,10 @@ bosh deployment my-cf-manifest-copy.yml
 bosh deploy
 ```
 
-If this succeeds, congratulations! Rexray should be running on Diego Cells, and allowing you to use Libstorage for a Persistent Storage solution. If you need help deploying libstorage, check out our [libstorage bosh release](https://github.com/EMC-CMD/libstorage-release).
+If this succeeds, congratulations! Libstorage should be running on a VM, Rexray should be running on Diego Cells, and the Isilon Service Broker should be deployed on PCF. All of this to allow you to use your Isilon as a Persistent Storage solution. If you need any additional help contact us at any of the following!
+
+- Slack Channel:
+  - Organization: <http://cloudfoundry.slack.com>
+  - Channel: `#persi`
+- Contact: [EMC Dojo](mailto:emcdojo@emc.com) [@EMCDojo](https://twitter.com/hashtag/emcdojo)
+- Blog: [EMC Dojo Blog](http://dojoblog.emc.com)

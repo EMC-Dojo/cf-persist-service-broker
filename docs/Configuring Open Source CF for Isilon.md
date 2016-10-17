@@ -1,9 +1,11 @@
 #Enabling Isilon in Open Source CF
 
-_This Guide assumes that diego cells and CF BOSH deployments are separate manifests. If this is not the case; combine steps 1, 3, and 4 accordingly to put the proper YAML together in the same manifest._
+####Pre-Requisits
+Before enabling Isilon on the Diego Cells with the following guide, ensure you have already performed the following 2 steps.
 
-_Take note that this guide enables the use of the service broker, but does not implement it. For more information on installing the service broker either through the avaiable BOSH releases for [libstorage](https://github.com/EMC-CMD/libstorage-release), [our persistent broker](https://github.com/EMC-CMD/emc-persistence-release), and other options; contact us through victor.fong@emc.com._
+- Installed and have a running `LibStorage` host connected to your Isilon.
 
+- Installed and have a running `Isilon Service Broker` connected to the above LibStorage host. This may be deployed inside of CloudFoundry as an application, externally through BOSH or stand-alone on a VM.
 
 ####Step 1: Enable Volume Services in CF Manifest
 
@@ -82,7 +84,7 @@ releases:
           insecure: true  
           username: #EDIT ME
           password: #EDIT ME
-          volumePath: /rexray  
+          volumePath: /rexray #READ NOTE2 BELOW
           nfsHost: #EDIT ME
           dataSubnet: #EDIT ME
           quotas: #EDIT ME
@@ -91,11 +93,10 @@ releases:
           volume:  
             fileMode: 0777  
 ```
-__NOTE: VALUES ABOVE MARKED "EDIT ME" WILL NOT WORK, UPDATE THEM__
 
-This should mount Rexray into all Diego Cells on the next deploy. It's probably a good idea to make a copy of this manifest for reference. A re-deployment of Pivotal Elastic Runtime may cause a wipe of these changes, and the valuable fields will have to be recreated.
+_NOTE: VALUES ABOVE MARKED "EDIT ME" WILL NOT WORK, UPDATE THEM AND REMOVE THE COMMENT INCLUDING #_
 
-_The volume path specified above must exist in the Isilon cluster. (i.e. our example would be /ifs/volumes/rexray/)_
+_NOTE2: volumePath refers to the path relative to /ifs/volumes/ on your Isilon. This is the folder where we will create subfolders for your CloudFoundry. ENSURE THIS IS PRE-CREATED AND IS THE CORRECT PATH #_
 
 ####Step 4: Re-Deploy Diego Cells
 
@@ -107,4 +108,10 @@ bosh deployment my-diego-cells.yml
 bosh deploy
 ```
 
-If this succeeds, congratulations! Rexray should be running on Diego Cells, and allowing you to use Libstorage for a Persistent Storage solution. If you need help deploying libstorage, check out our [libstorage bosh release](https://github.com/EMC-CMD/libstorage-release)
+If this succeeds, congratulations! Libstorage should be running on a VM, Rexray should be running on Diego Cells, and the Isilon Service Broker should be deployed on opensource CloudFoundry. All of this to allow you to use your Isilon as a Persistent Storage solution. If you need any additional help contact us at any of the following!
+
+- Slack Channel:
+  - Organization: <http://cloudfoundry.slack.com>
+  - Channel: `#persi`
+- Contact: [EMC Dojo](mailto:emcdojo@emc.com) [@EMCDojo](https://twitter.com/hashtag/emcdojo)
+- Blog: [EMC Dojo Blog](http://dojoblog.emc.com)
