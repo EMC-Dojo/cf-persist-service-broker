@@ -65,3 +65,5 @@ c3ac9d7 Added documentation for PCF Tile/Open Source
 124add6 Few Doc Updates/Clarifications
 ## v49
 6364e07 Allow broker to accept volume size in GB
+## v50
+7b43853 Fix Size Bug: global variable issue
