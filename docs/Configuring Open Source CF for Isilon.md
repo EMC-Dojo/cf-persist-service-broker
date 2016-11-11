@@ -73,12 +73,21 @@ releases:
               type: docker  
               libstorage:  
                 service: isilon  
-        libstorage:  
+        libstorage:
+          logging:
+            level: debug
           embedded: true  
-          server:  
+          server:
+            logging:
+              level: debug  
             services:  
               isilon:  
-                driver: isilon  
+                driver: isilon
+                integration:
+          volume:
+            operations:
+              mount:
+                path: /var/vcap/data  
         isilon:  
           endpoint: #EDIT ME
           insecure: true  
