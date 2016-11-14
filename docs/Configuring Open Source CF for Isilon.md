@@ -83,11 +83,11 @@ releases:
             services:  
               isilon:  
                 driver: isilon
-                integration:
-          volume:
-            operations:
-              mount:
-                path: /var/vcap/data  
+          integration:
+            volume:
+              operations:
+                mount:
+                  path: /var/vcap/data  
         isilon:  
           endpoint: #EDIT ME
           insecure: true  
